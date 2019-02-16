@@ -41,6 +41,7 @@ import mtools4acdc as mtools
 
 # pylint: disable=locally-disabled, too-many-instance-attributes, too-few-public-methods
 # pylint: disable=locally-disabled, too-many-arguments, too-many-statements
+# pylint: disable-msg=R0914
 
 # Specific gas constant for dry air
 # (in Joules ) per kilogram per Kelvin
@@ -76,7 +77,8 @@ class Runway:
         if icao_code:
             # Read relevant runway data from the ourairports.com database
             # le_... / he_... - numbers referring to the low/high end respectively
-            with open('/data/runways.csv', newline='') as rwyfile:
+            rwy_file = os.path.join(os.path.dirname(__file__), "data", "runways.csv")
+            with open(rwy_file, newline='') as rwyfile:
                 runwaydata = csv.reader(rwyfile, delimiter=',')
                 runwaylist = []
                 for row in runwaydata:

@@ -7,7 +7,8 @@ Unit tests for the atmospheres module
 
 import unittest
 import numpy as np
-import atmospheres as at
+#import atmospheres as at
+from ADRpy import atmospheres as at
 
 class TestUM(unittest.TestCase):
     """Unit tests for the atmospheres module against the 1976 US std. atm."""
