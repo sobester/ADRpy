@@ -24,7 +24,7 @@ setup(
     long_description=long_description,
     url='https://github.com/sobester/ADRpy',
     download_url='https://github.com/sobester/ADRpy/tarball/' + __version__,
-    license='BSD',
+    license='GPLv3',
     classifiers=[
       'Development Status :: 3 - Alpha',
       'Intended Audience :: Developers',
