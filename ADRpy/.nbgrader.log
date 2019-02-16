@@ -1,0 +1,22 @@
+[NotebookApp | WARNING] No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)
+[NotebookApp | INFO] Loading the validate_assignment nbgrader serverextension
+[NotebookApp | INFO] Serving notebooks from local directory: /Users/andrassobester/Dropbox/ADRpy/ADRpy
+[NotebookApp | INFO] 0 active kernels 
+[NotebookApp | INFO] The Jupyter Notebook is running at: http://localhost:8890/?token=8195080e14f39524e84e48f4e078031eae1e1ea9bf077b3e
+[NotebookApp | INFO] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[NotebookApp | CRITICAL] 
+    
+    Copy/paste this URL into your browser when you connect for the first time,
+    to login with a token:
+        http://localhost:8890/?token=8195080e14f39524e84e48f4e078031eae1e1ea9bf077b3e
+[NotebookApp | INFO] Accepting one-time-token-authenticated connection from ::1
+[NotebookApp | INFO] Creating new notebook in 
+[NotebookApp | INFO] Kernel started: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc
+[NotebookApp | INFO] Saving file at /Untitled.ipynb
+[NotebookApp | INFO] Kernel restarted: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc
+[NotebookApp | INFO] Saving file at /Untitled.ipynb
+[NotebookApp | INFO] Kernel restarted: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc
+[NotebookApp | INFO] Kernel restarted: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc
+[NotebookApp | INFO] Kernel restarted: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc
+[NotebookApp | INFO] Saving file at /Untitled.ipynb
+[NotebookApp | INFO] Kernel shutdown: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc

@@ -615,10 +615,11 @@ class Atmosphere:
 def mil_hdbk_310(high_or_low, temp_or_dens, alt_km):
     """Load an atmospheric data set from US Military Handbook 310"""
 
-    m310path = os.path.join(os.path.dirname(__file__), "data", "_MHDBK310")
-
-    _fstr = m310path + high_or_low + '_' + temp_or_dens \
+    m310name = high_or_low + '_' + temp_or_dens \
     + '_at_' + str(alt_km) + 'km.m310'
+
+    _fstr = os.path.join(os.path.dirname(__file__), "data",
+                         "_MHDBK310", m310name)
 
     # Also looking for m310 files in the current directory if not found
     # in a dedicated _MHDBK310 folder
