@@ -1,0 +1,3 @@
+{
+  "tests/t_atmospheres.py::TestUM::test_runwayclass": true
+}

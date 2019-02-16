@@ -26,9 +26,9 @@ setup(
     download_url='https://github.com/sobester/ADRpy/tarball/' + __version__,
     license='GPLv3',
     classifiers=[
-      'Development Status :: 3 - Alpha',
-      'Intended Audience :: Developers',
-      'Programming Language :: Python :: 3',
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'Programming Language :: Python :: 3',
     ],
     keywords='',
     packages=find_packages(exclude=['docs', 'tests*']),

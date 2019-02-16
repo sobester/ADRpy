@@ -76,7 +76,7 @@ class Runway:
         if icao_code:
             # Read relevant runway data from the ourairports.com database
             # le_... / he_... - numbers referring to the low/high end respectively
-            with open('runways.csv', newline='') as rwyfile:
+            with open('/data/runways.csv', newline='') as rwyfile:
                 runwaydata = csv.reader(rwyfile, delimiter=',')
                 runwaylist = []
                 for row in runwaydata:
