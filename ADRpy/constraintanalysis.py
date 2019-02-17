@@ -401,8 +401,8 @@ class AircraftConcept:
         `EXAMPLE`
         ------------
             #!python
-            import atmospheres as at
-            import constraintanalysis as ca
+            from ADRpy import atmospheres as at
+            from ADRpy import constraintanalysis as ca
 
             designbrief = {'rwyelevation_m':1000, 'groundrun_m':1200}
             designdefinition = {'aspectratio':7.3, 'bpr':3.9, 'tr':1.05}
@@ -507,9 +507,9 @@ class AircraftConcept:
         T/W ratio to hold that load factor in the turn.
         ------------
             #!python
-            import atmospheres as at
-            import constraintanalysis as ca
-            import unitconversions as co
+            from ADRpy import atmospheres as at
+            from ADRpy import constraintanalysis as ca
+            from ADRpy import unitconversions as co
 
             designbrief = {'stloadfactor': 2, 'turnalt_m': co.feet2m(10000), 'turnspeed_ktas': 140}
 
@@ -618,8 +618,8 @@ class AircraftConcept:
         T/W ratio to hold the specified climb rate.
         ------------
             #!python
-            import atmospheres as at
-            import constraintanalysis as ca
+            from ADRpy import atmospheres as at
+            from ADRpy import constraintanalysis as ca
 
             designbrief = {'climbalt_m': 0, 'climbspeed_kias': 101, 'climbrate_fpm': 1398}
 
@@ -952,9 +952,9 @@ def tw2pw(thrusttoweight, speed, etap):
 
     ------------
         #!python
-        import constraintanalysis as ca
-        import atmospheres as at
-        import unitconversions as co
+        from ADRpy import constraintanalysis as ca
+        from ADRpy import atmospheres as at
+        from ADRpy import unitconversions as co
 
         designbrief = {'stloadfactor': 2, 'turnalt_m': 3050, 'turnspeed_ktas': 140}
 
