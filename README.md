@@ -41,3 +41,5 @@ print(kcas)
 ```python
 [ 101.25392563  209.93839073  333.01861569]
 ```
+
+[Constraint analysis](/docs/ADRpy/constraintanalysis.html)
