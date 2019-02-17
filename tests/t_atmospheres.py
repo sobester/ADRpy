@@ -105,5 +105,13 @@ class TestUM(unittest.TestCase):
         np.testing.assert_array_equal(np.round(runwaycomp * 100), [1000, 0, -863])
         np.testing.assert_array_equal(np.round(crosscomp * 100), [0, 1000, -506])
 
+    def test_m310(self):
+        """Tests access to the MIL HDBK 310 atmospheres"""
+        print("MIL HDBK 310 - high temp at 10km.")
+        obs1p, _ = at.mil_hdbk_310('high', 'temp', 10)
+        m310_high10_1p = at.Atmosphere(profile=obs1p)
+        sltemp_c = m310_high10_1p.airtemp_c(100)
+        self.assertEqual(round(1000 * sltemp_c), round(1000 * 25.501))
+
 if __name__ == '__main__':
     unittest.main()
