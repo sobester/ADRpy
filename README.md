@@ -3,7 +3,7 @@ Aircraft Design Recipes in Python
 
 A library of aircraft conceptual design and performance codes, including virtual (design) atmospheres and constraint analysis methods.
 
-version number: 0.0.10
+version number: 0.0.11
 author: Andras Sobester
 
 Installation / Usage
@@ -41,5 +41,3 @@ print(kcas)
 ```python
 [ 101.25392563  209.93839073  333.01861569]
 ```
-
-[Constraint analysis](/docs/ADRpy/constraintanalysis.html)

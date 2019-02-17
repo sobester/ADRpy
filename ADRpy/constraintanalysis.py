@@ -7,7 +7,7 @@
 # CLASSES:
 #    AircraftConcept
 
-#Unit tests in t_constraintanalysis.py.
+# Unit tests in tests/t_constraints.py.
 
 __author__ = "Andras Sobester"
 

@@ -22,7 +22,7 @@ Contains the following class definitions:
     `Obsprofile`
     `Atmosphere`
 
-Unit tests in t_atmospheres.py. Checking against data from the 1976
+Unit tests in tests/t_atmospheres.py. Checking against data from the 1976
 US Standard Atmosphere, NASA-TM-X-74335. ESDU 77022 describes its
 ISA model as being identical for all practical purposes with the US
 Standard Atmospheres.
