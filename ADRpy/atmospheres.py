@@ -514,8 +514,8 @@ class Atmosphere:
         -----------
         Compute q at 20m/s TAS at a range of altitudes in an ISA
 
-            import atmospheres as at
-            import unitconversions as co
+            from ADRpy import atmospheres as at
+            from ADRpy import unitconversions as co
 
             ISA = at.Atmosphere()
 
@@ -587,9 +587,9 @@ class Atmosphere:
 
         `EXAMPLE`
         ------------
-            import atmospheres as at
             import numpy as np
-            import unitconversions as co
+            from ADRpy import atmospheres as at
+            from ADRpy import unitconversions as co
 
             isa = at.Atmosphere()
 
