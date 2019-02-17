@@ -411,9 +411,10 @@ class AircraftConcept:
         wingloadinglist_pa = [2000, 3000, 4000, 5000]
 
         atm = at.Atmosphere()
-        concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
+        concept = ca.AircraftConcept(designbrief, designdefinition,
+                                     designperformance, atm)
 
-        tw_sl, liftoffspeed_mps, avspeed_mps = concept.twrequired_to(wingloadinglist_pa)
+        tw_sl, liftoffspeed_mps, _ = concept.twrequired_to(wingloadinglist_pa)
 
         print(tw_sl)
         print(liftoffspeed_mps)
@@ -511,13 +512,16 @@ class AircraftConcept:
         from ADRpy import constraintanalysis as ca
         from ADRpy import unitconversions as co
 
-        designbrief = {'stloadfactor': 2, 'turnalt_m': co.feet2m(10000), 'turnspeed_ktas': 140}
+        designbrief = {'stloadfactor': 2, 'turnalt_m': co.feet2m(10000),
+                       'turnspeed_ktas': 140}
 
         etap = {'turn': 0.85}
 
-        designperformance = {'CLmaxclean': 1.45, 'CDminclean':0.02541, 'etaprop': etap}
+        designperformance = {'CLmaxclean': 1.45, 'CDminclean':0.02541,
+                             'etaprop': etap}
 
-        designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1}
+        designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2,
+                     'sweep_mt_deg': 0, 'bpr': -1}
 
         designatm = at.Atmosphere()
 
@@ -621,19 +625,22 @@ class AircraftConcept:
         from ADRpy import atmospheres as at
         from ADRpy import constraintanalysis as ca
 
-        designbrief = {'climbalt_m': 0, 'climbspeed_kias': 101, 'climbrate_fpm': 1398}
+        designbrief = {'climbalt_m': 0, 'climbspeed_kias': 101,
+                       'climbrate_fpm': 1398}
 
         etap = {'climb': 0.8}
 
         designperformance = {'CDminclean': 0.0254, 'etaprop' :etap}
 
-        designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1}
+        designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2,
+                     'sweep_mt_deg': 0, 'bpr': -1}
 
         TOW_kg = 1542.0
 
         designatm = at.Atmosphere()
 
-        concept = ca.AircraftConcept(designbrief, designdef, designperformance, designatm)
+        concept = ca.AircraftConcept(designbrief, designdef,
+                                     designperformance, designatm)
 
         wingloadinglist_pa = [1250, 1500, 1750]
 

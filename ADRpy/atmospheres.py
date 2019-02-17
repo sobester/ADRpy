@@ -512,25 +512,26 @@ class Atmosphere:
 
         `EXAMPLE`
         -----------
-        Compute q at 20m/s TAS at a range of altitudes in an ISA
+        ```python
+        from ADRpy import atmospheres as at
+        from ADRpy import unitconversions as co
 
-            from ADRpy import atmospheres as at
-            from ADRpy import unitconversions as co
+        ISA = at.Atmosphere()
 
-            ISA = at.Atmosphere()
+        altitudelist_m = [0, 500, 1000, 1500]
 
-            altitudelist_m = [0, 500, 1000, 1500]
+        MPSTAS = 20
 
-            MPSTAS = 20
+        q_Pa = ISA.dynamicpressure_pa(MPSTAS, altitudelist_m)
 
-            q_Pa = ISA.dynamicpressure_pa(MPSTAS, altitudelist_m)
+        q_mbar = co.pa2mbar(q_Pa)
 
-            q_mbar = co.pa2mbar(q_Pa)
-
-            print(q_mbar)
+        print(q_mbar)
+        ```
         -----------
-            [ 2.44999974  2.33453737  2.22328473  2.11613426]
-
+        ```python
+        [ 2.44999974  2.33453737  2.22328473  2.11613426]
+        ```
         """
 
         return 0.5 * self.airdens_kgpm3(altitudes_m) * (airspeed_mps ** 2)
@@ -587,22 +588,24 @@ class Atmosphere:
 
         `EXAMPLE`
         ------------
-            import numpy as np
-            from ADRpy import atmospheres as at
-            from ADRpy import unitconversions as co
+        ```python
+        import numpy as np
+        from ADRpy import atmospheres as at
+        from ADRpy import unitconversions as co
 
-            isa = at.Atmosphere()
+        isa = at.Atmosphere()
 
-            keas = np.array([100, 200, 300])
-            altitude_m = co.feet2m(40000)
+        keas = np.array([100, 200, 300])
+        altitude_m = co.feet2m(40000)
 
-            kcas, mach = isa.keas2kcas(keas, altitude_m)
+        kcas, mach = isa.keas2kcas(keas, altitude_m)
 
-            print(kcas)
-
+        print(kcas)
+        ```
         ---
-            [ 101.25392563  209.93839073  333.01861569]
-
+        ```python
+        [ 101.25392563  209.93839073  333.01861569]
+        ```
         """
         # Note: unit specific, as the calculation requires Mach no.
         np.asarray(keas)

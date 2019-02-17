@@ -1,0 +1,3267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.2" />
+<title>ADRpy.constraintanalysis API documentation</title>
+<meta name="description" content="Constraint analysis tools for aircraft conceptual design" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>ADRpy.constraintanalysis</code> module</h1>
+</header>
+<section id="section-intro">
+<p>Constraint analysis tools for aircraft conceptual design</p>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# constraintanalysis.py:
+&#34;&#34;&#34; Constraint analysis tools for aircraft conceptual design&#34;&#34;&#34;
+
+# CLASSES:
+#    AircraftConcept
+
+#Unit tests in t_constraintanalysis.py.
+
+__author__ = &#34;Andras Sobester&#34;
+
+# pylint: disable=locally-disabled, too-many-instance-attributes
+# pylint: disable=locally-disabled, too-many-branches
+# pylint: disable=locally-disabled, too-many-statements
+# pylint: disable=locally-disabled, too-many-locals
+
+import math
+import warnings
+from scipy import constants
+import numpy as np
+from ADRpy import atmospheres as at
+from ADRpy import unitconversions as co
+from ADRpy import mtools4acdc as actools
+
+#__pdoc__ = {}
+#__pdoc__[&#39;etadefaultflag&#39;] = False
+
+class AircraftConcept:
+    &#34;&#34;&#34;Definition of a basic aircraft concept. An aircraft concept object must
+    be defined for all constraint analysis functions.
+    &#34;&#34;&#34;
+
+    def __init__(self, brief, design, performance, designatm):
+
+        # Assign a default, if needed, to the atmosphere
+        if not designatm:
+            designatm = at.Atmosphere()
+        self.designatm = designatm
+
+        # Unpick the design brief dictionary first:
+
+        if &#39;groundrun_m&#39; in brief:
+            self.groundrun_m = brief[&#39;groundrun_m&#39;]
+        else:
+            # Flag if not specified, error thrown by t/o constraint
+            self.groundrun_m = -1
+
+        if &#39;rwyelevation_m&#39; in brief:
+            self.rwyelevation_m = brief[&#39;rwyelevation_m&#39;]
+        else:
+            # Assign sea level, if not specified
+            self.rwyelevation_m = 0
+
+        if &#39;turnalt_m&#39; in brief:
+            self.turnalt_m = brief[&#39;turnalt_m&#39;]
+        else:
+            # Assign sea level, if not specified
+            self.turnalt_m = 0
+
+        if &#39;turnspeed_ktas&#39; in brief:
+            self.turnspeed_ktas = brief[&#39;turnspeed_ktas&#39;]
+        else:
+            # Flag if not specified, error thrown by turn constraint
+            self.turnspeed_ktas = -1
+
+        if &#39;stloadfactor&#39; in brief:
+            self.stloadfactor = brief[&#39;stloadfactor&#39;]
+        else:
+            # Flag if not specified, error thrown by climb constraint
+            self.stloadfactor = -1
+
+        if &#39;climbalt_m&#39; in brief:
+            self.climbalt_m = brief[&#39;climbalt_m&#39;]
+        else:
+            # Assign sea level, if not specified
+            self.climbalt_m = 0
+
+        if &#39;climbspeed_kias&#39; in brief:
+            self.climbspeed_kias = brief[&#39;climbspeed_kias&#39;]
+        else:
+            # Flag if not specified, error thrown by climb constraint
+            self.climbspeed_kias = -1
+
+        if &#39;climbrate_fpm&#39; in brief:
+            self.climbrate_fpm = brief[&#39;climbrate_fpm&#39;]
+        else:
+            # Flag if not specified, error thrown by climb constraint
+            self.climbrate_fpm = -1
+
+        if &#39;cruisealt_m&#39; in brief:
+            self.cruisealt_m = brief[&#39;cruisealt_m&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.cruisealt_m = -1
+
+        if &#39;cruisespeed_ktas&#39; in brief: # Option to specify Mach number instead coming soon
+            self.cruisespeed_ktas = brief[&#39;cruisespeed_ktas&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.cruisespeed_ktas = -1
+
+        if &#39;cruisethrustfact&#39; in brief:
+            self.cruisethrustfact = brief[&#39;cruisethrustfact&#39;]
+        else:
+            # Assume 100% throttle in cruise
+            self.cruisethrustfact = 1.0
+
+        if &#39;servceil_m&#39; in brief:
+            self.servceil_m = brief[&#39;servceil_m&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.servceil_m = -1
+
+        if &#39;secclimbspd_kias&#39; in brief:
+            self.secclimbspd_kias = brief[&#39;secclimbspd_kias&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.secclimbspd_kias = -1
+
+        if &#39;vstallclean_kcas&#39; in brief:
+            self.vstallclean_kcas = brief[&#39;vstallclean_kcas&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.vstallclean_kcas = -1
+
+
+        # Unpick the design dictionary next:
+
+        if &#39;aspectratio&#39; in design:
+            self.aspectratio = design[&#39;aspectratio&#39;]
+        else:
+            self.aspectratio = 8
+
+        if &#39;bpr&#39; in design:
+            self.bpr = design[&#39;bpr&#39;]
+        else:
+            # Piston engine
+            self.bpr = -1
+
+        if &#39;tr&#39; in design:
+            self.throttle_r = design[&#39;tr&#39;]
+        else:
+            self.throttle_r = 1.07
+
+        if &#39;sweep_le_deg&#39; in design:
+            self.sweep_le_deg = design[&#39;sweep_le_deg&#39;]
+            self.sweep_le_rad = math.radians(self.sweep_le_deg)
+        else:
+            self.sweep_le_deg = 0
+            self.sweep_le_rad = 0
+
+        if &#39;sweep_mt_deg&#39; in design:
+            self.sweep_mt_deg = design[&#39;sweep_mt_deg&#39;]
+            self.sweep_mt_rad = math.radians(self.sweep_mt_deg)
+        else:
+            self.sweep_mt_deg = self.sweep_le_deg
+            self.sweep_mt_rad = self.sweep_le_rad
+
+        if &#39;weightfractions&#39; in design:
+            if &#39;cruise&#39; in design[&#39;weightfractions&#39;]:
+                self.cruise_weight_fraction = design[&#39;weightfractions&#39;][&#39;cruise&#39;]
+            else:
+                self.cruise_weight_fraction = 1.0
+            if &#39;servceil&#39; in design[&#39;weightfractions&#39;]:
+                self.sec_weight_fraction = design[&#39;weightfractions&#39;][&#39;servceil&#39;]
+            else:
+                self.sec_weight_fraction = 1.0
+            if &#39;turn&#39; in design[&#39;weightfractions&#39;]:
+                self.turn_weight_fraction = design[&#39;weightfractions&#39;][&#39;turn&#39;]
+            else:
+                self.turn_weight_fraction = 1.0
+            if &#39;climb&#39; in design[&#39;weightfractions&#39;]:
+                self.climb_weight_fraction = design[&#39;weightfractions&#39;][&#39;climb&#39;]
+            else:
+                self.climb_weight_fraction = 1.0
+        else:
+            # Assume all constraints at same weight (e.g., electrically powered a/c)
+            self.cruise_weight_fraction = 1.0
+            self.sec_weight_fraction = 1.0
+            self.turn_weight_fraction = 1.0
+            self.climb_weight_fraction = 1.0
+
+        # Next, unpick the performance dictionary
+
+        if &#39;CDTO&#39; in performance:
+            self.cdto = performance[&#39;CDTO&#39;]
+        else:
+            self.cdto = 0.09
+
+        if &#39;CDminclean&#39; in performance:
+            self.cdminclean = performance[&#39;CDminclean&#39;]
+        else:
+            self.cdminclean = 0.03
+
+        if &#39;mu_R&#39; in performance:
+            self.mu_r = performance[&#39;mu_R&#39;]
+        else:
+            self.mu_r = 0.03
+
+        if &#39;CLTO&#39; in performance:
+            self.clto = performance[&#39;CLTO&#39;]
+        else:
+            self.clto = 0.95
+
+        if &#39;CLmaxTO&#39; in performance:
+            self.clmaxto = performance[&#39;CLmaxTO&#39;]
+        else:
+            self.clmaxto = 1.5
+
+        if &#39;etaprop&#39; in performance:
+            self.etaprop = performance[&#39;etaprop&#39;]
+        else:
+            self.etaprop = -1
+
+        if &#39;CLmaxclean&#39; in performance:
+            self.clmaxclean = performance[&#39;CLmaxclean&#39;]
+        else:
+            self.clmaxclean = -1
+
+        self.etadefaultflag = 0
+        if &#39;etaprop&#39; in performance:
+            if &#39;take-off&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_to = performance[&#39;etaprop&#39;][&#39;take-off&#39;]
+            else:
+                self.etaprop_to = 0.45
+                self.etadefaultflag += 1
+            if &#39;cruise&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_cruise = performance[&#39;etaprop&#39;][&#39;cruise&#39;]
+            else:
+                self.etaprop_cruise = 0.85
+                self.etadefaultflag += 1
+            if &#39;servceil&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_sec = performance[&#39;etaprop&#39;][&#39;servceil&#39;]
+            else:
+                self.etaprop_sec = 0.65
+                self.etadefaultflag += 1
+            if &#39;turn&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_turn = performance[&#39;etaprop&#39;][&#39;turn&#39;]
+            else:
+                self.etaprop_turn = 0.85
+                self.etadefaultflag += 1
+            if &#39;climb&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_climb = performance[&#39;etaprop&#39;][&#39;climb&#39;]
+            else:
+                self.etaprop_climb = 0.75
+                self.etadefaultflag += 1
+        else:
+            self.etaprop_to = 0.45
+            self.etaprop_cruise = 0.85
+            self.etaprop_sec = 0.65
+            self.etaprop_climb = 0.75
+            self.etaprop_turn = 0.85
+            self.etadefaultflag = 5
+
+    # Three different estimates the Oswald efficieny factor:
+
+    def oswaldspaneff1(self):
+        &#34;&#34;&#34;Raymer&#39;s Oswald span efficiency estimate, sweep &lt; 30, moderate AR&#34;&#34;&#34;
+        return 1.78 * (1 - 0.045 * (self.aspectratio ** 0.68)) - 0.64
+
+    def oswaldspaneff2(self):
+        &#34;&#34;&#34;Oswald span efficiency estimate due to Brandt et al.&#34;&#34;&#34;
+        sqrtterm = 4 + self.aspectratio ** 2 * (1 + (math.tan(self.sweep_mt_rad)) ** 2)
+        return 2/(2 - self.aspectratio + math.sqrt(sqrtterm))
+
+    def oswaldspaneff3(self):
+        &#34;&#34;&#34;Raymer&#39;s Oswald span efficiency estimate, swept wings&#34;&#34;&#34;
+        return 4.61 * (1 - 0.045 * (self.aspectratio ** 0.68)) * \
+        ((math.cos(self.sweep_le_rad)) ** 0.15) - 3.1
+
+
+    def induceddragfact(self, whichoswald=1):
+        &#34;&#34;&#34;Lift induced drag factor k estimate (Cd = Cd0 + k.Cl^2)&#34;&#34;&#34;
+
+        # k = 1 / pi.AR.e
+        if whichoswald == 1:
+            oswaldspaneff = self.oswaldspaneff1()
+        elif whichoswald == 2:
+            oswaldspaneff = self.oswaldspaneff2()
+        elif whichoswald == 3:
+            oswaldspaneff = self.oswaldspaneff3()
+        elif whichoswald == 23:
+            oswaldspaneff = 0.5 * (self.oswaldspaneff2() + self.oswaldspaneff3())
+        elif whichoswald == 123:
+            oswaldspaneff = (self.oswaldspaneff1() + self.oswaldspaneff2() + \
+            self.oswaldspaneff3()) / 3.0
+        return 1.0 / (math.pi * self.aspectratio * oswaldspaneff)
+
+
+    def bestclimbspeedprop(self, wingloading_pa, altitude_m):
+        &#34;&#34;&#34;The best rate of climb speed for a propeller aircraft&#34;&#34;&#34;
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+        dragfactor = np.sqrt(self.induceddragfact(123) / (3 * self.cdminclean))
+        densfactor = 2 / self.designatm.airdens_kgpm3(altitude_m)
+
+        # Gudmundsson, eq. (18-27)
+        bestspeed_mps = np.sqrt(densfactor * wingloading_pa * dragfactor)
+
+        if len(bestspeed_mps) == 1:
+            return bestspeed_mps[0]
+
+        return bestspeed_mps
+
+
+    def thrusttoweight_takeoff(self, wingloading_pa):
+        &#34;&#34;&#34;The thrust to weight ratio required for take-off&#34;&#34;&#34;
+
+        groundrun_m = self.groundrun_m
+
+        # Assuming that the lift-off speed is equal to VR, which we estimate at 1.1VS1(T/O)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.rwyelevation_m)
+
+        vs1to_mps = np.sqrt((2 * wingloading_pa) / (density_kgpm3 * self.clmaxto))
+
+        liftoffspeed_mps = 1.1 * vs1to_mps
+
+        thrusttoweightreqd = (liftoffspeed_mps ** 2) / (2 * constants.g * groundrun_m) + \
+        0.5 * self.cdto / self.clto + \
+        0.5 * self.mu_r
+
+        return thrusttoweightreqd, liftoffspeed_mps
+
+
+    def thrusttoweight_sustainedturn(self, wingloading_pa):
+        &#34;&#34;&#34;Baseline T/W req&#39;d for sustaining a given load factor at a certain altitude&#34;&#34;&#34;
+
+        nturn = self.stloadfactor
+        turnalt_m = self.turnalt_m
+        turnspeed_mps = co.kts2mps(self.turnspeed_ktas)
+
+        qturn = self.designatm.dynamicpressure_pa(airspeed_mps=turnspeed_mps, altitudes_m=turnalt_m)
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+
+        cdmin = self.cdminclean
+
+        twreqtrn = qturn * \
+        (cdmin / wingloading_pa + inddragfact * ((nturn / qturn) ** 2) * wingloading_pa)
+
+        # What cl is required to actually reach the target load factor
+        clrequired = nturn * wingloading_pa / qturn
+
+        return twreqtrn, clrequired
+
+
+    def _altcorr(self, temp_c, pressure_pa, mach, density_kgpm3):
+        &#34;&#34;&#34;Altitude corrections, depending on propulsion system type&#34;&#34;&#34;
+        if self.bpr == -1:
+            twratio_altcorr = at.pistonpowerfactor(density_kgpm3)
+        elif self.bpr == -2:
+            twratio_altcorr = at.turbopropthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r)
+        elif self.bpr == -3: # no correction required
+            twratio_altcorr = 1
+        elif self.bpr == 0:
+            twratio_altcorr = at.turbojetthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r, False)
+        elif self.bpr &lt; 5:
+            twratio_altcorr = at.turbofanthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r, &#34;lowbpr&#34;)
+        else:
+            twratio_altcorr = at.turbofanthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r, &#34;highbpr&#34;)
+        return twratio_altcorr
+
+
+    def twrequired_to(self, wingloading_pa):
+        &#34;&#34;&#34;Calculate the T/W required for take-off for a range of wing loadings
+
+        `PARAMETERS`
+        ------------
+
+        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+
+        `RETURNS`
+        -----------
+
+        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+        `liftoffspeed_mps` : array, liftoff speeds (TAS) in m/s.
+
+        `avspeed_mps`: average speed (TAS) during the take-off run, in m/s.
+
+        `SEE ALSO`
+        ------------
+        ``twrequired``
+
+        `NOTES`
+        ---------
+        1. The calculations here assume a &#39;no wind&#39; take-off, conflating ground speed (GS) and
+        true airspeed (TAS).
+
+        2. Use `twrequired` if a full constraint analysis is desired, as this integrates
+        the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+        computing the combined constraint boundary.
+
+        `EXAMPLE`
+        ------------
+        ```python
+        from ADRpy import atmospheres as at
+        from ADRpy import constraintanalysis as ca
+
+        designbrief = {&#39;rwyelevation_m&#39;:1000, &#39;groundrun_m&#39;:1200}
+        designdefinition = {&#39;aspectratio&#39;:7.3, &#39;bpr&#39;:3.9, &#39;tr&#39;:1.05}
+        designperformance = {&#39;CDTO&#39;:0.04, &#39;CLTO&#39;:0.9, &#39;CLmaxTO&#39;:1.6, &#39;mu_R&#39;:0.02}
+
+        wingloadinglist_pa = [2000, 3000, 4000, 5000]
+
+        atm = at.Atmosphere()
+        concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
+
+        tw_sl, liftoffspeed_mps, avspeed_mps = concept.twrequired_to(wingloadinglist_pa)
+
+        print(tw_sl)
+        print(liftoffspeed_mps)
+        ```
+        ---
+        ```python
+        [ 0.19397876  0.26758006  0.33994772  0.41110154]
+        [ 52.16511207  63.88895348  73.77260898  82.48028428]
+        ```
+        &#34;&#34;&#34;
+        if self.groundrun_m == -1:
+            tomsg = &#34;Ground run not specified in the designbrief dictionary.&#34;
+            raise ValueError(tomsg)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        twratio, liftoffspeed_mps = self.thrusttoweight_takeoff(wingloading_pa)
+
+        # What does this required T/W mean in terms of static T/W required?
+        twratio = self.map2static() * twratio
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.rwyelevation_m)
+        pressure_pa = self.designatm.airpress_pa(self.rwyelevation_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.rwyelevation_m)
+
+        for i, los_mps in enumerate(liftoffspeed_mps):
+            mach = self.designatm.mach(los_mps, self.rwyelevation_m)
+            corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+            twratio[i] = twratio[i] / corr
+
+        avspeed_mps = liftoffspeed_mps / np.sqrt(2)
+
+        if len(twratio) == 1:
+            return twratio[0], liftoffspeed_mps[0], avspeed_mps[0]
+
+        return twratio, liftoffspeed_mps, avspeed_mps
+
+
+    def bank2turnradius(self, bankangle_deg):
+        &#34;&#34;&#34;Calculates the turn radius in m, given the turn TAS and the bank angle&#34;&#34;&#34;
+
+        bankangle_rad = math.radians(bankangle_deg)
+        v_mps = co.kts2mps(self.turnspeed_ktas)
+
+        r_m = (v_mps ** 2) / (constants.g * math.tan(bankangle_rad))
+
+        return r_m
+
+
+    def twrequired_trn(self, wingloading_pa):
+        &#34;&#34;&#34;Calculates the T/W required for turning for a range of wing loadings
+
+        `PARAMETERS`
+        ------------
+
+        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+        `RETURNS`
+        -----------
+
+        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+        `clrequired` : array, lift coefficient values required for the turn (see notes).
+
+        `feasibletw`: as twratio, but contains NaNs in lieu of unachievable (CLmax exceeded) values.
+
+        `SEE ALSO`
+        ------------
+        ``twrequired``
+
+        `NOTES`
+        ---------
+        1. Use `twrequired` if a full constraint analysis is desired, as this integrates
+        the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+        computing the combined constraint boundary.
+
+        2. At the higher end of the wing loading range (low wing area values) the CL required
+        to achieve the required turn rate may exceed the maximum clean CL (as specified in the
+        `CLmaxclean` entry in the `performance` dictionary argument of the `AircraftConcept`
+        class object being used). This means that, whatever the T/W ratio, the wings will stall
+        at this point. The basic T/W value will still be returned in `twratio`, but there is
+        another output, `feasibletw`, which is an array of the same T/W values, with those
+        values blanked out (replaced with NaN) that cannot be achieved due to CL exceeding
+        the maximum clean lift coefficient.
+
+        `EXAMPLE`
+
+        Given a load factor, an altitude (in a given atmosphere) and a true airspeed, as well as
+        a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+        T/W ratio to hold that load factor in the turn.
+        ------------
+        ```python
+        from ADRpy import atmospheres as at
+        from ADRpy import constraintanalysis as ca
+        from ADRpy import unitconversions as co
+
+        designbrief = {&#39;stloadfactor&#39;: 2, &#39;turnalt_m&#39;: co.feet2m(10000), &#39;turnspeed_ktas&#39;: 140}
+
+        etap = {&#39;turn&#39;: 0.85}
+
+        designperformance = {&#39;CLmaxclean&#39;: 1.45, &#39;CDminclean&#39;:0.02541, &#39;etaprop&#39;: etap}
+
+        designdef = {&#39;aspectratio&#39;: 10.12, &#39;sweep_le_deg&#39;: 2, &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+        designatm = at.Atmosphere()
+
+        concept = ca.AircraftConcept(designbrief, designdef,
+        designperformance, designatm)
+
+        wingloadinglist_pa = [1250, 1500, 1750]
+
+        twratio, clrequired, feasibletw = concept.twrequired_trn(wingloadinglist_pa)
+
+        print(&#39;T/W:               &#39;, twratio)
+        print(&#39;Only feasible T/Ws:&#39;, feasibletw)
+        print(&#39;CL required:       &#39;, clrequired)
+        print(&#39;CLmax clean:       &#39;, designperformance[&#39;CLmaxclean&#39;])
+        ```
+        ---
+        ```python
+        T/W:                [ 0.19920641  0.21420513  0.23243016]
+        Only feasible T/Ws: [ 0.19920641  0.21420513         nan]
+        CL required:        [ 1.06552292  1.2786275   1.49173209]
+        CLmax clean:        1.45
+        ```
+        &#34;&#34;&#34;
+
+        if self.turnspeed_ktas == -1:
+            turnmsg = &#34;Turn speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+
+        if self.stloadfactor == -1:
+            turnmsg = &#34;Turn load factor not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the specified turn test may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.turn_weight_fraction
+
+        twratio, clrequired = self.thrusttoweight_sustainedturn(wingloading_pa)
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.turnalt_m)
+        pressure_pa = self.designatm.airpress_pa(self.turnalt_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.turnalt_m)
+        turnspeed_mps = co.kts2mps(self.turnspeed_ktas)
+        mach = self.designatm.mach(turnspeed_mps, self.turnalt_m)
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if turn start weight is less than MTOW
+        twratio = twratio * self.turn_weight_fraction
+
+        # Which of these points is actually reachable given the clean CLmax?
+        feasibletw = np.copy(twratio)
+        for idx, val in enumerate(clrequired):
+            if val &gt; self.clmaxclean:
+                feasibletw[idx] = np.nan
+
+        if len(twratio) == 1:
+            return twratio[0], clrequired[0], feasibletw[0]
+
+        return twratio, clrequired, feasibletw
+
+
+    def twrequired_clm(self, wingloading_pa):
+        &#34;&#34;&#34;Calculates the T/W required for climbing for a range of wing loadings.
+
+        `PARAMETERS`
+        ------------
+
+        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+        `RETURNS`
+        -----------
+
+        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+        `SEE ALSO`
+        ------------
+        ``twrequired``
+
+        `NOTES`
+        ---------
+        1. Use `twrequired` if a full constraint analysis is desired, as this integrates
+        the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+        computing the combined constraint boundary.
+
+        2. The calculation currently approximates climb performance on the constant TAS
+        assumption (though note that the design brief dictionary variable must specify the
+        climb speed as IAS, which is the operationally relevant figure) - a future version
+        of the code will remove this approximation and assume constant IAS.
+
+        `EXAMPLE`
+
+        Given a climb rate (in feet per minute) and a climb speed (KIAS), as well as an
+        altitude (in a given atmosphere) where these must be achieved, as well as
+        a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+        T/W ratio to hold the specified climb rate.
+        ------------
+        ```python
+        from ADRpy import atmospheres as at
+        from ADRpy import constraintanalysis as ca
+
+        designbrief = {&#39;climbalt_m&#39;: 0, &#39;climbspeed_kias&#39;: 101, &#39;climbrate_fpm&#39;: 1398}
+
+        etap = {&#39;climb&#39;: 0.8}
+
+        designperformance = {&#39;CDminclean&#39;: 0.0254, &#39;etaprop&#39; :etap}
+
+        designdef = {&#39;aspectratio&#39;: 10.12, &#39;sweep_le_deg&#39;: 2, &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+        TOW_kg = 1542.0
+
+        designatm = at.Atmosphere()
+
+        concept = ca.AircraftConcept(designbrief, designdef, designperformance, designatm)
+
+        wingloadinglist_pa = [1250, 1500, 1750]
+
+        twratio = concept.twrequired_clm(wingloadinglist_pa)
+
+        print(&#39;T/W: &#39;, twratio)
+        ```
+        ---
+        ```python
+        T/W:  [ 0.20249491  0.2033384   0.20578177]
+        ```
+        &#34;&#34;&#34;
+
+        if self.climbspeed_kias == -1:
+            turnmsg = &#34;Climb speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+        climbspeed_mpsias = co.kts2mps(self.climbspeed_kias)
+
+        # Assuming that the climb rate is &#39;indicated&#39;
+        if self.climbrate_fpm == -1:
+            turnmsg = &#34;Climb rate not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+        climbrate_mps = co.fpm2mps(self.climbrate_fpm)
+
+        climbspeed_mpstas = self.designatm.eas2tas(climbspeed_mpsias, self.servceil_m)
+        climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.servceil_m)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the specified climb segment may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.climb_weight_fraction
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+        qclimb_pa = self.designatm.dynamicpressure_pa(climbspeed_mpstas, self.climbalt_m)
+
+        cos_sq_theta = (1 - (climbrate_mpstroc / climbspeed_mpstas) ** 2)
+
+        # To be implemented, as 1 + (V/g)*(dV/dh)
+        accel_fact = 1.0
+
+        twratio = accel_fact * climbrate_mpstroc / climbspeed_mpstas + \
+        (1 / wingloading_pa) * qclimb_pa * self.cdminclean + \
+        (inddragfact / qclimb_pa) * wingloading_pa * cos_sq_theta
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.climbalt_m)
+        pressure_pa = self.designatm.airpress_pa(self.climbalt_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.climbalt_m)
+        mach = self.designatm.mach(climbspeed_mpstas, self.climbalt_m)
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if climb start weight is less than MTOW
+        twratio = twratio * self.climb_weight_fraction
+
+        if len(twratio) == 1:
+            return twratio[0]
+
+        return twratio
+
+
+    def twrequired_sec(self, wingloading_pa):
+        &#34;&#34;&#34;T/W required for a service ceiling for a range of wing loadings&#34;&#34;&#34;
+
+        if self.servceil_m == -1:
+            secmsg = &#34;Climb rate not specified in the designbrief dictionary.&#34;
+            raise ValueError(secmsg)
+
+        if self.secclimbspd_kias == -1:
+            secmsg = &#34;Best climb speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(secmsg)
+
+        secclimbspeed_mpsias = co.kts2mps(self.secclimbspd_kias)
+        secclimbspeed_mpstas = self.designatm.eas2tas(secclimbspeed_mpsias, self.servceil_m)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the service ceiling test point may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.sec_weight_fraction
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+        qclimb_pa = self.designatm.dynamicpressure_pa(secclimbspeed_mpstas, self.servceil_m)
+
+        # Service ceiling typically defined in terms of climb rate (at best climb speed) of
+        # dropping to 100feet/min ~ 0.508m/s
+        climbrate_mps = co.fpm2mps(100)
+
+        # What true climb rate does 100 feet/minute correspond to?
+        climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.servceil_m)
+
+        twratio = climbrate_mpstroc / secclimbspeed_mpstas + \
+        (1 / wingloading_pa) * qclimb_pa * self.cdminclean + \
+        (inddragfact / qclimb_pa) * wingloading_pa
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.servceil_m)
+        pressure_pa = self.designatm.airpress_pa(self.servceil_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.servceil_m)
+        mach = self.designatm.mach(secclimbspeed_mpstas, self.servceil_m)
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if service ceiling test start weight is less than MTOW
+        twratio = twratio * self.sec_weight_fraction
+
+        if len(twratio) == 1:
+            return twratio[0]
+
+        return twratio
+
+
+
+
+    def twrequired_crs(self, wingloading_pa):
+        &#34;&#34;&#34;Calculate the T/W required for cruise for a range of wing loadings&#34;&#34;&#34;
+
+        if self.cruisespeed_ktas == -1:
+            cruisemsg = &#34;Cruise speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(cruisemsg)
+        cruisespeed_mps = co.kts2mps(self.cruisespeed_ktas)
+
+        if self.cruisealt_m == -1:
+            cruisemsg = &#34;Cruise altitude not specified in the designbrief dictionary.&#34;
+            raise ValueError(cruisemsg)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the cruise may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.cruise_weight_fraction
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+        qcruise_pa = self.designatm.dynamicpressure_pa(cruisespeed_mps, self.cruisealt_m)
+
+        twratio = (1 / wingloading_pa) * qcruise_pa * self.cdminclean + \
+        (inddragfact / qcruise_pa) * wingloading_pa
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.cruisealt_m)
+        pressure_pa = self.designatm.airpress_pa(self.cruisealt_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.cruisealt_m)
+
+        mach = self.designatm.mach(cruisespeed_mps, self.cruisealt_m)
+
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if cruise start weight is less than MTOW
+        twratio = twratio * self.cruise_weight_fraction
+
+        twratio = twratio * (1 / self.cruisethrustfact)
+
+        if len(twratio) == 1:
+            return twratio[0]
+
+        return twratio
+
+
+    def twrequired(self, wingloadinglist_pa, feasibleonly=True):
+        &#34;&#34;&#34;Calculate the T/W required for t/o, trn, clm, crs, sec.&#34;&#34;&#34;
+
+        tw_to, liftoffspeed_mps, avspeed_mps = self.twrequired_to(wingloadinglist_pa)
+        tw_trn, clrequired, feasibletw_trn = self.twrequired_trn(wingloadinglist_pa)
+        tw_clm = self.twrequired_clm(wingloadinglist_pa)
+        tw_crs = self.twrequired_crs(wingloadinglist_pa)
+        tw_sec = self.twrequired_sec(wingloadinglist_pa)
+
+        if feasibleonly:
+            tw_combined = np.amax([tw_to, feasibletw_trn, tw_clm, tw_crs, tw_sec], 0)
+        else:
+            tw_combined = np.max([tw_to, tw_trn, tw_clm, tw_crs, tw_sec], 0)
+
+        twreq = {
+            &#39;take-off&#39;: tw_to,
+            &#39;liftoffspeed_mps&#39;: liftoffspeed_mps,
+            &#39;avspeed_mps&#39;: avspeed_mps,
+            &#39;turn&#39;: tw_trn,
+            &#39;turnfeasible&#39;: feasibletw_trn,
+            &#39;turncl&#39;: clrequired,
+            &#39;climb&#39;: tw_clm,
+            &#39;cruise&#39;: tw_crs,
+            &#39;servceil&#39;: tw_sec,
+            &#39;combined&#39;: tw_combined}
+
+        return twreq
+
+
+    def powerrequired(self, wingloadinglist_pa, tow_kg, feasibleonly=True):
+        &#34;&#34;&#34;Calculate the power required for t/o, trn, clm, crs, sec.&#34;&#34;&#34;
+
+        if self.etadefaultflag &gt; 0:
+            etamsg = str(self.etadefaultflag) + &#34; prop etas set to defaults.&#34;
+            warnings.warn(etamsg, RuntimeWarning)
+
+        twreq = self.twrequired(wingloadinglist_pa, feasibleonly)
+
+        # Take-off power required
+        pw_to_wpn = tw2pw(twreq[&#39;take-off&#39;], twreq[&#39;avspeed_mps&#39;], self.etaprop_to)
+        pw_to_hpkg = co.wn2hpkg(pw_to_wpn)
+        p_to_hp = pw_to_hpkg * tow_kg
+
+        # Turn power required
+        trnspeed_mpstas = co.kts2mps(self.turnspeed_ktas)
+        if feasibleonly:
+            pw_trn_wpn = tw2pw(twreq[&#39;turnfeasible&#39;], trnspeed_mpstas, self.etaprop_turn)
+        else:
+            pw_trn_wpn = tw2pw(twreq[&#39;turn&#39;], trnspeed_mpstas, self.etaprop_turn)
+        pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
+        p_trn_hp = pw_trn_hpkg * tow_kg
+
+        # Climb power
+        # Conversion to TAS, IAS and EAS conflated, safe for typical prop speeds
+        climbspeed_ktas = self.designatm.eas2tas(self.climbspeed_kias, self.climbalt_m)
+        clmspeed_mpstas = co.kts2mps(climbspeed_ktas)
+        pw_clm_wpn = tw2pw(twreq[&#39;climb&#39;], clmspeed_mpstas, self.etaprop_climb)
+        pw_clm_hpkg = co.wn2hpkg(pw_clm_wpn)
+        p_clm_hp = pw_clm_hpkg * tow_kg
+
+        # Power for cruise
+        crsspeed_mpstas = co.kts2mps(self.cruisespeed_ktas)
+        pw_crs_wpn = tw2pw(twreq[&#39;cruise&#39;], crsspeed_mpstas, self.etaprop_cruise)
+        pw_crs_hpkg = co.wn2hpkg(pw_crs_wpn)
+        p_crs_hp = pw_crs_hpkg * tow_kg
+
+        # Power for service ceiling
+        # Conversion to TAS, IAS and EAS conflated, safe for typical prop speeds
+        secclmbspeed_ktas = self.designatm.eas2tas(self.secclimbspd_kias, self.servceil_m)
+        secclmspeed_mpstas = co.kts2mps(secclmbspeed_ktas)
+        pw_sec_wpn = tw2pw(twreq[&#39;servceil&#39;], secclmspeed_mpstas, self.etaprop_sec)
+        pw_sec_hpkg = co.wn2hpkg(pw_sec_wpn)
+        p_sec_hp = pw_sec_hpkg * tow_kg
+
+        p_combined_hp = np.amax([p_to_hp, p_trn_hp, p_clm_hp, p_crs_hp, p_sec_hp], 0)
+
+        preq_hp = {
+            &#39;take-off&#39;: p_to_hp,
+            &#39;liftoffspeed_mps&#39;: twreq[&#39;liftoffspeed_mps&#39;],
+            &#39;avspeed_mps&#39;: twreq[&#39;avspeed_mps&#39;],
+            &#39;turn&#39;: p_trn_hp,
+            &#39;turncl&#39;: twreq[&#39;turncl&#39;],
+            &#39;climb&#39;: p_clm_hp,
+            &#39;cruise&#39;: p_crs_hp,
+            &#39;servceil&#39;: p_sec_hp,
+            &#39;combined&#39;: p_combined_hp}
+
+        return preq_hp
+
+
+    def wsmaxcleanstall_pa(self):
+        &#34;&#34;&#34;Maximum wing loading defined by the clean stall Clmax&#34;&#34;&#34;
+
+        # (W/S)_max = q_vstall * CLmaxclean
+
+        if self.clmaxclean == -1:
+            clmaxmsg = &#34;CLmaxclean must be specified in the performance dictionary.&#34;
+            raise ValueError(clmaxmsg)
+
+        if self.vstallclean_kcas == -1:
+            vstallmsg = &#34;Clean stall speed must be specified in the design brief dictionary.&#34;
+            raise ValueError(vstallmsg)
+
+        # We do the q calculation at SL conditions, TAS ~= EAS ~= CAS
+        # (conflating CAS and EAS on the basis that the stall Mach number is likely v small)
+        stallspeed_mpstas = co.kts2mps(self.vstallclean_kcas)
+
+        q_pa = self.designatm.dynamicpressure_pa(stallspeed_mpstas, 0)
+        return q_pa * self.clmaxclean
+
+
+    def smincleanstall_m2(self, weight_kg):
+        &#34;&#34;&#34;Minimum wing area defined by the clean stall CLmax and the weight&#34;&#34;&#34;
+
+        wsmax = self.wsmaxcleanstall_pa()
+        return co.kg2n(weight_kg) / wsmax
+
+
+    def map2static(self):
+        &#34;&#34;&#34;Maps the average take-off thrust to static thrust&#34;&#34;&#34;
+        if self.bpr &gt; 1:
+            return (4 / 3) * (4 + self.bpr) / (5 + self.bpr)
+
+        return 1.0
+
+
+def tw2pw(thrusttoweight, speed, etap):
+    &#34;&#34;&#34;Converts thrust to weight to power to weight (propeller-driven aircraft)
+
+    `PARAMETERS`
+    ------------
+
+    `thrusttoweight` : thrust to weight ratio (non-dimensional)
+
+    `speed`: speed (in m/s if output in Watts / Newton is required)
+
+    `etap`: propeller efficiency (non-dimensional)
+
+    `RETURNS`
+    -----------
+
+    power to weight ratio (in W/N if speed is in m/s)
+
+    `SEE ALSO`
+    ------------
+    ``powerrequired``
+
+    `NOTES`
+    ---------
+    A note on units. If the input speed is in m/s, the other two inputs being
+    non-dimensional, the output product is also in m/s, which is equal to W/N
+    (W / N = (J/s) / N = (Nm/s) / N = m/s).
+
+    `EXAMPLE`
+    ---------
+    ```python
+    from ADRpy import constraintanalysis as ca
+    from ADRpy import atmospheres as at
+    from ADRpy import unitconversions as co
+
+    designbrief = {&#39;stloadfactor&#39;: 2, &#39;turnalt_m&#39;: 3050, &#39;turnspeed_ktas&#39;: 140}
+
+    etap = {&#39;turn&#39;: 0.85}
+
+    designperformance = {&#39;CLmaxclean&#39;: 1.45, &#39;CDminclean&#39;: 0.02541,
+                            &#39;etaprop&#39;: etap}
+
+    designdef = {&#39;aspectratio&#39;: 10, &#39;sweep_le_deg&#39;: 2,
+                    &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+    TOW_kg = 1500
+
+    designatm = at.Atmosphere()
+    concept = ca.AircraftConcept(designbrief, designdef,
+                                    designperformance, designatm)
+
+    wingloading_pa = 1000
+
+    twreq, _, _ = concept.twrequired_trn(wingloading_pa)
+
+    turnspeed_mpstas = co.kts2mps(designbrief[&#39;turnspeed_ktas&#39;])
+
+    pw_trn_wpn = ca.tw2pw(twreq, turnspeed_mpstas, etap[&#39;turn&#39;])
+    pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
+    p_trn_hp = pw_trn_hpkg * TOW_kg
+
+    print(p_trn_hp)
+    ```
+    ---
+    ```python
+    318.691213406
+    ```
+    &#34;&#34;&#34;
+    return thrusttoweight * speed / etap</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="ADRpy.constraintanalysis.tw2pw"><code class="name flex">
+<span>def <span class="ident">tw2pw</span></span>(<span>thrusttoweight, speed, etap)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Converts thrust to weight to power to weight (propeller-driven aircraft)</p>
+<h2 id="parameters"><code>PARAMETERS</code></h2>
+<p><code>thrusttoweight</code> : thrust to weight ratio (non-dimensional)</p>
+<p><code>speed</code>: speed (in m/s if output in Watts / Newton is required)</p>
+<p><code>etap</code>: propeller efficiency (non-dimensional)</p>
+<h2 id="returns"><code>RETURNS</code></h2>
+<p>power to weight ratio (in W/N if speed is in m/s)</p>
+<h2 id="see-also"><code>SEE ALSO</code></h2>
+<p><code>powerrequired</code></p>
+<h2 id="notes"><code>NOTES</code></h2>
+<p>A note on units. If the input speed is in m/s, the other two inputs being
+non-dimensional, the output product is also in m/s, which is equal to W/N
+(W / N = (J/s) / N = (Nm/s) / N = m/s).</p>
+<h2 id="example"><code>EXAMPLE</code></h2>
+<pre><code class="python">from ADRpy import constraintanalysis as ca
+from ADRpy import atmospheres as at
+from ADRpy import unitconversions as co
+
+designbrief = {'stloadfactor': 2, 'turnalt_m': 3050, 'turnspeed_ktas': 140}
+
+etap = {'turn': 0.85}
+
+designperformance = {'CLmaxclean': 1.45, 'CDminclean': 0.02541,
+                        'etaprop': etap}
+
+designdef = {'aspectratio': 10, 'sweep_le_deg': 2,
+                'sweep_mt_deg': 0, 'bpr': -1}
+
+TOW_kg = 1500
+
+designatm = at.Atmosphere()
+concept = ca.AircraftConcept(designbrief, designdef,
+                                designperformance, designatm)
+
+wingloading_pa = 1000
+
+twreq, _, _ = concept.twrequired_trn(wingloading_pa)
+
+turnspeed_mpstas = co.kts2mps(designbrief['turnspeed_ktas'])
+
+pw_trn_wpn = ca.tw2pw(twreq, turnspeed_mpstas, etap['turn'])
+pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
+p_trn_hp = pw_trn_hpkg * TOW_kg
+
+print(p_trn_hp)
+</code></pre>
+<hr>
+<pre><code class="python">318.691213406
+</code></pre></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def tw2pw(thrusttoweight, speed, etap):
+    &#34;&#34;&#34;Converts thrust to weight to power to weight (propeller-driven aircraft)
+
+    `PARAMETERS`
+    ------------
+
+    `thrusttoweight` : thrust to weight ratio (non-dimensional)
+
+    `speed`: speed (in m/s if output in Watts / Newton is required)
+
+    `etap`: propeller efficiency (non-dimensional)
+
+    `RETURNS`
+    -----------
+
+    power to weight ratio (in W/N if speed is in m/s)
+
+    `SEE ALSO`
+    ------------
+    ``powerrequired``
+
+    `NOTES`
+    ---------
+    A note on units. If the input speed is in m/s, the other two inputs being
+    non-dimensional, the output product is also in m/s, which is equal to W/N
+    (W / N = (J/s) / N = (Nm/s) / N = m/s).
+
+    `EXAMPLE`
+    ---------
+    ```python
+    from ADRpy import constraintanalysis as ca
+    from ADRpy import atmospheres as at
+    from ADRpy import unitconversions as co
+
+    designbrief = {&#39;stloadfactor&#39;: 2, &#39;turnalt_m&#39;: 3050, &#39;turnspeed_ktas&#39;: 140}
+
+    etap = {&#39;turn&#39;: 0.85}
+
+    designperformance = {&#39;CLmaxclean&#39;: 1.45, &#39;CDminclean&#39;: 0.02541,
+                            &#39;etaprop&#39;: etap}
+
+    designdef = {&#39;aspectratio&#39;: 10, &#39;sweep_le_deg&#39;: 2,
+                    &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+    TOW_kg = 1500
+
+    designatm = at.Atmosphere()
+    concept = ca.AircraftConcept(designbrief, designdef,
+                                    designperformance, designatm)
+
+    wingloading_pa = 1000
+
+    twreq, _, _ = concept.twrequired_trn(wingloading_pa)
+
+    turnspeed_mpstas = co.kts2mps(designbrief[&#39;turnspeed_ktas&#39;])
+
+    pw_trn_wpn = ca.tw2pw(twreq, turnspeed_mpstas, etap[&#39;turn&#39;])
+    pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
+    p_trn_hp = pw_trn_hpkg * TOW_kg
+
+    print(p_trn_hp)
+    ```
+    ---
+    ```python
+    318.691213406
+    ```
+    &#34;&#34;&#34;
+    return thrusttoweight * speed / etap</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ADRpy.constraintanalysis.AircraftConcept"><code class="flex name class">
+<span>class <span class="ident">AircraftConcept</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Definition of a basic aircraft concept. An aircraft concept object must
+be defined for all constraint analysis functions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class AircraftConcept:
+    &#34;&#34;&#34;Definition of a basic aircraft concept. An aircraft concept object must
+    be defined for all constraint analysis functions.
+    &#34;&#34;&#34;
+
+    def __init__(self, brief, design, performance, designatm):
+
+        # Assign a default, if needed, to the atmosphere
+        if not designatm:
+            designatm = at.Atmosphere()
+        self.designatm = designatm
+
+        # Unpick the design brief dictionary first:
+
+        if &#39;groundrun_m&#39; in brief:
+            self.groundrun_m = brief[&#39;groundrun_m&#39;]
+        else:
+            # Flag if not specified, error thrown by t/o constraint
+            self.groundrun_m = -1
+
+        if &#39;rwyelevation_m&#39; in brief:
+            self.rwyelevation_m = brief[&#39;rwyelevation_m&#39;]
+        else:
+            # Assign sea level, if not specified
+            self.rwyelevation_m = 0
+
+        if &#39;turnalt_m&#39; in brief:
+            self.turnalt_m = brief[&#39;turnalt_m&#39;]
+        else:
+            # Assign sea level, if not specified
+            self.turnalt_m = 0
+
+        if &#39;turnspeed_ktas&#39; in brief:
+            self.turnspeed_ktas = brief[&#39;turnspeed_ktas&#39;]
+        else:
+            # Flag if not specified, error thrown by turn constraint
+            self.turnspeed_ktas = -1
+
+        if &#39;stloadfactor&#39; in brief:
+            self.stloadfactor = brief[&#39;stloadfactor&#39;]
+        else:
+            # Flag if not specified, error thrown by climb constraint
+            self.stloadfactor = -1
+
+        if &#39;climbalt_m&#39; in brief:
+            self.climbalt_m = brief[&#39;climbalt_m&#39;]
+        else:
+            # Assign sea level, if not specified
+            self.climbalt_m = 0
+
+        if &#39;climbspeed_kias&#39; in brief:
+            self.climbspeed_kias = brief[&#39;climbspeed_kias&#39;]
+        else:
+            # Flag if not specified, error thrown by climb constraint
+            self.climbspeed_kias = -1
+
+        if &#39;climbrate_fpm&#39; in brief:
+            self.climbrate_fpm = brief[&#39;climbrate_fpm&#39;]
+        else:
+            # Flag if not specified, error thrown by climb constraint
+            self.climbrate_fpm = -1
+
+        if &#39;cruisealt_m&#39; in brief:
+            self.cruisealt_m = brief[&#39;cruisealt_m&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.cruisealt_m = -1
+
+        if &#39;cruisespeed_ktas&#39; in brief: # Option to specify Mach number instead coming soon
+            self.cruisespeed_ktas = brief[&#39;cruisespeed_ktas&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.cruisespeed_ktas = -1
+
+        if &#39;cruisethrustfact&#39; in brief:
+            self.cruisethrustfact = brief[&#39;cruisethrustfact&#39;]
+        else:
+            # Assume 100% throttle in cruise
+            self.cruisethrustfact = 1.0
+
+        if &#39;servceil_m&#39; in brief:
+            self.servceil_m = brief[&#39;servceil_m&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.servceil_m = -1
+
+        if &#39;secclimbspd_kias&#39; in brief:
+            self.secclimbspd_kias = brief[&#39;secclimbspd_kias&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.secclimbspd_kias = -1
+
+        if &#39;vstallclean_kcas&#39; in brief:
+            self.vstallclean_kcas = brief[&#39;vstallclean_kcas&#39;]
+        else:
+            # Flag if not specified, error thrown by cruise constraint
+            self.vstallclean_kcas = -1
+
+
+        # Unpick the design dictionary next:
+
+        if &#39;aspectratio&#39; in design:
+            self.aspectratio = design[&#39;aspectratio&#39;]
+        else:
+            self.aspectratio = 8
+
+        if &#39;bpr&#39; in design:
+            self.bpr = design[&#39;bpr&#39;]
+        else:
+            # Piston engine
+            self.bpr = -1
+
+        if &#39;tr&#39; in design:
+            self.throttle_r = design[&#39;tr&#39;]
+        else:
+            self.throttle_r = 1.07
+
+        if &#39;sweep_le_deg&#39; in design:
+            self.sweep_le_deg = design[&#39;sweep_le_deg&#39;]
+            self.sweep_le_rad = math.radians(self.sweep_le_deg)
+        else:
+            self.sweep_le_deg = 0
+            self.sweep_le_rad = 0
+
+        if &#39;sweep_mt_deg&#39; in design:
+            self.sweep_mt_deg = design[&#39;sweep_mt_deg&#39;]
+            self.sweep_mt_rad = math.radians(self.sweep_mt_deg)
+        else:
+            self.sweep_mt_deg = self.sweep_le_deg
+            self.sweep_mt_rad = self.sweep_le_rad
+
+        if &#39;weightfractions&#39; in design:
+            if &#39;cruise&#39; in design[&#39;weightfractions&#39;]:
+                self.cruise_weight_fraction = design[&#39;weightfractions&#39;][&#39;cruise&#39;]
+            else:
+                self.cruise_weight_fraction = 1.0
+            if &#39;servceil&#39; in design[&#39;weightfractions&#39;]:
+                self.sec_weight_fraction = design[&#39;weightfractions&#39;][&#39;servceil&#39;]
+            else:
+                self.sec_weight_fraction = 1.0
+            if &#39;turn&#39; in design[&#39;weightfractions&#39;]:
+                self.turn_weight_fraction = design[&#39;weightfractions&#39;][&#39;turn&#39;]
+            else:
+                self.turn_weight_fraction = 1.0
+            if &#39;climb&#39; in design[&#39;weightfractions&#39;]:
+                self.climb_weight_fraction = design[&#39;weightfractions&#39;][&#39;climb&#39;]
+            else:
+                self.climb_weight_fraction = 1.0
+        else:
+            # Assume all constraints at same weight (e.g., electrically powered a/c)
+            self.cruise_weight_fraction = 1.0
+            self.sec_weight_fraction = 1.0
+            self.turn_weight_fraction = 1.0
+            self.climb_weight_fraction = 1.0
+
+        # Next, unpick the performance dictionary
+
+        if &#39;CDTO&#39; in performance:
+            self.cdto = performance[&#39;CDTO&#39;]
+        else:
+            self.cdto = 0.09
+
+        if &#39;CDminclean&#39; in performance:
+            self.cdminclean = performance[&#39;CDminclean&#39;]
+        else:
+            self.cdminclean = 0.03
+
+        if &#39;mu_R&#39; in performance:
+            self.mu_r = performance[&#39;mu_R&#39;]
+        else:
+            self.mu_r = 0.03
+
+        if &#39;CLTO&#39; in performance:
+            self.clto = performance[&#39;CLTO&#39;]
+        else:
+            self.clto = 0.95
+
+        if &#39;CLmaxTO&#39; in performance:
+            self.clmaxto = performance[&#39;CLmaxTO&#39;]
+        else:
+            self.clmaxto = 1.5
+
+        if &#39;etaprop&#39; in performance:
+            self.etaprop = performance[&#39;etaprop&#39;]
+        else:
+            self.etaprop = -1
+
+        if &#39;CLmaxclean&#39; in performance:
+            self.clmaxclean = performance[&#39;CLmaxclean&#39;]
+        else:
+            self.clmaxclean = -1
+
+        self.etadefaultflag = 0
+        if &#39;etaprop&#39; in performance:
+            if &#39;take-off&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_to = performance[&#39;etaprop&#39;][&#39;take-off&#39;]
+            else:
+                self.etaprop_to = 0.45
+                self.etadefaultflag += 1
+            if &#39;cruise&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_cruise = performance[&#39;etaprop&#39;][&#39;cruise&#39;]
+            else:
+                self.etaprop_cruise = 0.85
+                self.etadefaultflag += 1
+            if &#39;servceil&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_sec = performance[&#39;etaprop&#39;][&#39;servceil&#39;]
+            else:
+                self.etaprop_sec = 0.65
+                self.etadefaultflag += 1
+            if &#39;turn&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_turn = performance[&#39;etaprop&#39;][&#39;turn&#39;]
+            else:
+                self.etaprop_turn = 0.85
+                self.etadefaultflag += 1
+            if &#39;climb&#39; in performance[&#39;etaprop&#39;]:
+                self.etaprop_climb = performance[&#39;etaprop&#39;][&#39;climb&#39;]
+            else:
+                self.etaprop_climb = 0.75
+                self.etadefaultflag += 1
+        else:
+            self.etaprop_to = 0.45
+            self.etaprop_cruise = 0.85
+            self.etaprop_sec = 0.65
+            self.etaprop_climb = 0.75
+            self.etaprop_turn = 0.85
+            self.etadefaultflag = 5
+
+    # Three different estimates the Oswald efficieny factor:
+
+    def oswaldspaneff1(self):
+        &#34;&#34;&#34;Raymer&#39;s Oswald span efficiency estimate, sweep &lt; 30, moderate AR&#34;&#34;&#34;
+        return 1.78 * (1 - 0.045 * (self.aspectratio ** 0.68)) - 0.64
+
+    def oswaldspaneff2(self):
+        &#34;&#34;&#34;Oswald span efficiency estimate due to Brandt et al.&#34;&#34;&#34;
+        sqrtterm = 4 + self.aspectratio ** 2 * (1 + (math.tan(self.sweep_mt_rad)) ** 2)
+        return 2/(2 - self.aspectratio + math.sqrt(sqrtterm))
+
+    def oswaldspaneff3(self):
+        &#34;&#34;&#34;Raymer&#39;s Oswald span efficiency estimate, swept wings&#34;&#34;&#34;
+        return 4.61 * (1 - 0.045 * (self.aspectratio ** 0.68)) * \
+        ((math.cos(self.sweep_le_rad)) ** 0.15) - 3.1
+
+
+    def induceddragfact(self, whichoswald=1):
+        &#34;&#34;&#34;Lift induced drag factor k estimate (Cd = Cd0 + k.Cl^2)&#34;&#34;&#34;
+
+        # k = 1 / pi.AR.e
+        if whichoswald == 1:
+            oswaldspaneff = self.oswaldspaneff1()
+        elif whichoswald == 2:
+            oswaldspaneff = self.oswaldspaneff2()
+        elif whichoswald == 3:
+            oswaldspaneff = self.oswaldspaneff3()
+        elif whichoswald == 23:
+            oswaldspaneff = 0.5 * (self.oswaldspaneff2() + self.oswaldspaneff3())
+        elif whichoswald == 123:
+            oswaldspaneff = (self.oswaldspaneff1() + self.oswaldspaneff2() + \
+            self.oswaldspaneff3()) / 3.0
+        return 1.0 / (math.pi * self.aspectratio * oswaldspaneff)
+
+
+    def bestclimbspeedprop(self, wingloading_pa, altitude_m):
+        &#34;&#34;&#34;The best rate of climb speed for a propeller aircraft&#34;&#34;&#34;
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+        dragfactor = np.sqrt(self.induceddragfact(123) / (3 * self.cdminclean))
+        densfactor = 2 / self.designatm.airdens_kgpm3(altitude_m)
+
+        # Gudmundsson, eq. (18-27)
+        bestspeed_mps = np.sqrt(densfactor * wingloading_pa * dragfactor)
+
+        if len(bestspeed_mps) == 1:
+            return bestspeed_mps[0]
+
+        return bestspeed_mps
+
+
+    def thrusttoweight_takeoff(self, wingloading_pa):
+        &#34;&#34;&#34;The thrust to weight ratio required for take-off&#34;&#34;&#34;
+
+        groundrun_m = self.groundrun_m
+
+        # Assuming that the lift-off speed is equal to VR, which we estimate at 1.1VS1(T/O)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.rwyelevation_m)
+
+        vs1to_mps = np.sqrt((2 * wingloading_pa) / (density_kgpm3 * self.clmaxto))
+
+        liftoffspeed_mps = 1.1 * vs1to_mps
+
+        thrusttoweightreqd = (liftoffspeed_mps ** 2) / (2 * constants.g * groundrun_m) + \
+        0.5 * self.cdto / self.clto + \
+        0.5 * self.mu_r
+
+        return thrusttoweightreqd, liftoffspeed_mps
+
+
+    def thrusttoweight_sustainedturn(self, wingloading_pa):
+        &#34;&#34;&#34;Baseline T/W req&#39;d for sustaining a given load factor at a certain altitude&#34;&#34;&#34;
+
+        nturn = self.stloadfactor
+        turnalt_m = self.turnalt_m
+        turnspeed_mps = co.kts2mps(self.turnspeed_ktas)
+
+        qturn = self.designatm.dynamicpressure_pa(airspeed_mps=turnspeed_mps, altitudes_m=turnalt_m)
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+
+        cdmin = self.cdminclean
+
+        twreqtrn = qturn * \
+        (cdmin / wingloading_pa + inddragfact * ((nturn / qturn) ** 2) * wingloading_pa)
+
+        # What cl is required to actually reach the target load factor
+        clrequired = nturn * wingloading_pa / qturn
+
+        return twreqtrn, clrequired
+
+
+    def _altcorr(self, temp_c, pressure_pa, mach, density_kgpm3):
+        &#34;&#34;&#34;Altitude corrections, depending on propulsion system type&#34;&#34;&#34;
+        if self.bpr == -1:
+            twratio_altcorr = at.pistonpowerfactor(density_kgpm3)
+        elif self.bpr == -2:
+            twratio_altcorr = at.turbopropthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r)
+        elif self.bpr == -3: # no correction required
+            twratio_altcorr = 1
+        elif self.bpr == 0:
+            twratio_altcorr = at.turbojetthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r, False)
+        elif self.bpr &lt; 5:
+            twratio_altcorr = at.turbofanthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r, &#34;lowbpr&#34;)
+        else:
+            twratio_altcorr = at.turbofanthrustfactor(temp_c, pressure_pa, mach, \
+            self.throttle_r, &#34;highbpr&#34;)
+        return twratio_altcorr
+
+
+    def twrequired_to(self, wingloading_pa):
+        &#34;&#34;&#34;Calculate the T/W required for take-off for a range of wing loadings
+
+        `PARAMETERS`
+        ------------
+
+        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+
+        `RETURNS`
+        -----------
+
+        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+        `liftoffspeed_mps` : array, liftoff speeds (TAS) in m/s.
+
+        `avspeed_mps`: average speed (TAS) during the take-off run, in m/s.
+
+        `SEE ALSO`
+        ------------
+        ``twrequired``
+
+        `NOTES`
+        ---------
+        1. The calculations here assume a &#39;no wind&#39; take-off, conflating ground speed (GS) and
+        true airspeed (TAS).
+
+        2. Use `twrequired` if a full constraint analysis is desired, as this integrates
+        the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+        computing the combined constraint boundary.
+
+        `EXAMPLE`
+        ------------
+        ```python
+        from ADRpy import atmospheres as at
+        from ADRpy import constraintanalysis as ca
+
+        designbrief = {&#39;rwyelevation_m&#39;:1000, &#39;groundrun_m&#39;:1200}
+        designdefinition = {&#39;aspectratio&#39;:7.3, &#39;bpr&#39;:3.9, &#39;tr&#39;:1.05}
+        designperformance = {&#39;CDTO&#39;:0.04, &#39;CLTO&#39;:0.9, &#39;CLmaxTO&#39;:1.6, &#39;mu_R&#39;:0.02}
+
+        wingloadinglist_pa = [2000, 3000, 4000, 5000]
+
+        atm = at.Atmosphere()
+        concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
+
+        tw_sl, liftoffspeed_mps, avspeed_mps = concept.twrequired_to(wingloadinglist_pa)
+
+        print(tw_sl)
+        print(liftoffspeed_mps)
+        ```
+        ---
+        ```python
+        [ 0.19397876  0.26758006  0.33994772  0.41110154]
+        [ 52.16511207  63.88895348  73.77260898  82.48028428]
+        ```
+        &#34;&#34;&#34;
+        if self.groundrun_m == -1:
+            tomsg = &#34;Ground run not specified in the designbrief dictionary.&#34;
+            raise ValueError(tomsg)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        twratio, liftoffspeed_mps = self.thrusttoweight_takeoff(wingloading_pa)
+
+        # What does this required T/W mean in terms of static T/W required?
+        twratio = self.map2static() * twratio
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.rwyelevation_m)
+        pressure_pa = self.designatm.airpress_pa(self.rwyelevation_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.rwyelevation_m)
+
+        for i, los_mps in enumerate(liftoffspeed_mps):
+            mach = self.designatm.mach(los_mps, self.rwyelevation_m)
+            corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+            twratio[i] = twratio[i] / corr
+
+        avspeed_mps = liftoffspeed_mps / np.sqrt(2)
+
+        if len(twratio) == 1:
+            return twratio[0], liftoffspeed_mps[0], avspeed_mps[0]
+
+        return twratio, liftoffspeed_mps, avspeed_mps
+
+
+    def bank2turnradius(self, bankangle_deg):
+        &#34;&#34;&#34;Calculates the turn radius in m, given the turn TAS and the bank angle&#34;&#34;&#34;
+
+        bankangle_rad = math.radians(bankangle_deg)
+        v_mps = co.kts2mps(self.turnspeed_ktas)
+
+        r_m = (v_mps ** 2) / (constants.g * math.tan(bankangle_rad))
+
+        return r_m
+
+
+    def twrequired_trn(self, wingloading_pa):
+        &#34;&#34;&#34;Calculates the T/W required for turning for a range of wing loadings
+
+        `PARAMETERS`
+        ------------
+
+        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+        `RETURNS`
+        -----------
+
+        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+        `clrequired` : array, lift coefficient values required for the turn (see notes).
+
+        `feasibletw`: as twratio, but contains NaNs in lieu of unachievable (CLmax exceeded) values.
+
+        `SEE ALSO`
+        ------------
+        ``twrequired``
+
+        `NOTES`
+        ---------
+        1. Use `twrequired` if a full constraint analysis is desired, as this integrates
+        the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+        computing the combined constraint boundary.
+
+        2. At the higher end of the wing loading range (low wing area values) the CL required
+        to achieve the required turn rate may exceed the maximum clean CL (as specified in the
+        `CLmaxclean` entry in the `performance` dictionary argument of the `AircraftConcept`
+        class object being used). This means that, whatever the T/W ratio, the wings will stall
+        at this point. The basic T/W value will still be returned in `twratio`, but there is
+        another output, `feasibletw`, which is an array of the same T/W values, with those
+        values blanked out (replaced with NaN) that cannot be achieved due to CL exceeding
+        the maximum clean lift coefficient.
+
+        `EXAMPLE`
+
+        Given a load factor, an altitude (in a given atmosphere) and a true airspeed, as well as
+        a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+        T/W ratio to hold that load factor in the turn.
+        ------------
+        ```python
+        from ADRpy import atmospheres as at
+        from ADRpy import constraintanalysis as ca
+        from ADRpy import unitconversions as co
+
+        designbrief = {&#39;stloadfactor&#39;: 2, &#39;turnalt_m&#39;: co.feet2m(10000), &#39;turnspeed_ktas&#39;: 140}
+
+        etap = {&#39;turn&#39;: 0.85}
+
+        designperformance = {&#39;CLmaxclean&#39;: 1.45, &#39;CDminclean&#39;:0.02541, &#39;etaprop&#39;: etap}
+
+        designdef = {&#39;aspectratio&#39;: 10.12, &#39;sweep_le_deg&#39;: 2, &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+        designatm = at.Atmosphere()
+
+        concept = ca.AircraftConcept(designbrief, designdef,
+        designperformance, designatm)
+
+        wingloadinglist_pa = [1250, 1500, 1750]
+
+        twratio, clrequired, feasibletw = concept.twrequired_trn(wingloadinglist_pa)
+
+        print(&#39;T/W:               &#39;, twratio)
+        print(&#39;Only feasible T/Ws:&#39;, feasibletw)
+        print(&#39;CL required:       &#39;, clrequired)
+        print(&#39;CLmax clean:       &#39;, designperformance[&#39;CLmaxclean&#39;])
+        ```
+        ---
+        ```python
+        T/W:                [ 0.19920641  0.21420513  0.23243016]
+        Only feasible T/Ws: [ 0.19920641  0.21420513         nan]
+        CL required:        [ 1.06552292  1.2786275   1.49173209]
+        CLmax clean:        1.45
+        ```
+        &#34;&#34;&#34;
+
+        if self.turnspeed_ktas == -1:
+            turnmsg = &#34;Turn speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+
+        if self.stloadfactor == -1:
+            turnmsg = &#34;Turn load factor not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the specified turn test may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.turn_weight_fraction
+
+        twratio, clrequired = self.thrusttoweight_sustainedturn(wingloading_pa)
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.turnalt_m)
+        pressure_pa = self.designatm.airpress_pa(self.turnalt_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.turnalt_m)
+        turnspeed_mps = co.kts2mps(self.turnspeed_ktas)
+        mach = self.designatm.mach(turnspeed_mps, self.turnalt_m)
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if turn start weight is less than MTOW
+        twratio = twratio * self.turn_weight_fraction
+
+        # Which of these points is actually reachable given the clean CLmax?
+        feasibletw = np.copy(twratio)
+        for idx, val in enumerate(clrequired):
+            if val &gt; self.clmaxclean:
+                feasibletw[idx] = np.nan
+
+        if len(twratio) == 1:
+            return twratio[0], clrequired[0], feasibletw[0]
+
+        return twratio, clrequired, feasibletw
+
+
+    def twrequired_clm(self, wingloading_pa):
+        &#34;&#34;&#34;Calculates the T/W required for climbing for a range of wing loadings.
+
+        `PARAMETERS`
+        ------------
+
+        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+        `RETURNS`
+        -----------
+
+        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+        `SEE ALSO`
+        ------------
+        ``twrequired``
+
+        `NOTES`
+        ---------
+        1. Use `twrequired` if a full constraint analysis is desired, as this integrates
+        the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+        computing the combined constraint boundary.
+
+        2. The calculation currently approximates climb performance on the constant TAS
+        assumption (though note that the design brief dictionary variable must specify the
+        climb speed as IAS, which is the operationally relevant figure) - a future version
+        of the code will remove this approximation and assume constant IAS.
+
+        `EXAMPLE`
+
+        Given a climb rate (in feet per minute) and a climb speed (KIAS), as well as an
+        altitude (in a given atmosphere) where these must be achieved, as well as
+        a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+        T/W ratio to hold the specified climb rate.
+        ------------
+        ```python
+        from ADRpy import atmospheres as at
+        from ADRpy import constraintanalysis as ca
+
+        designbrief = {&#39;climbalt_m&#39;: 0, &#39;climbspeed_kias&#39;: 101, &#39;climbrate_fpm&#39;: 1398}
+
+        etap = {&#39;climb&#39;: 0.8}
+
+        designperformance = {&#39;CDminclean&#39;: 0.0254, &#39;etaprop&#39; :etap}
+
+        designdef = {&#39;aspectratio&#39;: 10.12, &#39;sweep_le_deg&#39;: 2, &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+        TOW_kg = 1542.0
+
+        designatm = at.Atmosphere()
+
+        concept = ca.AircraftConcept(designbrief, designdef, designperformance, designatm)
+
+        wingloadinglist_pa = [1250, 1500, 1750]
+
+        twratio = concept.twrequired_clm(wingloadinglist_pa)
+
+        print(&#39;T/W: &#39;, twratio)
+        ```
+        ---
+        ```python
+        T/W:  [ 0.20249491  0.2033384   0.20578177]
+        ```
+        &#34;&#34;&#34;
+
+        if self.climbspeed_kias == -1:
+            turnmsg = &#34;Climb speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+        climbspeed_mpsias = co.kts2mps(self.climbspeed_kias)
+
+        # Assuming that the climb rate is &#39;indicated&#39;
+        if self.climbrate_fpm == -1:
+            turnmsg = &#34;Climb rate not specified in the designbrief dictionary.&#34;
+            raise ValueError(turnmsg)
+        climbrate_mps = co.fpm2mps(self.climbrate_fpm)
+
+        climbspeed_mpstas = self.designatm.eas2tas(climbspeed_mpsias, self.servceil_m)
+        climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.servceil_m)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the specified climb segment may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.climb_weight_fraction
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+        qclimb_pa = self.designatm.dynamicpressure_pa(climbspeed_mpstas, self.climbalt_m)
+
+        cos_sq_theta = (1 - (climbrate_mpstroc / climbspeed_mpstas) ** 2)
+
+        # To be implemented, as 1 + (V/g)*(dV/dh)
+        accel_fact = 1.0
+
+        twratio = accel_fact * climbrate_mpstroc / climbspeed_mpstas + \
+        (1 / wingloading_pa) * qclimb_pa * self.cdminclean + \
+        (inddragfact / qclimb_pa) * wingloading_pa * cos_sq_theta
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.climbalt_m)
+        pressure_pa = self.designatm.airpress_pa(self.climbalt_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.climbalt_m)
+        mach = self.designatm.mach(climbspeed_mpstas, self.climbalt_m)
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if climb start weight is less than MTOW
+        twratio = twratio * self.climb_weight_fraction
+
+        if len(twratio) == 1:
+            return twratio[0]
+
+        return twratio
+
+
+    def twrequired_sec(self, wingloading_pa):
+        &#34;&#34;&#34;T/W required for a service ceiling for a range of wing loadings&#34;&#34;&#34;
+
+        if self.servceil_m == -1:
+            secmsg = &#34;Climb rate not specified in the designbrief dictionary.&#34;
+            raise ValueError(secmsg)
+
+        if self.secclimbspd_kias == -1:
+            secmsg = &#34;Best climb speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(secmsg)
+
+        secclimbspeed_mpsias = co.kts2mps(self.secclimbspd_kias)
+        secclimbspeed_mpstas = self.designatm.eas2tas(secclimbspeed_mpsias, self.servceil_m)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the service ceiling test point may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.sec_weight_fraction
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+        qclimb_pa = self.designatm.dynamicpressure_pa(secclimbspeed_mpstas, self.servceil_m)
+
+        # Service ceiling typically defined in terms of climb rate (at best climb speed) of
+        # dropping to 100feet/min ~ 0.508m/s
+        climbrate_mps = co.fpm2mps(100)
+
+        # What true climb rate does 100 feet/minute correspond to?
+        climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.servceil_m)
+
+        twratio = climbrate_mpstroc / secclimbspeed_mpstas + \
+        (1 / wingloading_pa) * qclimb_pa * self.cdminclean + \
+        (inddragfact / qclimb_pa) * wingloading_pa
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.servceil_m)
+        pressure_pa = self.designatm.airpress_pa(self.servceil_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.servceil_m)
+        mach = self.designatm.mach(secclimbspeed_mpstas, self.servceil_m)
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if service ceiling test start weight is less than MTOW
+        twratio = twratio * self.sec_weight_fraction
+
+        if len(twratio) == 1:
+            return twratio[0]
+
+        return twratio
+
+
+
+
+    def twrequired_crs(self, wingloading_pa):
+        &#34;&#34;&#34;Calculate the T/W required for cruise for a range of wing loadings&#34;&#34;&#34;
+
+        if self.cruisespeed_ktas == -1:
+            cruisemsg = &#34;Cruise speed not specified in the designbrief dictionary.&#34;
+            raise ValueError(cruisemsg)
+        cruisespeed_mps = co.kts2mps(self.cruisespeed_ktas)
+
+        if self.cruisealt_m == -1:
+            cruisemsg = &#34;Cruise altitude not specified in the designbrief dictionary.&#34;
+            raise ValueError(cruisemsg)
+
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # W/S at the start of the cruise may be less than MTOW/S
+        wingloading_pa = wingloading_pa * self.cruise_weight_fraction
+
+        inddragfact = self.induceddragfact(whichoswald=123)
+        qcruise_pa = self.designatm.dynamicpressure_pa(cruisespeed_mps, self.cruisealt_m)
+
+        twratio = (1 / wingloading_pa) * qcruise_pa * self.cdminclean + \
+        (inddragfact / qcruise_pa) * wingloading_pa
+
+        # What SL T/W will yield the required T/W at the actual altitude?
+        temp_c = self.designatm.airtemp_c(self.cruisealt_m)
+        pressure_pa = self.designatm.airpress_pa(self.cruisealt_m)
+        density_kgpm3 = self.designatm.airdens_kgpm3(self.cruisealt_m)
+
+        mach = self.designatm.mach(cruisespeed_mps, self.cruisealt_m)
+
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+        twratio = twratio / corr
+
+        # Map back to T/MTOW if cruise start weight is less than MTOW
+        twratio = twratio * self.cruise_weight_fraction
+
+        twratio = twratio * (1 / self.cruisethrustfact)
+
+        if len(twratio) == 1:
+            return twratio[0]
+
+        return twratio
+
+
+    def twrequired(self, wingloadinglist_pa, feasibleonly=True):
+        &#34;&#34;&#34;Calculate the T/W required for t/o, trn, clm, crs, sec.&#34;&#34;&#34;
+
+        tw_to, liftoffspeed_mps, avspeed_mps = self.twrequired_to(wingloadinglist_pa)
+        tw_trn, clrequired, feasibletw_trn = self.twrequired_trn(wingloadinglist_pa)
+        tw_clm = self.twrequired_clm(wingloadinglist_pa)
+        tw_crs = self.twrequired_crs(wingloadinglist_pa)
+        tw_sec = self.twrequired_sec(wingloadinglist_pa)
+
+        if feasibleonly:
+            tw_combined = np.amax([tw_to, feasibletw_trn, tw_clm, tw_crs, tw_sec], 0)
+        else:
+            tw_combined = np.max([tw_to, tw_trn, tw_clm, tw_crs, tw_sec], 0)
+
+        twreq = {
+            &#39;take-off&#39;: tw_to,
+            &#39;liftoffspeed_mps&#39;: liftoffspeed_mps,
+            &#39;avspeed_mps&#39;: avspeed_mps,
+            &#39;turn&#39;: tw_trn,
+            &#39;turnfeasible&#39;: feasibletw_trn,
+            &#39;turncl&#39;: clrequired,
+            &#39;climb&#39;: tw_clm,
+            &#39;cruise&#39;: tw_crs,
+            &#39;servceil&#39;: tw_sec,
+            &#39;combined&#39;: tw_combined}
+
+        return twreq
+
+
+    def powerrequired(self, wingloadinglist_pa, tow_kg, feasibleonly=True):
+        &#34;&#34;&#34;Calculate the power required for t/o, trn, clm, crs, sec.&#34;&#34;&#34;
+
+        if self.etadefaultflag &gt; 0:
+            etamsg = str(self.etadefaultflag) + &#34; prop etas set to defaults.&#34;
+            warnings.warn(etamsg, RuntimeWarning)
+
+        twreq = self.twrequired(wingloadinglist_pa, feasibleonly)
+
+        # Take-off power required
+        pw_to_wpn = tw2pw(twreq[&#39;take-off&#39;], twreq[&#39;avspeed_mps&#39;], self.etaprop_to)
+        pw_to_hpkg = co.wn2hpkg(pw_to_wpn)
+        p_to_hp = pw_to_hpkg * tow_kg
+
+        # Turn power required
+        trnspeed_mpstas = co.kts2mps(self.turnspeed_ktas)
+        if feasibleonly:
+            pw_trn_wpn = tw2pw(twreq[&#39;turnfeasible&#39;], trnspeed_mpstas, self.etaprop_turn)
+        else:
+            pw_trn_wpn = tw2pw(twreq[&#39;turn&#39;], trnspeed_mpstas, self.etaprop_turn)
+        pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
+        p_trn_hp = pw_trn_hpkg * tow_kg
+
+        # Climb power
+        # Conversion to TAS, IAS and EAS conflated, safe for typical prop speeds
+        climbspeed_ktas = self.designatm.eas2tas(self.climbspeed_kias, self.climbalt_m)
+        clmspeed_mpstas = co.kts2mps(climbspeed_ktas)
+        pw_clm_wpn = tw2pw(twreq[&#39;climb&#39;], clmspeed_mpstas, self.etaprop_climb)
+        pw_clm_hpkg = co.wn2hpkg(pw_clm_wpn)
+        p_clm_hp = pw_clm_hpkg * tow_kg
+
+        # Power for cruise
+        crsspeed_mpstas = co.kts2mps(self.cruisespeed_ktas)
+        pw_crs_wpn = tw2pw(twreq[&#39;cruise&#39;], crsspeed_mpstas, self.etaprop_cruise)
+        pw_crs_hpkg = co.wn2hpkg(pw_crs_wpn)
+        p_crs_hp = pw_crs_hpkg * tow_kg
+
+        # Power for service ceiling
+        # Conversion to TAS, IAS and EAS conflated, safe for typical prop speeds
+        secclmbspeed_ktas = self.designatm.eas2tas(self.secclimbspd_kias, self.servceil_m)
+        secclmspeed_mpstas = co.kts2mps(secclmbspeed_ktas)
+        pw_sec_wpn = tw2pw(twreq[&#39;servceil&#39;], secclmspeed_mpstas, self.etaprop_sec)
+        pw_sec_hpkg = co.wn2hpkg(pw_sec_wpn)
+        p_sec_hp = pw_sec_hpkg * tow_kg
+
+        p_combined_hp = np.amax([p_to_hp, p_trn_hp, p_clm_hp, p_crs_hp, p_sec_hp], 0)
+
+        preq_hp = {
+            &#39;take-off&#39;: p_to_hp,
+            &#39;liftoffspeed_mps&#39;: twreq[&#39;liftoffspeed_mps&#39;],
+            &#39;avspeed_mps&#39;: twreq[&#39;avspeed_mps&#39;],
+            &#39;turn&#39;: p_trn_hp,
+            &#39;turncl&#39;: twreq[&#39;turncl&#39;],
+            &#39;climb&#39;: p_clm_hp,
+            &#39;cruise&#39;: p_crs_hp,
+            &#39;servceil&#39;: p_sec_hp,
+            &#39;combined&#39;: p_combined_hp}
+
+        return preq_hp
+
+
+    def wsmaxcleanstall_pa(self):
+        &#34;&#34;&#34;Maximum wing loading defined by the clean stall Clmax&#34;&#34;&#34;
+
+        # (W/S)_max = q_vstall * CLmaxclean
+
+        if self.clmaxclean == -1:
+            clmaxmsg = &#34;CLmaxclean must be specified in the performance dictionary.&#34;
+            raise ValueError(clmaxmsg)
+
+        if self.vstallclean_kcas == -1:
+            vstallmsg = &#34;Clean stall speed must be specified in the design brief dictionary.&#34;
+            raise ValueError(vstallmsg)
+
+        # We do the q calculation at SL conditions, TAS ~= EAS ~= CAS
+        # (conflating CAS and EAS on the basis that the stall Mach number is likely v small)
+        stallspeed_mpstas = co.kts2mps(self.vstallclean_kcas)
+
+        q_pa = self.designatm.dynamicpressure_pa(stallspeed_mpstas, 0)
+        return q_pa * self.clmaxclean
+
+
+    def smincleanstall_m2(self, weight_kg):
+        &#34;&#34;&#34;Minimum wing area defined by the clean stall CLmax and the weight&#34;&#34;&#34;
+
+        wsmax = self.wsmaxcleanstall_pa()
+        return co.kg2n(weight_kg) / wsmax
+
+
+    def map2static(self):
+        &#34;&#34;&#34;Maps the average take-off thrust to static thrust&#34;&#34;&#34;
+        if self.bpr &gt; 1:
+            return (4 / 3) * (4 + self.bpr) / (5 + self.bpr)
+
+        return 1.0</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, brief, design, performance, designatm)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize self.
+See help(type(self)) for accurate signature.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(self, brief, design, performance, designatm):
+
+    # Assign a default, if needed, to the atmosphere
+    if not designatm:
+        designatm = at.Atmosphere()
+    self.designatm = designatm
+
+    # Unpick the design brief dictionary first:
+
+    if &#39;groundrun_m&#39; in brief:
+        self.groundrun_m = brief[&#39;groundrun_m&#39;]
+    else:
+        # Flag if not specified, error thrown by t/o constraint
+        self.groundrun_m = -1
+
+    if &#39;rwyelevation_m&#39; in brief:
+        self.rwyelevation_m = brief[&#39;rwyelevation_m&#39;]
+    else:
+        # Assign sea level, if not specified
+        self.rwyelevation_m = 0
+
+    if &#39;turnalt_m&#39; in brief:
+        self.turnalt_m = brief[&#39;turnalt_m&#39;]
+    else:
+        # Assign sea level, if not specified
+        self.turnalt_m = 0
+
+    if &#39;turnspeed_ktas&#39; in brief:
+        self.turnspeed_ktas = brief[&#39;turnspeed_ktas&#39;]
+    else:
+        # Flag if not specified, error thrown by turn constraint
+        self.turnspeed_ktas = -1
+
+    if &#39;stloadfactor&#39; in brief:
+        self.stloadfactor = brief[&#39;stloadfactor&#39;]
+    else:
+        # Flag if not specified, error thrown by climb constraint
+        self.stloadfactor = -1
+
+    if &#39;climbalt_m&#39; in brief:
+        self.climbalt_m = brief[&#39;climbalt_m&#39;]
+    else:
+        # Assign sea level, if not specified
+        self.climbalt_m = 0
+
+    if &#39;climbspeed_kias&#39; in brief:
+        self.climbspeed_kias = brief[&#39;climbspeed_kias&#39;]
+    else:
+        # Flag if not specified, error thrown by climb constraint
+        self.climbspeed_kias = -1
+
+    if &#39;climbrate_fpm&#39; in brief:
+        self.climbrate_fpm = brief[&#39;climbrate_fpm&#39;]
+    else:
+        # Flag if not specified, error thrown by climb constraint
+        self.climbrate_fpm = -1
+
+    if &#39;cruisealt_m&#39; in brief:
+        self.cruisealt_m = brief[&#39;cruisealt_m&#39;]
+    else:
+        # Flag if not specified, error thrown by cruise constraint
+        self.cruisealt_m = -1
+
+    if &#39;cruisespeed_ktas&#39; in brief: # Option to specify Mach number instead coming soon
+        self.cruisespeed_ktas = brief[&#39;cruisespeed_ktas&#39;]
+    else:
+        # Flag if not specified, error thrown by cruise constraint
+        self.cruisespeed_ktas = -1
+
+    if &#39;cruisethrustfact&#39; in brief:
+        self.cruisethrustfact = brief[&#39;cruisethrustfact&#39;]
+    else:
+        # Assume 100% throttle in cruise
+        self.cruisethrustfact = 1.0
+
+    if &#39;servceil_m&#39; in brief:
+        self.servceil_m = brief[&#39;servceil_m&#39;]
+    else:
+        # Flag if not specified, error thrown by cruise constraint
+        self.servceil_m = -1
+
+    if &#39;secclimbspd_kias&#39; in brief:
+        self.secclimbspd_kias = brief[&#39;secclimbspd_kias&#39;]
+    else:
+        # Flag if not specified, error thrown by cruise constraint
+        self.secclimbspd_kias = -1
+
+    if &#39;vstallclean_kcas&#39; in brief:
+        self.vstallclean_kcas = brief[&#39;vstallclean_kcas&#39;]
+    else:
+        # Flag if not specified, error thrown by cruise constraint
+        self.vstallclean_kcas = -1
+
+
+    # Unpick the design dictionary next:
+
+    if &#39;aspectratio&#39; in design:
+        self.aspectratio = design[&#39;aspectratio&#39;]
+    else:
+        self.aspectratio = 8
+
+    if &#39;bpr&#39; in design:
+        self.bpr = design[&#39;bpr&#39;]
+    else:
+        # Piston engine
+        self.bpr = -1
+
+    if &#39;tr&#39; in design:
+        self.throttle_r = design[&#39;tr&#39;]
+    else:
+        self.throttle_r = 1.07
+
+    if &#39;sweep_le_deg&#39; in design:
+        self.sweep_le_deg = design[&#39;sweep_le_deg&#39;]
+        self.sweep_le_rad = math.radians(self.sweep_le_deg)
+    else:
+        self.sweep_le_deg = 0
+        self.sweep_le_rad = 0
+
+    if &#39;sweep_mt_deg&#39; in design:
+        self.sweep_mt_deg = design[&#39;sweep_mt_deg&#39;]
+        self.sweep_mt_rad = math.radians(self.sweep_mt_deg)
+    else:
+        self.sweep_mt_deg = self.sweep_le_deg
+        self.sweep_mt_rad = self.sweep_le_rad
+
+    if &#39;weightfractions&#39; in design:
+        if &#39;cruise&#39; in design[&#39;weightfractions&#39;]:
+            self.cruise_weight_fraction = design[&#39;weightfractions&#39;][&#39;cruise&#39;]
+        else:
+            self.cruise_weight_fraction = 1.0
+        if &#39;servceil&#39; in design[&#39;weightfractions&#39;]:
+            self.sec_weight_fraction = design[&#39;weightfractions&#39;][&#39;servceil&#39;]
+        else:
+            self.sec_weight_fraction = 1.0
+        if &#39;turn&#39; in design[&#39;weightfractions&#39;]:
+            self.turn_weight_fraction = design[&#39;weightfractions&#39;][&#39;turn&#39;]
+        else:
+            self.turn_weight_fraction = 1.0
+        if &#39;climb&#39; in design[&#39;weightfractions&#39;]:
+            self.climb_weight_fraction = design[&#39;weightfractions&#39;][&#39;climb&#39;]
+        else:
+            self.climb_weight_fraction = 1.0
+    else:
+        # Assume all constraints at same weight (e.g., electrically powered a/c)
+        self.cruise_weight_fraction = 1.0
+        self.sec_weight_fraction = 1.0
+        self.turn_weight_fraction = 1.0
+        self.climb_weight_fraction = 1.0
+
+    # Next, unpick the performance dictionary
+
+    if &#39;CDTO&#39; in performance:
+        self.cdto = performance[&#39;CDTO&#39;]
+    else:
+        self.cdto = 0.09
+
+    if &#39;CDminclean&#39; in performance:
+        self.cdminclean = performance[&#39;CDminclean&#39;]
+    else:
+        self.cdminclean = 0.03
+
+    if &#39;mu_R&#39; in performance:
+        self.mu_r = performance[&#39;mu_R&#39;]
+    else:
+        self.mu_r = 0.03
+
+    if &#39;CLTO&#39; in performance:
+        self.clto = performance[&#39;CLTO&#39;]
+    else:
+        self.clto = 0.95
+
+    if &#39;CLmaxTO&#39; in performance:
+        self.clmaxto = performance[&#39;CLmaxTO&#39;]
+    else:
+        self.clmaxto = 1.5
+
+    if &#39;etaprop&#39; in performance:
+        self.etaprop = performance[&#39;etaprop&#39;]
+    else:
+        self.etaprop = -1
+
+    if &#39;CLmaxclean&#39; in performance:
+        self.clmaxclean = performance[&#39;CLmaxclean&#39;]
+    else:
+        self.clmaxclean = -1
+
+    self.etadefaultflag = 0
+    if &#39;etaprop&#39; in performance:
+        if &#39;take-off&#39; in performance[&#39;etaprop&#39;]:
+            self.etaprop_to = performance[&#39;etaprop&#39;][&#39;take-off&#39;]
+        else:
+            self.etaprop_to = 0.45
+            self.etadefaultflag += 1
+        if &#39;cruise&#39; in performance[&#39;etaprop&#39;]:
+            self.etaprop_cruise = performance[&#39;etaprop&#39;][&#39;cruise&#39;]
+        else:
+            self.etaprop_cruise = 0.85
+            self.etadefaultflag += 1
+        if &#39;servceil&#39; in performance[&#39;etaprop&#39;]:
+            self.etaprop_sec = performance[&#39;etaprop&#39;][&#39;servceil&#39;]
+        else:
+            self.etaprop_sec = 0.65
+            self.etadefaultflag += 1
+        if &#39;turn&#39; in performance[&#39;etaprop&#39;]:
+            self.etaprop_turn = performance[&#39;etaprop&#39;][&#39;turn&#39;]
+        else:
+            self.etaprop_turn = 0.85
+            self.etadefaultflag += 1
+        if &#39;climb&#39; in performance[&#39;etaprop&#39;]:
+            self.etaprop_climb = performance[&#39;etaprop&#39;][&#39;climb&#39;]
+        else:
+            self.etaprop_climb = 0.75
+            self.etadefaultflag += 1
+    else:
+        self.etaprop_to = 0.45
+        self.etaprop_cruise = 0.85
+        self.etaprop_sec = 0.65
+        self.etaprop_climb = 0.75
+        self.etaprop_turn = 0.85
+        self.etadefaultflag = 5</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.bank2turnradius"><code class="name flex">
+<span>def <span class="ident">bank2turnradius</span></span>(<span>self, bankangle_deg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculates the turn radius in m, given the turn TAS and the bank angle</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def bank2turnradius(self, bankangle_deg):
+    &#34;&#34;&#34;Calculates the turn radius in m, given the turn TAS and the bank angle&#34;&#34;&#34;
+
+    bankangle_rad = math.radians(bankangle_deg)
+    v_mps = co.kts2mps(self.turnspeed_ktas)
+
+    r_m = (v_mps ** 2) / (constants.g * math.tan(bankangle_rad))
+
+    return r_m</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.bestclimbspeedprop"><code class="name flex">
+<span>def <span class="ident">bestclimbspeedprop</span></span>(<span>self, wingloading_pa, altitude_m)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>The best rate of climb speed for a propeller aircraft</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def bestclimbspeedprop(self, wingloading_pa, altitude_m):
+    &#34;&#34;&#34;The best rate of climb speed for a propeller aircraft&#34;&#34;&#34;
+
+    wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+    dragfactor = np.sqrt(self.induceddragfact(123) / (3 * self.cdminclean))
+    densfactor = 2 / self.designatm.airdens_kgpm3(altitude_m)
+
+    # Gudmundsson, eq. (18-27)
+    bestspeed_mps = np.sqrt(densfactor * wingloading_pa * dragfactor)
+
+    if len(bestspeed_mps) == 1:
+        return bestspeed_mps[0]
+
+    return bestspeed_mps</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.induceddragfact"><code class="name flex">
+<span>def <span class="ident">induceddragfact</span></span>(<span>self, whichoswald=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Lift induced drag factor k estimate (Cd = Cd0 + k.Cl^2)</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def induceddragfact(self, whichoswald=1):
+    &#34;&#34;&#34;Lift induced drag factor k estimate (Cd = Cd0 + k.Cl^2)&#34;&#34;&#34;
+
+    # k = 1 / pi.AR.e
+    if whichoswald == 1:
+        oswaldspaneff = self.oswaldspaneff1()
+    elif whichoswald == 2:
+        oswaldspaneff = self.oswaldspaneff2()
+    elif whichoswald == 3:
+        oswaldspaneff = self.oswaldspaneff3()
+    elif whichoswald == 23:
+        oswaldspaneff = 0.5 * (self.oswaldspaneff2() + self.oswaldspaneff3())
+    elif whichoswald == 123:
+        oswaldspaneff = (self.oswaldspaneff1() + self.oswaldspaneff2() + \
+        self.oswaldspaneff3()) / 3.0
+    return 1.0 / (math.pi * self.aspectratio * oswaldspaneff)</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.map2static"><code class="name flex">
+<span>def <span class="ident">map2static</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Maps the average take-off thrust to static thrust</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def map2static(self):
+    &#34;&#34;&#34;Maps the average take-off thrust to static thrust&#34;&#34;&#34;
+    if self.bpr &gt; 1:
+        return (4 / 3) * (4 + self.bpr) / (5 + self.bpr)
+
+    return 1.0</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff1"><code class="name flex">
+<span>def <span class="ident">oswaldspaneff1</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Raymer's Oswald span efficiency estimate, sweep &lt; 30, moderate AR</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def oswaldspaneff1(self):
+    &#34;&#34;&#34;Raymer&#39;s Oswald span efficiency estimate, sweep &lt; 30, moderate AR&#34;&#34;&#34;
+    return 1.78 * (1 - 0.045 * (self.aspectratio ** 0.68)) - 0.64</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff2"><code class="name flex">
+<span>def <span class="ident">oswaldspaneff2</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Oswald span efficiency estimate due to Brandt et al.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def oswaldspaneff2(self):
+    &#34;&#34;&#34;Oswald span efficiency estimate due to Brandt et al.&#34;&#34;&#34;
+    sqrtterm = 4 + self.aspectratio ** 2 * (1 + (math.tan(self.sweep_mt_rad)) ** 2)
+    return 2/(2 - self.aspectratio + math.sqrt(sqrtterm))</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff3"><code class="name flex">
+<span>def <span class="ident">oswaldspaneff3</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Raymer's Oswald span efficiency estimate, swept wings</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def oswaldspaneff3(self):
+    &#34;&#34;&#34;Raymer&#39;s Oswald span efficiency estimate, swept wings&#34;&#34;&#34;
+    return 4.61 * (1 - 0.045 * (self.aspectratio ** 0.68)) * \
+    ((math.cos(self.sweep_le_rad)) ** 0.15) - 3.1</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.powerrequired"><code class="name flex">
+<span>def <span class="ident">powerrequired</span></span>(<span>self, wingloadinglist_pa, tow_kg, feasibleonly=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculate the power required for t/o, trn, clm, crs, sec.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def powerrequired(self, wingloadinglist_pa, tow_kg, feasibleonly=True):
+    &#34;&#34;&#34;Calculate the power required for t/o, trn, clm, crs, sec.&#34;&#34;&#34;
+
+    if self.etadefaultflag &gt; 0:
+        etamsg = str(self.etadefaultflag) + &#34; prop etas set to defaults.&#34;
+        warnings.warn(etamsg, RuntimeWarning)
+
+    twreq = self.twrequired(wingloadinglist_pa, feasibleonly)
+
+    # Take-off power required
+    pw_to_wpn = tw2pw(twreq[&#39;take-off&#39;], twreq[&#39;avspeed_mps&#39;], self.etaprop_to)
+    pw_to_hpkg = co.wn2hpkg(pw_to_wpn)
+    p_to_hp = pw_to_hpkg * tow_kg
+
+    # Turn power required
+    trnspeed_mpstas = co.kts2mps(self.turnspeed_ktas)
+    if feasibleonly:
+        pw_trn_wpn = tw2pw(twreq[&#39;turnfeasible&#39;], trnspeed_mpstas, self.etaprop_turn)
+    else:
+        pw_trn_wpn = tw2pw(twreq[&#39;turn&#39;], trnspeed_mpstas, self.etaprop_turn)
+    pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
+    p_trn_hp = pw_trn_hpkg * tow_kg
+
+    # Climb power
+    # Conversion to TAS, IAS and EAS conflated, safe for typical prop speeds
+    climbspeed_ktas = self.designatm.eas2tas(self.climbspeed_kias, self.climbalt_m)
+    clmspeed_mpstas = co.kts2mps(climbspeed_ktas)
+    pw_clm_wpn = tw2pw(twreq[&#39;climb&#39;], clmspeed_mpstas, self.etaprop_climb)
+    pw_clm_hpkg = co.wn2hpkg(pw_clm_wpn)
+    p_clm_hp = pw_clm_hpkg * tow_kg
+
+    # Power for cruise
+    crsspeed_mpstas = co.kts2mps(self.cruisespeed_ktas)
+    pw_crs_wpn = tw2pw(twreq[&#39;cruise&#39;], crsspeed_mpstas, self.etaprop_cruise)
+    pw_crs_hpkg = co.wn2hpkg(pw_crs_wpn)
+    p_crs_hp = pw_crs_hpkg * tow_kg
+
+    # Power for service ceiling
+    # Conversion to TAS, IAS and EAS conflated, safe for typical prop speeds
+    secclmbspeed_ktas = self.designatm.eas2tas(self.secclimbspd_kias, self.servceil_m)
+    secclmspeed_mpstas = co.kts2mps(secclmbspeed_ktas)
+    pw_sec_wpn = tw2pw(twreq[&#39;servceil&#39;], secclmspeed_mpstas, self.etaprop_sec)
+    pw_sec_hpkg = co.wn2hpkg(pw_sec_wpn)
+    p_sec_hp = pw_sec_hpkg * tow_kg
+
+    p_combined_hp = np.amax([p_to_hp, p_trn_hp, p_clm_hp, p_crs_hp, p_sec_hp], 0)
+
+    preq_hp = {
+        &#39;take-off&#39;: p_to_hp,
+        &#39;liftoffspeed_mps&#39;: twreq[&#39;liftoffspeed_mps&#39;],
+        &#39;avspeed_mps&#39;: twreq[&#39;avspeed_mps&#39;],
+        &#39;turn&#39;: p_trn_hp,
+        &#39;turncl&#39;: twreq[&#39;turncl&#39;],
+        &#39;climb&#39;: p_clm_hp,
+        &#39;cruise&#39;: p_crs_hp,
+        &#39;servceil&#39;: p_sec_hp,
+        &#39;combined&#39;: p_combined_hp}
+
+    return preq_hp</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.smincleanstall_m2"><code class="name flex">
+<span>def <span class="ident">smincleanstall_m2</span></span>(<span>self, weight_kg)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Minimum wing area defined by the clean stall CLmax and the weight</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def smincleanstall_m2(self, weight_kg):
+    &#34;&#34;&#34;Minimum wing area defined by the clean stall CLmax and the weight&#34;&#34;&#34;
+
+    wsmax = self.wsmaxcleanstall_pa()
+    return co.kg2n(weight_kg) / wsmax</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.thrusttoweight_sustainedturn"><code class="name flex">
+<span>def <span class="ident">thrusttoweight_sustainedturn</span></span>(<span>self, wingloading_pa)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Baseline T/W req'd for sustaining a given load factor at a certain altitude</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def thrusttoweight_sustainedturn(self, wingloading_pa):
+    &#34;&#34;&#34;Baseline T/W req&#39;d for sustaining a given load factor at a certain altitude&#34;&#34;&#34;
+
+    nturn = self.stloadfactor
+    turnalt_m = self.turnalt_m
+    turnspeed_mps = co.kts2mps(self.turnspeed_ktas)
+
+    qturn = self.designatm.dynamicpressure_pa(airspeed_mps=turnspeed_mps, altitudes_m=turnalt_m)
+
+    inddragfact = self.induceddragfact(whichoswald=123)
+
+    cdmin = self.cdminclean
+
+    twreqtrn = qturn * \
+    (cdmin / wingloading_pa + inddragfact * ((nturn / qturn) ** 2) * wingloading_pa)
+
+    # What cl is required to actually reach the target load factor
+    clrequired = nturn * wingloading_pa / qturn
+
+    return twreqtrn, clrequired</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.thrusttoweight_takeoff"><code class="name flex">
+<span>def <span class="ident">thrusttoweight_takeoff</span></span>(<span>self, wingloading_pa)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>The thrust to weight ratio required for take-off</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def thrusttoweight_takeoff(self, wingloading_pa):
+    &#34;&#34;&#34;The thrust to weight ratio required for take-off&#34;&#34;&#34;
+
+    groundrun_m = self.groundrun_m
+
+    # Assuming that the lift-off speed is equal to VR, which we estimate at 1.1VS1(T/O)
+    density_kgpm3 = self.designatm.airdens_kgpm3(self.rwyelevation_m)
+
+    vs1to_mps = np.sqrt((2 * wingloading_pa) / (density_kgpm3 * self.clmaxto))
+
+    liftoffspeed_mps = 1.1 * vs1to_mps
+
+    thrusttoweightreqd = (liftoffspeed_mps ** 2) / (2 * constants.g * groundrun_m) + \
+    0.5 * self.cdto / self.clto + \
+    0.5 * self.mu_r
+
+    return thrusttoweightreqd, liftoffspeed_mps</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.twrequired"><code class="name flex">
+<span>def <span class="ident">twrequired</span></span>(<span>self, wingloadinglist_pa, feasibleonly=True)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculate the T/W required for t/o, trn, clm, crs, sec.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def twrequired(self, wingloadinglist_pa, feasibleonly=True):
+    &#34;&#34;&#34;Calculate the T/W required for t/o, trn, clm, crs, sec.&#34;&#34;&#34;
+
+    tw_to, liftoffspeed_mps, avspeed_mps = self.twrequired_to(wingloadinglist_pa)
+    tw_trn, clrequired, feasibletw_trn = self.twrequired_trn(wingloadinglist_pa)
+    tw_clm = self.twrequired_clm(wingloadinglist_pa)
+    tw_crs = self.twrequired_crs(wingloadinglist_pa)
+    tw_sec = self.twrequired_sec(wingloadinglist_pa)
+
+    if feasibleonly:
+        tw_combined = np.amax([tw_to, feasibletw_trn, tw_clm, tw_crs, tw_sec], 0)
+    else:
+        tw_combined = np.max([tw_to, tw_trn, tw_clm, tw_crs, tw_sec], 0)
+
+    twreq = {
+        &#39;take-off&#39;: tw_to,
+        &#39;liftoffspeed_mps&#39;: liftoffspeed_mps,
+        &#39;avspeed_mps&#39;: avspeed_mps,
+        &#39;turn&#39;: tw_trn,
+        &#39;turnfeasible&#39;: feasibletw_trn,
+        &#39;turncl&#39;: clrequired,
+        &#39;climb&#39;: tw_clm,
+        &#39;cruise&#39;: tw_crs,
+        &#39;servceil&#39;: tw_sec,
+        &#39;combined&#39;: tw_combined}
+
+    return twreq</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.twrequired_clm"><code class="name flex">
+<span>def <span class="ident">twrequired_clm</span></span>(<span>self, wingloading_pa)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculates the T/W required for climbing for a range of wing loadings.</p>
+<h2 id="parameters"><code>PARAMETERS</code></h2>
+<p><code>wingloading_pa</code> : float or numpy array, list of wing loading values in Pa.</p>
+<h2 id="returns"><code>RETURNS</code></h2>
+<p><code>twratio</code> : array, thrust to weight ratio required for the given wing loadings.</p>
+<h2 id="see-also"><code>SEE ALSO</code></h2>
+<p><code>twrequired</code></p>
+<h2 id="notes"><code>NOTES</code></h2>
+<ol>
+<li>
+<p>Use <code>twrequired</code> if a full constraint analysis is desired, as this integrates
+the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+computing the combined constraint boundary.</p>
+</li>
+<li>
+<p>The calculation currently approximates climb performance on the constant TAS
+assumption (though note that the design brief dictionary variable must specify the
+climb speed as IAS, which is the operationally relevant figure) - a future version
+of the code will remove this approximation and assume constant IAS.</p>
+</li>
+</ol>
+<p><code>EXAMPLE</code></p>
+<p>Given a climb rate (in feet per minute) and a climb speed (KIAS), as well as an
+altitude (in a given atmosphere) where these must be achieved, as well as
+a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+T/W ratio to hold the specified climb rate.</p>
+<hr>
+<pre><code class="python">from ADRpy import atmospheres as at
+from ADRpy import constraintanalysis as ca
+
+designbrief = {'climbalt_m': 0, 'climbspeed_kias': 101, 'climbrate_fpm': 1398}
+
+etap = {'climb': 0.8}
+
+designperformance = {'CDminclean': 0.0254, 'etaprop' :etap}
+
+designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1}
+
+TOW_kg = 1542.0
+
+designatm = at.Atmosphere()
+
+concept = ca.AircraftConcept(designbrief, designdef, designperformance, designatm)
+
+wingloadinglist_pa = [1250, 1500, 1750]
+
+twratio = concept.twrequired_clm(wingloadinglist_pa)
+
+print('T/W: ', twratio)
+</code></pre>
+<hr>
+<pre><code class="python">T/W:  [ 0.20249491  0.2033384   0.20578177]
+</code></pre></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def twrequired_clm(self, wingloading_pa):
+    &#34;&#34;&#34;Calculates the T/W required for climbing for a range of wing loadings.
+
+    `PARAMETERS`
+    ------------
+
+    `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+    `RETURNS`
+    -----------
+
+    `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+    `SEE ALSO`
+    ------------
+    ``twrequired``
+
+    `NOTES`
+    ---------
+    1. Use `twrequired` if a full constraint analysis is desired, as this integrates
+    the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+    computing the combined constraint boundary.
+
+    2. The calculation currently approximates climb performance on the constant TAS
+    assumption (though note that the design brief dictionary variable must specify the
+    climb speed as IAS, which is the operationally relevant figure) - a future version
+    of the code will remove this approximation and assume constant IAS.
+
+    `EXAMPLE`
+
+    Given a climb rate (in feet per minute) and a climb speed (KIAS), as well as an
+    altitude (in a given atmosphere) where these must be achieved, as well as
+    a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+    T/W ratio to hold the specified climb rate.
+    ------------
+    ```python
+    from ADRpy import atmospheres as at
+    from ADRpy import constraintanalysis as ca
+
+    designbrief = {&#39;climbalt_m&#39;: 0, &#39;climbspeed_kias&#39;: 101, &#39;climbrate_fpm&#39;: 1398}
+
+    etap = {&#39;climb&#39;: 0.8}
+
+    designperformance = {&#39;CDminclean&#39;: 0.0254, &#39;etaprop&#39; :etap}
+
+    designdef = {&#39;aspectratio&#39;: 10.12, &#39;sweep_le_deg&#39;: 2, &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+    TOW_kg = 1542.0
+
+    designatm = at.Atmosphere()
+
+    concept = ca.AircraftConcept(designbrief, designdef, designperformance, designatm)
+
+    wingloadinglist_pa = [1250, 1500, 1750]
+
+    twratio = concept.twrequired_clm(wingloadinglist_pa)
+
+    print(&#39;T/W: &#39;, twratio)
+    ```
+    ---
+    ```python
+    T/W:  [ 0.20249491  0.2033384   0.20578177]
+    ```
+    &#34;&#34;&#34;
+
+    if self.climbspeed_kias == -1:
+        turnmsg = &#34;Climb speed not specified in the designbrief dictionary.&#34;
+        raise ValueError(turnmsg)
+    climbspeed_mpsias = co.kts2mps(self.climbspeed_kias)
+
+    # Assuming that the climb rate is &#39;indicated&#39;
+    if self.climbrate_fpm == -1:
+        turnmsg = &#34;Climb rate not specified in the designbrief dictionary.&#34;
+        raise ValueError(turnmsg)
+    climbrate_mps = co.fpm2mps(self.climbrate_fpm)
+
+    climbspeed_mpstas = self.designatm.eas2tas(climbspeed_mpsias, self.servceil_m)
+    climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.servceil_m)
+
+    wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+    # W/S at the start of the specified climb segment may be less than MTOW/S
+    wingloading_pa = wingloading_pa * self.climb_weight_fraction
+
+    inddragfact = self.induceddragfact(whichoswald=123)
+    qclimb_pa = self.designatm.dynamicpressure_pa(climbspeed_mpstas, self.climbalt_m)
+
+    cos_sq_theta = (1 - (climbrate_mpstroc / climbspeed_mpstas) ** 2)
+
+    # To be implemented, as 1 + (V/g)*(dV/dh)
+    accel_fact = 1.0
+
+    twratio = accel_fact * climbrate_mpstroc / climbspeed_mpstas + \
+    (1 / wingloading_pa) * qclimb_pa * self.cdminclean + \
+    (inddragfact / qclimb_pa) * wingloading_pa * cos_sq_theta
+
+    # What SL T/W will yield the required T/W at the actual altitude?
+    temp_c = self.designatm.airtemp_c(self.climbalt_m)
+    pressure_pa = self.designatm.airpress_pa(self.climbalt_m)
+    density_kgpm3 = self.designatm.airdens_kgpm3(self.climbalt_m)
+    mach = self.designatm.mach(climbspeed_mpstas, self.climbalt_m)
+    corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+    twratio = twratio / corr
+
+    # Map back to T/MTOW if climb start weight is less than MTOW
+    twratio = twratio * self.climb_weight_fraction
+
+    if len(twratio) == 1:
+        return twratio[0]
+
+    return twratio</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.twrequired_crs"><code class="name flex">
+<span>def <span class="ident">twrequired_crs</span></span>(<span>self, wingloading_pa)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculate the T/W required for cruise for a range of wing loadings</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def twrequired_crs(self, wingloading_pa):
+    &#34;&#34;&#34;Calculate the T/W required for cruise for a range of wing loadings&#34;&#34;&#34;
+
+    if self.cruisespeed_ktas == -1:
+        cruisemsg = &#34;Cruise speed not specified in the designbrief dictionary.&#34;
+        raise ValueError(cruisemsg)
+    cruisespeed_mps = co.kts2mps(self.cruisespeed_ktas)
+
+    if self.cruisealt_m == -1:
+        cruisemsg = &#34;Cruise altitude not specified in the designbrief dictionary.&#34;
+        raise ValueError(cruisemsg)
+
+    wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+    # W/S at the start of the cruise may be less than MTOW/S
+    wingloading_pa = wingloading_pa * self.cruise_weight_fraction
+
+    inddragfact = self.induceddragfact(whichoswald=123)
+    qcruise_pa = self.designatm.dynamicpressure_pa(cruisespeed_mps, self.cruisealt_m)
+
+    twratio = (1 / wingloading_pa) * qcruise_pa * self.cdminclean + \
+    (inddragfact / qcruise_pa) * wingloading_pa
+
+    # What SL T/W will yield the required T/W at the actual altitude?
+    temp_c = self.designatm.airtemp_c(self.cruisealt_m)
+    pressure_pa = self.designatm.airpress_pa(self.cruisealt_m)
+    density_kgpm3 = self.designatm.airdens_kgpm3(self.cruisealt_m)
+
+    mach = self.designatm.mach(cruisespeed_mps, self.cruisealt_m)
+
+    corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+    twratio = twratio / corr
+
+    # Map back to T/MTOW if cruise start weight is less than MTOW
+    twratio = twratio * self.cruise_weight_fraction
+
+    twratio = twratio * (1 / self.cruisethrustfact)
+
+    if len(twratio) == 1:
+        return twratio[0]
+
+    return twratio</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.twrequired_sec"><code class="name flex">
+<span>def <span class="ident">twrequired_sec</span></span>(<span>self, wingloading_pa)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>T/W required for a service ceiling for a range of wing loadings</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def twrequired_sec(self, wingloading_pa):
+    &#34;&#34;&#34;T/W required for a service ceiling for a range of wing loadings&#34;&#34;&#34;
+
+    if self.servceil_m == -1:
+        secmsg = &#34;Climb rate not specified in the designbrief dictionary.&#34;
+        raise ValueError(secmsg)
+
+    if self.secclimbspd_kias == -1:
+        secmsg = &#34;Best climb speed not specified in the designbrief dictionary.&#34;
+        raise ValueError(secmsg)
+
+    secclimbspeed_mpsias = co.kts2mps(self.secclimbspd_kias)
+    secclimbspeed_mpstas = self.designatm.eas2tas(secclimbspeed_mpsias, self.servceil_m)
+
+    wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+    # W/S at the start of the service ceiling test point may be less than MTOW/S
+    wingloading_pa = wingloading_pa * self.sec_weight_fraction
+
+    inddragfact = self.induceddragfact(whichoswald=123)
+    qclimb_pa = self.designatm.dynamicpressure_pa(secclimbspeed_mpstas, self.servceil_m)
+
+    # Service ceiling typically defined in terms of climb rate (at best climb speed) of
+    # dropping to 100feet/min ~ 0.508m/s
+    climbrate_mps = co.fpm2mps(100)
+
+    # What true climb rate does 100 feet/minute correspond to?
+    climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.servceil_m)
+
+    twratio = climbrate_mpstroc / secclimbspeed_mpstas + \
+    (1 / wingloading_pa) * qclimb_pa * self.cdminclean + \
+    (inddragfact / qclimb_pa) * wingloading_pa
+
+    # What SL T/W will yield the required T/W at the actual altitude?
+    temp_c = self.designatm.airtemp_c(self.servceil_m)
+    pressure_pa = self.designatm.airpress_pa(self.servceil_m)
+    density_kgpm3 = self.designatm.airdens_kgpm3(self.servceil_m)
+    mach = self.designatm.mach(secclimbspeed_mpstas, self.servceil_m)
+    corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+    twratio = twratio / corr
+
+    # Map back to T/MTOW if service ceiling test start weight is less than MTOW
+    twratio = twratio * self.sec_weight_fraction
+
+    if len(twratio) == 1:
+        return twratio[0]
+
+    return twratio</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.twrequired_to"><code class="name flex">
+<span>def <span class="ident">twrequired_to</span></span>(<span>self, wingloading_pa)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculate the T/W required for take-off for a range of wing loadings</p>
+<h2 id="parameters"><code>PARAMETERS</code></h2>
+<p><code>wingloading_pa</code> : float or numpy array, list of wing loading values in Pa.</p>
+<h2 id="returns"><code>RETURNS</code></h2>
+<p><code>twratio</code> : array, thrust to weight ratio required for the given wing loadings.</p>
+<p><code>liftoffspeed_mps</code> : array, liftoff speeds (TAS) in m/s.</p>
+<p><code>avspeed_mps</code>: average speed (TAS) during the take-off run, in m/s.</p>
+<h2 id="see-also"><code>SEE ALSO</code></h2>
+<p><code>twrequired</code></p>
+<h2 id="notes"><code>NOTES</code></h2>
+<ol>
+<li>
+<p>The calculations here assume a 'no wind' take-off, conflating ground speed (GS) and
+true airspeed (TAS).</p>
+</li>
+<li>
+<p>Use <code>twrequired</code> if a full constraint analysis is desired, as this integrates
+the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+computing the combined constraint boundary.</p>
+</li>
+</ol>
+<h2 id="example"><code>EXAMPLE</code></h2>
+<pre><code class="python">from ADRpy import atmospheres as at
+from ADRpy import constraintanalysis as ca
+
+designbrief = {'rwyelevation_m':1000, 'groundrun_m':1200}
+designdefinition = {'aspectratio':7.3, 'bpr':3.9, 'tr':1.05}
+designperformance = {'CDTO':0.04, 'CLTO':0.9, 'CLmaxTO':1.6, 'mu_R':0.02}
+
+wingloadinglist_pa = [2000, 3000, 4000, 5000]
+
+atm = at.Atmosphere()
+concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
+
+tw_sl, liftoffspeed_mps, avspeed_mps = concept.twrequired_to(wingloadinglist_pa)
+
+print(tw_sl)
+print(liftoffspeed_mps)
+</code></pre>
+<hr>
+<pre><code class="python">[ 0.19397876  0.26758006  0.33994772  0.41110154]
+[ 52.16511207  63.88895348  73.77260898  82.48028428]
+</code></pre></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def twrequired_to(self, wingloading_pa):
+    &#34;&#34;&#34;Calculate the T/W required for take-off for a range of wing loadings
+
+    `PARAMETERS`
+    ------------
+
+    `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+
+    `RETURNS`
+    -----------
+
+    `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+    `liftoffspeed_mps` : array, liftoff speeds (TAS) in m/s.
+
+    `avspeed_mps`: average speed (TAS) during the take-off run, in m/s.
+
+    `SEE ALSO`
+    ------------
+    ``twrequired``
+
+    `NOTES`
+    ---------
+    1. The calculations here assume a &#39;no wind&#39; take-off, conflating ground speed (GS) and
+    true airspeed (TAS).
+
+    2. Use `twrequired` if a full constraint analysis is desired, as this integrates
+    the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+    computing the combined constraint boundary.
+
+    `EXAMPLE`
+    ------------
+    ```python
+    from ADRpy import atmospheres as at
+    from ADRpy import constraintanalysis as ca
+
+    designbrief = {&#39;rwyelevation_m&#39;:1000, &#39;groundrun_m&#39;:1200}
+    designdefinition = {&#39;aspectratio&#39;:7.3, &#39;bpr&#39;:3.9, &#39;tr&#39;:1.05}
+    designperformance = {&#39;CDTO&#39;:0.04, &#39;CLTO&#39;:0.9, &#39;CLmaxTO&#39;:1.6, &#39;mu_R&#39;:0.02}
+
+    wingloadinglist_pa = [2000, 3000, 4000, 5000]
+
+    atm = at.Atmosphere()
+    concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
+
+    tw_sl, liftoffspeed_mps, avspeed_mps = concept.twrequired_to(wingloadinglist_pa)
+
+    print(tw_sl)
+    print(liftoffspeed_mps)
+    ```
+    ---
+    ```python
+    [ 0.19397876  0.26758006  0.33994772  0.41110154]
+    [ 52.16511207  63.88895348  73.77260898  82.48028428]
+    ```
+    &#34;&#34;&#34;
+    if self.groundrun_m == -1:
+        tomsg = &#34;Ground run not specified in the designbrief dictionary.&#34;
+        raise ValueError(tomsg)
+
+    wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+    twratio, liftoffspeed_mps = self.thrusttoweight_takeoff(wingloading_pa)
+
+    # What does this required T/W mean in terms of static T/W required?
+    twratio = self.map2static() * twratio
+
+    # What SL T/W will yield the required T/W at the actual altitude?
+    temp_c = self.designatm.airtemp_c(self.rwyelevation_m)
+    pressure_pa = self.designatm.airpress_pa(self.rwyelevation_m)
+    density_kgpm3 = self.designatm.airdens_kgpm3(self.rwyelevation_m)
+
+    for i, los_mps in enumerate(liftoffspeed_mps):
+        mach = self.designatm.mach(los_mps, self.rwyelevation_m)
+        corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+        twratio[i] = twratio[i] / corr
+
+    avspeed_mps = liftoffspeed_mps / np.sqrt(2)
+
+    if len(twratio) == 1:
+        return twratio[0], liftoffspeed_mps[0], avspeed_mps[0]
+
+    return twratio, liftoffspeed_mps, avspeed_mps</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.twrequired_trn"><code class="name flex">
+<span>def <span class="ident">twrequired_trn</span></span>(<span>self, wingloading_pa)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Calculates the T/W required for turning for a range of wing loadings</p>
+<h2 id="parameters"><code>PARAMETERS</code></h2>
+<p><code>wingloading_pa</code> : float or numpy array, list of wing loading values in Pa.</p>
+<h2 id="returns"><code>RETURNS</code></h2>
+<p><code>twratio</code> : array, thrust to weight ratio required for the given wing loadings.</p>
+<p><code>clrequired</code> : array, lift coefficient values required for the turn (see notes).</p>
+<p><code>feasibletw</code>: as twratio, but contains NaNs in lieu of unachievable (CLmax exceeded) values.</p>
+<h2 id="see-also"><code>SEE ALSO</code></h2>
+<p><code>twrequired</code></p>
+<h2 id="notes"><code>NOTES</code></h2>
+<ol>
+<li>
+<p>Use <code>twrequired</code> if a full constraint analysis is desired, as this integrates
+the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+computing the combined constraint boundary.</p>
+</li>
+<li>
+<p>At the higher end of the wing loading range (low wing area values) the CL required
+to achieve the required turn rate may exceed the maximum clean CL (as specified in the
+<code>CLmaxclean</code> entry in the <code>performance</code> dictionary argument of the <code>AircraftConcept</code>
+class object being used). This means that, whatever the T/W ratio, the wings will stall
+at this point. The basic T/W value will still be returned in <code>twratio</code>, but there is
+another output, <code>feasibletw</code>, which is an array of the same T/W values, with those
+values blanked out (replaced with NaN) that cannot be achieved due to CL exceeding
+the maximum clean lift coefficient.</p>
+</li>
+</ol>
+<p><code>EXAMPLE</code></p>
+<p>Given a load factor, an altitude (in a given atmosphere) and a true airspeed, as well as
+a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+T/W ratio to hold that load factor in the turn.</p>
+<hr>
+<pre><code class="python">from ADRpy import atmospheres as at
+from ADRpy import constraintanalysis as ca
+from ADRpy import unitconversions as co
+
+designbrief = {'stloadfactor': 2, 'turnalt_m': co.feet2m(10000), 'turnspeed_ktas': 140}
+
+etap = {'turn': 0.85}
+
+designperformance = {'CLmaxclean': 1.45, 'CDminclean':0.02541, 'etaprop': etap}
+
+designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1}
+
+designatm = at.Atmosphere()
+
+concept = ca.AircraftConcept(designbrief, designdef,
+designperformance, designatm)
+
+wingloadinglist_pa = [1250, 1500, 1750]
+
+twratio, clrequired, feasibletw = concept.twrequired_trn(wingloadinglist_pa)
+
+print('T/W:               ', twratio)
+print('Only feasible T/Ws:', feasibletw)
+print('CL required:       ', clrequired)
+print('CLmax clean:       ', designperformance['CLmaxclean'])
+</code></pre>
+<hr>
+<pre><code class="python">T/W:                [ 0.19920641  0.21420513  0.23243016]
+Only feasible T/Ws: [ 0.19920641  0.21420513         nan]
+CL required:        [ 1.06552292  1.2786275   1.49173209]
+CLmax clean:        1.45
+</code></pre></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def twrequired_trn(self, wingloading_pa):
+    &#34;&#34;&#34;Calculates the T/W required for turning for a range of wing loadings
+
+    `PARAMETERS`
+    ------------
+
+    `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+
+    `RETURNS`
+    -----------
+
+    `twratio` : array, thrust to weight ratio required for the given wing loadings.
+
+    `clrequired` : array, lift coefficient values required for the turn (see notes).
+
+    `feasibletw`: as twratio, but contains NaNs in lieu of unachievable (CLmax exceeded) values.
+
+    `SEE ALSO`
+    ------------
+    ``twrequired``
+
+    `NOTES`
+    ---------
+    1. Use `twrequired` if a full constraint analysis is desired, as this integrates
+    the take-off, turn, climb, cruise, and service ceiling constraints, as well as
+    computing the combined constraint boundary.
+
+    2. At the higher end of the wing loading range (low wing area values) the CL required
+    to achieve the required turn rate may exceed the maximum clean CL (as specified in the
+    `CLmaxclean` entry in the `performance` dictionary argument of the `AircraftConcept`
+    class object being used). This means that, whatever the T/W ratio, the wings will stall
+    at this point. The basic T/W value will still be returned in `twratio`, but there is
+    another output, `feasibletw`, which is an array of the same T/W values, with those
+    values blanked out (replaced with NaN) that cannot be achieved due to CL exceeding
+    the maximum clean lift coefficient.
+
+    `EXAMPLE`
+
+    Given a load factor, an altitude (in a given atmosphere) and a true airspeed, as well as
+    a set of basic geometrical and aerodynamic performance parameters, compute the necessary
+    T/W ratio to hold that load factor in the turn.
+    ------------
+    ```python
+    from ADRpy import atmospheres as at
+    from ADRpy import constraintanalysis as ca
+    from ADRpy import unitconversions as co
+
+    designbrief = {&#39;stloadfactor&#39;: 2, &#39;turnalt_m&#39;: co.feet2m(10000), &#39;turnspeed_ktas&#39;: 140}
+
+    etap = {&#39;turn&#39;: 0.85}
+
+    designperformance = {&#39;CLmaxclean&#39;: 1.45, &#39;CDminclean&#39;:0.02541, &#39;etaprop&#39;: etap}
+
+    designdef = {&#39;aspectratio&#39;: 10.12, &#39;sweep_le_deg&#39;: 2, &#39;sweep_mt_deg&#39;: 0, &#39;bpr&#39;: -1}
+
+    designatm = at.Atmosphere()
+
+    concept = ca.AircraftConcept(designbrief, designdef,
+    designperformance, designatm)
+
+    wingloadinglist_pa = [1250, 1500, 1750]
+
+    twratio, clrequired, feasibletw = concept.twrequired_trn(wingloadinglist_pa)
+
+    print(&#39;T/W:               &#39;, twratio)
+    print(&#39;Only feasible T/Ws:&#39;, feasibletw)
+    print(&#39;CL required:       &#39;, clrequired)
+    print(&#39;CLmax clean:       &#39;, designperformance[&#39;CLmaxclean&#39;])
+    ```
+    ---
+    ```python
+    T/W:                [ 0.19920641  0.21420513  0.23243016]
+    Only feasible T/Ws: [ 0.19920641  0.21420513         nan]
+    CL required:        [ 1.06552292  1.2786275   1.49173209]
+    CLmax clean:        1.45
+    ```
+    &#34;&#34;&#34;
+
+    if self.turnspeed_ktas == -1:
+        turnmsg = &#34;Turn speed not specified in the designbrief dictionary.&#34;
+        raise ValueError(turnmsg)
+
+    if self.stloadfactor == -1:
+        turnmsg = &#34;Turn load factor not specified in the designbrief dictionary.&#34;
+        raise ValueError(turnmsg)
+
+    wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+    # W/S at the start of the specified turn test may be less than MTOW/S
+    wingloading_pa = wingloading_pa * self.turn_weight_fraction
+
+    twratio, clrequired = self.thrusttoweight_sustainedturn(wingloading_pa)
+
+    # What SL T/W will yield the required T/W at the actual altitude?
+    temp_c = self.designatm.airtemp_c(self.turnalt_m)
+    pressure_pa = self.designatm.airpress_pa(self.turnalt_m)
+    density_kgpm3 = self.designatm.airdens_kgpm3(self.turnalt_m)
+    turnspeed_mps = co.kts2mps(self.turnspeed_ktas)
+    mach = self.designatm.mach(turnspeed_mps, self.turnalt_m)
+    corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
+
+    twratio = twratio / corr
+
+    # Map back to T/MTOW if turn start weight is less than MTOW
+    twratio = twratio * self.turn_weight_fraction
+
+    # Which of these points is actually reachable given the clean CLmax?
+    feasibletw = np.copy(twratio)
+    for idx, val in enumerate(clrequired):
+        if val &gt; self.clmaxclean:
+            feasibletw[idx] = np.nan
+
+    if len(twratio) == 1:
+        return twratio[0], clrequired[0], feasibletw[0]
+
+    return twratio, clrequired, feasibletw</code></pre>
+</details>
+</dd>
+<dt id="ADRpy.constraintanalysis.AircraftConcept.wsmaxcleanstall_pa"><code class="name flex">
+<span>def <span class="ident">wsmaxcleanstall_pa</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Maximum wing loading defined by the clean stall Clmax</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def wsmaxcleanstall_pa(self):
+    &#34;&#34;&#34;Maximum wing loading defined by the clean stall Clmax&#34;&#34;&#34;
+
+    # (W/S)_max = q_vstall * CLmaxclean
+
+    if self.clmaxclean == -1:
+        clmaxmsg = &#34;CLmaxclean must be specified in the performance dictionary.&#34;
+        raise ValueError(clmaxmsg)
+
+    if self.vstallclean_kcas == -1:
+        vstallmsg = &#34;Clean stall speed must be specified in the design brief dictionary.&#34;
+        raise ValueError(vstallmsg)
+
+    # We do the q calculation at SL conditions, TAS ~= EAS ~= CAS
+    # (conflating CAS and EAS on the basis that the stall Mach number is likely v small)
+    stallspeed_mpstas = co.kts2mps(self.vstallclean_kcas)
+
+    q_pa = self.designatm.dynamicpressure_pa(stallspeed_mpstas, 0)
+    return q_pa * self.clmaxclean</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ADRpy.constraintanalysis.tw2pw" href="#ADRpy.constraintanalysis.tw2pw">tw2pw</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ADRpy.constraintanalysis.AircraftConcept" href="#ADRpy.constraintanalysis.AircraftConcept">AircraftConcept</a></code></h4>
+<ul class="">
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.__init__" href="#ADRpy.constraintanalysis.AircraftConcept.__init__">__init__</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.bank2turnradius" href="#ADRpy.constraintanalysis.AircraftConcept.bank2turnradius">bank2turnradius</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.bestclimbspeedprop" href="#ADRpy.constraintanalysis.AircraftConcept.bestclimbspeedprop">bestclimbspeedprop</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.induceddragfact" href="#ADRpy.constraintanalysis.AircraftConcept.induceddragfact">induceddragfact</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.map2static" href="#ADRpy.constraintanalysis.AircraftConcept.map2static">map2static</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff1" href="#ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff1">oswaldspaneff1</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff2" href="#ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff2">oswaldspaneff2</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff3" href="#ADRpy.constraintanalysis.AircraftConcept.oswaldspaneff3">oswaldspaneff3</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.powerrequired" href="#ADRpy.constraintanalysis.AircraftConcept.powerrequired">powerrequired</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.smincleanstall_m2" href="#ADRpy.constraintanalysis.AircraftConcept.smincleanstall_m2">smincleanstall_m2</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.thrusttoweight_sustainedturn" href="#ADRpy.constraintanalysis.AircraftConcept.thrusttoweight_sustainedturn">thrusttoweight_sustainedturn</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.thrusttoweight_takeoff" href="#ADRpy.constraintanalysis.AircraftConcept.thrusttoweight_takeoff">thrusttoweight_takeoff</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.twrequired" href="#ADRpy.constraintanalysis.AircraftConcept.twrequired">twrequired</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.twrequired_clm" href="#ADRpy.constraintanalysis.AircraftConcept.twrequired_clm">twrequired_clm</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.twrequired_crs" href="#ADRpy.constraintanalysis.AircraftConcept.twrequired_crs">twrequired_crs</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.twrequired_sec" href="#ADRpy.constraintanalysis.AircraftConcept.twrequired_sec">twrequired_sec</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.twrequired_to" href="#ADRpy.constraintanalysis.AircraftConcept.twrequired_to">twrequired_to</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.twrequired_trn" href="#ADRpy.constraintanalysis.AircraftConcept.twrequired_trn">twrequired_trn</a></code></li>
+<li><code><a title="ADRpy.constraintanalysis.AircraftConcept.wsmaxcleanstall_pa" href="#ADRpy.constraintanalysis.AircraftConcept.wsmaxcleanstall_pa">wsmaxcleanstall_pa</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
