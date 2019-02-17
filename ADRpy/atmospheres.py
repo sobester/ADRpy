@@ -512,6 +512,7 @@ class Atmosphere:
 
         `EXAMPLE`
         -----------
+
         ```python
         from ADRpy import atmospheres as at
         from ADRpy import unitconversions as co
@@ -588,6 +589,7 @@ class Atmosphere:
 
         `EXAMPLE`
         ------------
+
         ```python
         import numpy as np
         from ADRpy import atmospheres as at
