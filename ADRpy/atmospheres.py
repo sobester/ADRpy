@@ -36,8 +36,8 @@ import csv
 import os
 import numpy as np
 from scipy import interpolate
-import unitconversions as co
-import mtools4acdc as mtools
+from ADRpy import unitconversions as co
+from ADRpy import mtools4acdc as mtools
 
 # pylint: disable=locally-disabled, too-many-instance-attributes, too-few-public-methods
 # pylint: disable=locally-disabled, too-many-arguments, too-many-statements

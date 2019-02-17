@@ -20,3 +20,6 @@
 [NotebookApp | INFO] Kernel restarted: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc
 [NotebookApp | INFO] Saving file at /Untitled.ipynb
 [NotebookApp | INFO] Kernel shutdown: a649d8ea-74ab-4ae1-9ea9-67dcfd741dcc
+[NotebookApp | INFO] interrupted
+[NotebookApp | CRITICAL] Shutdown confirmed
+[NotebookApp | INFO] Shutting down kernels

@@ -20,9 +20,9 @@ import math
 import warnings
 from scipy import constants
 import numpy as np
-import atmospheres as at
-import unitconversions as co
-import mtools4acdc as actools
+from ADRpy import atmospheres as at
+from ADRpy import unitconversions as co
+from ADRpy import mtools4acdc as actools
 
 #__pdoc__ = {}
 #__pdoc__['etadefaultflag'] = False
