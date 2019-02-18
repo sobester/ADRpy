@@ -3,9 +3,10 @@
 Aircraft Design Recipes in Python
 =================================
 
-A library of aircraft conceptual design and performance codes, including virtual (design) atmospheres and constraint analysis methods.
+A library of aircraft conceptual design and performance tools, including virtual (design) atmospheres,
+constraint analysis methods, propulsion system performance models, conversion functions and much else.
 
-version number: 0.0.12b
+version number: 0.1.0
 author: Andras Sobester
 
 Installation / Usage
@@ -15,7 +16,7 @@ To install use pip:
 
     $ pip install ADRpy
 
-Or clone the repo:
+Or clone the GitHub repository:
 
     $ git clone https://github.com/sobester/ADRpy.git
     $ python setup.py install
@@ -83,7 +84,7 @@ tw_sl, liftoffspeed_mpstas, _ = concept.twrequired_to(wingloadinglist_pa)
 
 # The take-off constraint calculation also supplies an estimate of
 # the lift-off speed; this is TAS (assuming zero wind) - we convert 
-# it to EAS (in m/s):
+# it to equivalent airspeed (EAS), in m/s:
 liftoffspeed_mpseas = \
 m310_ht5.tas2eas(liftoffspeed_mpstas, designbrief['rwyelevation_m'])
 
