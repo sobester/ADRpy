@@ -1,11 +1,11 @@
-[[https://github.com/sobester/ADRpy/blob/master/docs/ADRpy/ADRpy_splash.png|alt=ADRpy]]
+![ADRpy](https://github.com/sobester/ADRpy/blob/master/docs/ADRpy/ADRpy_splash.png)
 
 Aircraft Design Recipes in Python
 =================================
 
 A library of aircraft conceptual design and performance codes, including virtual (design) atmospheres and constraint analysis methods.
 
-version number: 0.0.12
+version number: 0.0.12b
 author: Andras Sobester
 
 Installation / Usage
