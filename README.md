@@ -68,7 +68,8 @@ designbrief = {'rwyelevation_m':1000, 'groundrun_m':1200}
 designdefinition = {'aspectratio':7.3, 'bpr':3.9, 'tr':1.05}
 
 # Initial estimates of aerodynamic performance:
-designperf = {'CDTO':0.04, 'CLTO':0.9, 'CLmaxTO':1.6, 'mu_R':0.02}
+designperf = {'CDTO':0.04, 'CLTO':0.9, 'CLmaxTO':1.6,
+              'mu_R':0.02} # ...and wheel rolling resistance coeff.
 
 # An aircraft concept object can now be instantiated
 concept = ca.AircraftConcept(designbrief, designdefinition,
