@@ -93,3 +93,10 @@ print("Required T/W and V_liftoff under MIL-HDBK-310 conditions:")
 print("\nT/W (std. day, SL, static thrust):", tw_sl)
 print("\nLiftoff speed (KEAS):", co.mps2kts(liftoffspeed_mpseas))
 ```
+
+A complete example: wing/powerplant sizing for a single engine prop
+-------------------------------------------------------------------
+
+[![Single engine prop example in an online, 'live' Jupyter notebook](https://mybinder.org/badge_logo.svg)](https://hub.mybinder.org/user/sobester-adrpy-as4yyij0/notebooks/docs/ADRpy/single_engine_prop_power_requirements.ipynb)
+
+[...or click here for a static view of the  single engine prop example in a Jupyter notebook.]https://nbviewer.jupyter.org/github/sobester/ADRpy/blob/master/docs/ADRpy/single_engine_prop_power_requirements.ipynb
