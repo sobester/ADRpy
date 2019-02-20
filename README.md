@@ -97,4 +97,4 @@ print("\nLiftoff speed (KEAS):", co.mps2kts(liftoffspeed_mpseas))
 A complete example: wing/powerplant sizing for a single engine prop
 -------------------------------------------------------------------
 
-[View the example as a Jupyter notebook on nbviewer](https://nbviewer.jupyter.org/github/sobester/ADRpy/blob/master/docs/ADRpy/single_engine_prop_power_requirements.ipynb) (click on the binder icon in the top right corner for of the binder page for an editable, 'live' online version of the notebook).
+[View the single engine prop example as a Jupyter notebook on nbviewer](https://nbviewer.jupyter.org/github/sobester/ADRpy/blob/master/docs/ADRpy/single_engine_prop_power_requirements.ipynb) (click on the binder icon in the top right corner for of the nbviewer page for an editable, 'live', online version of the notebook).
