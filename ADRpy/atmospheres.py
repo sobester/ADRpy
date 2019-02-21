@@ -1,32 +1,43 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""atmospheres.py:
-Definitions of atmosphere models for use in aircraft engineering:
+"""
+The Atmospheres module
+----------------------
 
- - The International Standard Atmosphere model. Based on ESDU
-Data Item 77022, "Equations for calculation of International
-Standard Atmosphere and associated off-standard atmospheres",
-published 1977, amended 2008. It covers the first  50km of
-the atmosphere
+This module contains tools for defining atmosphere models for use
+in aircraft engineering, as follows:
 
- - Off-standard, temperature offset version of the above
+1. The **International Standard Atmosphere** model. Based on ESDU
+Data Item 77022, `"Equations for calculation of International
+Standard Atmosphere and associated off-standard atmospheres"`,
+published in 1977, amended in 2008. It covers the first  50km of
+the atmosphere.
 
- - Extremely warm/cold, and low/high density atmospheres from US
+2. Off-standard, temperature offset versions of the above.
+
+3. Extremely warm/cold, and low/high density atmospheres from US
 MIL HDBK 310
 
- - User-defined atmospheres based on interpolated data
+4. User-defined atmospheres based on interpolated data.
 
-Contains the following class definitions:
-    `Runway`
-    `Obsprofile`
-    `Atmosphere`
+The module contains the following class definitions:
 
-Unit tests in tests/t_atmospheres.py. Checking against data from the 1976
-US Standard Atmosphere, NASA-TM-X-74335. ESDU 77022 describes its
+``Runway``
+    Definition of a runway object
+``Obsprofile``
+    Definition of an atmospheric observation (sounding) object
+``Atmosphere``
+    Definition of a virtual atmosphere object.
+
+The unit tests (found in tests/t_atmospheres.py in the GitHub
+repository) compare the results against data from the 1976 US 
+Standard Atmosphere, NASA-TM-X-74335. ESDU 77022 describes its
 ISA model as being identical for all practical purposes with the US
 Standard Atmospheres.
+
 """
+
 __author__ = "Andras Sobester"
 
 
@@ -497,42 +508,37 @@ class Atmosphere:
     def dynamicpressure_pa(self, airspeed_mps=0, altitudes_m=0):
         """Dynamic pressure in the current atmosphere at a given true airspeed and altitude
 
-        `PARAMETERS`
-        ------------
+        **Parameters**
 
-        `airspeed_mps` : float, true airspeed in m/s (MPSTAS)
+        airspeed_mps
+            float, true airspeed in m/s (MPSTAS)
 
-        `altitudes_m`: float array, altitudes in m where the dynamic pressure is to be computed
+        altitudes_m
+            float array, altitudes in m where the dynamic pressure is to be computed
 
-
-        `RETURNS`
-        -----------
+        **Returns**
 
         float or array of floats, dynamic pressure values
 
-        `EXAMPLE`
-        -----------
+        **Example** ::
 
-        ```python
-        from ADRpy import atmospheres as at
-        from ADRpy import unitconversions as co
+            from ADRpy import atmospheres as at
+            from ADRpy import unitconversions as co
 
-        ISA = at.Atmosphere()
+            ISA = at.Atmosphere()
 
-        altitudelist_m = [0, 500, 1000, 1500]
+            altitudelist_m = [0, 500, 1000, 1500]
 
-        MPSTAS = 20
+            MPSTAS = 20
 
-        q_Pa = ISA.dynamicpressure_pa(MPSTAS, altitudelist_m)
+            q_Pa = ISA.dynamicpressure_pa(MPSTAS, altitudelist_m)
 
-        q_mbar = co.pa2mbar(q_Pa)
+            q_mbar = co.pa2mbar(q_Pa)
 
-        print(q_mbar)
-        ```
-        -----------
-        ```python
-        [ 2.44999974  2.33453737  2.22328473  2.11613426]
-        ```
+            print(q_mbar)
+
+            [ 2.44999974  2.33453737  2.22328473  2.11613426]
+
         """
 
         return 0.5 * self.airdens_kgpm3(altitudes_m) * (airspeed_mps ** 2)
@@ -561,53 +567,49 @@ class Atmosphere:
     def keas2kcas(self, keas, altitude_m):
         """Converts equivalent airspeed into calibrated airspeed.
 
-        `PARAMETERS`
-        ------------
+        **Parameters**
 
-        `keas` : float or numpy array, equivalent airspeed in knots.
+        keas
+            float or numpy array, equivalent airspeed in knots.
 
-        `altitude_m` : float, altitude in metres.
+        altitude_m
+            float, altitude in metres.
 
-        `RETURNS`
-        -----------
+        **Returns**
 
-        `kcas` : float or numpy array, calibrated airspeed in knots.
+        kcas
+            float or numpy array, calibrated airspeed in knots.
 
-        `mach` : float, Mach number.
+        mach
+            float, Mach number.
 
-        `SEE ALSO`
-        ------------
-        ``mpseas2mpscas``
+        **See also** ``mpseas2mpscas``
 
-        `NOTES`
-        ---------
+        **Notes**
+
         The reverse conversion is slightly more complicated, as their relationship
         depends on the Mach number. This, in turn, requires the computation of the
         true airspeed and that can only be computed from EAS, not CAS. The unit-
         specific nature of the function is also the result of the need for computing
         the Mach number.
 
-        `EXAMPLE`
-        ------------
+        **Example** ::
 
-        ```python
-        import numpy as np
-        from ADRpy import atmospheres as at
-        from ADRpy import unitconversions as co
+            import numpy as np
+            from ADRpy import atmospheres as at
+            from ADRpy import unitconversions as co
 
-        isa = at.Atmosphere()
+            isa = at.Atmosphere()
 
-        keas = np.array([100, 200, 300])
-        altitude_m = co.feet2m(40000)
+            keas = np.array([100, 200, 300])
+            altitude_m = co.feet2m(40000)
 
-        kcas, mach = isa.keas2kcas(keas, altitude_m)
+            kcas, mach = isa.keas2kcas(keas, altitude_m)
 
-        print(kcas)
-        ```
-        ---
-        ```python
-        [ 101.25392563  209.93839073  333.01861569]
-        ```
+            print(kcas)
+
+            [ 101.25392563  209.93839073  333.01861569]
+
         """
         # Note: unit specific, as the calculation requires Mach no.
         np.asarray(keas)

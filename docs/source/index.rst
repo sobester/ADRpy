@@ -1,7 +1,8 @@
-Welcome to Aircraft Design Recipes in Python's documentation!
-=========================================
+Aircraft Design Recipes in Python -- User's Guide
+=================================================
 
-Contents:
+.. automodule:: atmospheres
+    :members:
 
 .. toctree::
    :maxdepth: 2
