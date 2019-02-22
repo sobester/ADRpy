@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-The Atmospheres module
-----------------------
+.. _atmospheres_module:
+
+Atmospheres Module
+------------------
 
 This module contains tools for defining atmosphere models for use
 in aircraft engineering, as follows:
@@ -31,7 +33,7 @@ The module contains the following class definitions:
     Definition of a virtual atmosphere object.
 
 The unit tests (found in tests/t_atmospheres.py in the GitHub
-repository) compare the results against data from the 1976 US 
+repository) compare the results against data from the 1976 US
 Standard Atmosphere, NASA-TM-X-74335. ESDU 77022 describes its
 ISA model as being identical for all practical purposes with the US
 Standard Atmospheres.
@@ -537,6 +539,8 @@ class Atmosphere:
 
             print(q_mbar)
 
+        Output: ::
+
             [ 2.44999974  2.33453737  2.22328473  2.11613426]
 
         """
@@ -607,6 +611,8 @@ class Atmosphere:
             kcas, mach = isa.keas2kcas(keas, altitude_m)
 
             print(kcas)
+
+        Output: ::
 
             [ 101.25392563  209.93839073  333.01861569]
 

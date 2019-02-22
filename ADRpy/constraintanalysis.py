@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# constraintanalysis.py:
-""" Constraint analysis tools for aircraft conceptual design"""
+"""
+.. _constraints_module:
 
-# CLASSES:
-#    AircraftConcept
+Constraint Analysis Module
+--------------------------
 
-# Unit tests in tests/t_constraints.py.
+This module contains tools for the constraint analysis of fixed
+wing aircraft.
+
+"""
+
 
 __author__ = "Andras Sobester"
 
@@ -15,6 +19,7 @@ __author__ = "Andras Sobester"
 # pylint: disable=locally-disabled, too-many-branches
 # pylint: disable=locally-disabled, too-many-statements
 # pylint: disable=locally-disabled, too-many-locals
+# pylint: disable=locally-disabled, too-many-lines
 
 import math
 import warnings
@@ -24,8 +29,6 @@ from ADRpy import atmospheres as at
 from ADRpy import unitconversions as co
 from ADRpy import mtools4acdc as actools
 
-#__pdoc__ = {}
-#__pdoc__['etadefaultflag'] = False
 
 class AircraftConcept:
     """Definition of a basic aircraft concept. An aircraft concept object must
@@ -370,27 +373,26 @@ class AircraftConcept:
     def twrequired_to(self, wingloading_pa):
         """Calculate the T/W required for take-off for a range of wing loadings
 
-        `PARAMETERS`
-        ------------
+        **Parameters**
 
-        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+        wingloading_pa
+            float or numpy array, list of wing loading values in Pa.
 
+        **Returns**
 
-        `RETURNS`
-        -----------
+        twratio
+            array, thrust to weight ratio required for the given wing loadings.
 
-        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+        liftoffspeed_mps
+            array, liftoff speeds (TAS) in m/s.
 
-        `liftoffspeed_mps` : array, liftoff speeds (TAS) in m/s.
+        avspeed_mps
+            average speed (TAS) during the take-off run, in m/s.
 
-        `avspeed_mps`: average speed (TAS) during the take-off run, in m/s.
+        **See also** ``twrequired``
 
-        `SEE ALSO`
-        ------------
-        ``twrequired``
+        **Notes**
 
-        `NOTES`
-        ---------
         1. The calculations here assume a 'no wind' take-off, conflating ground speed (GS) and
         true airspeed (TAS).
 
@@ -398,32 +400,31 @@ class AircraftConcept:
         the take-off, turn, climb, cruise, and service ceiling constraints, as well as
         computing the combined constraint boundary.
 
-        `EXAMPLE`
-        ------------
-        ```python
-        from ADRpy import atmospheres as at
-        from ADRpy import constraintanalysis as ca
+        **Example** ::
 
-        designbrief = {'rwyelevation_m':1000, 'groundrun_m':1200}
-        designdefinition = {'aspectratio':7.3, 'bpr':3.9, 'tr':1.05}
-        designperformance = {'CDTO':0.04, 'CLTO':0.9, 'CLmaxTO':1.6, 'mu_R':0.02}
+            from ADRpy import atmospheres as at
+            from ADRpy import constraintanalysis as ca
 
-        wingloadinglist_pa = [2000, 3000, 4000, 5000]
+            designbrief = {'rwyelevation_m':1000, 'groundrun_m':1200}
+            designdefinition = {'aspectratio':7.3, 'bpr':3.9, 'tr':1.05}
+            designperformance = {'CDTO':0.04, 'CLTO':0.9, 'CLmaxTO':1.6, 'mu_R':0.02}
 
-        atm = at.Atmosphere()
-        concept = ca.AircraftConcept(designbrief, designdefinition,
-                                     designperformance, atm)
+            wingloadinglist_pa = [2000, 3000, 4000, 5000]
 
-        tw_sl, liftoffspeed_mps, _ = concept.twrequired_to(wingloadinglist_pa)
+            atm = at.Atmosphere()
+            concept = ca.AircraftConcept(designbrief, designdefinition,
+                                        designperformance, atm)
 
-        print(tw_sl)
-        print(liftoffspeed_mps)
-        ```
-        ---
-        ```python
-        [ 0.19397876  0.26758006  0.33994772  0.41110154]
-        [ 52.16511207  63.88895348  73.77260898  82.48028428]
-        ```
+            tw_sl, liftoffspeed_mps, _ = concept.twrequired_to(wingloadinglist_pa)
+
+            print(tw_sl)
+            print(liftoffspeed_mps)
+
+        Output: ::
+
+            [ 0.19397876  0.26758006  0.33994772  0.41110154]
+            [ 52.16511207  63.88895348  73.77260898  82.48028428]
+
         """
         if self.groundrun_m == -1:
             tomsg = "Ground run not specified in the designbrief dictionary."
@@ -468,26 +469,26 @@ class AircraftConcept:
     def twrequired_trn(self, wingloading_pa):
         """Calculates the T/W required for turning for a range of wing loadings
 
-        `PARAMETERS`
-        ------------
+        **Parameters**
 
-        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+        wingloading_pa
+            float or numpy array, list of wing loading values in Pa.
 
-        `RETURNS`
-        -----------
+        **Returns**
 
-        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+        twratio
+            array, thrust to weight ratio required for the given wing loadings.
 
-        `clrequired` : array, lift coefficient values required for the turn (see notes).
+        clrequired
+            array, lift coefficient values required for the turn (see notes).
 
-        `feasibletw`: as twratio, but contains NaNs in lieu of unachievable (CLmax exceeded) values.
+        feasibletw
+            as twratio, but contains NaNs in lieu of unachievable (CLmax exceeded) values.
 
-        `SEE ALSO`
-        ------------
-        ``twrequired``
+        **See also** ``twrequired``
 
-        `NOTES`
-        ---------
+        **Notes**
+
         1. Use `twrequired` if a full constraint analysis is desired, as this integrates
         the take-off, turn, climb, cruise, and service ceiling constraints, as well as
         computing the combined constraint boundary.
@@ -501,49 +502,52 @@ class AircraftConcept:
         values blanked out (replaced with NaN) that cannot be achieved due to CL exceeding
         the maximum clean lift coefficient.
 
-        `EXAMPLE`
+        **Example**
 
         Given a load factor, an altitude (in a given atmosphere) and a true airspeed, as well as
         a set of basic geometrical and aerodynamic performance parameters, compute the necessary
         T/W ratio to hold that load factor in the turn.
-        ------------
-        ```python
-        from ADRpy import atmospheres as at
-        from ADRpy import constraintanalysis as ca
-        from ADRpy import unitconversions as co
 
-        designbrief = {'stloadfactor': 2, 'turnalt_m': co.feet2m(10000),
-                       'turnspeed_ktas': 140}
+        ::
 
-        etap = {'turn': 0.85}
+            from ADRpy import atmospheres as at
+            from ADRpy import constraintanalysis as ca
+            from ADRpy import unitconversions as co
 
-        designperformance = {'CLmaxclean': 1.45, 'CDminclean':0.02541,
-                             'etaprop': etap}
+            designbrief = {'stloadfactor': 2, 'turnalt_m': co.feet2m(10000),
+                        'turnspeed_ktas': 140}
 
-        designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2,
-                     'sweep_mt_deg': 0, 'bpr': -1}
+            etap = {'turn': 0.85}
 
-        designatm = at.Atmosphere()
+            designperformance = {'CLmaxclean': 1.45, 'CDminclean':0.02541,
+                                'etaprop': etap}
 
-        concept = ca.AircraftConcept(designbrief, designdef,
-        designperformance, designatm)
+            designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2,
+                        'sweep_mt_deg': 0, 'bpr': -1}
 
-        wingloadinglist_pa = [1250, 1500, 1750]
+            designatm = at.Atmosphere()
 
-        twratio, clrequired, feasibletw = concept.twrequired_trn(wingloadinglist_pa)
+            concept = ca.AircraftConcept(designbrief, designdef,
+            designperformance, designatm)
 
-        print('T/W:               ', twratio)
-        print('Only feasible T/Ws:', feasibletw)
-        print('CL required:       ', clrequired)
-        print('CLmax clean:       ', designperformance['CLmaxclean'])
-        ```
-        ---
-        ```python
-        T/W:                [ 0.19920641  0.21420513  0.23243016]
-        Only feasible T/Ws: [ 0.19920641  0.21420513         nan]
-        CL required:        [ 1.06552292  1.2786275   1.49173209]
-        CLmax clean:        1.45
-        ```
+            wingloadinglist_pa = [1250, 1500, 1750]
+
+            twratio, clrequired, feasibletw = concept.twrequired_trn(wingloadinglist_pa)
+
+            print('T/W:               ', twratio)
+            print('Only feasible T/Ws:', feasibletw)
+            print('CL required:       ', clrequired)
+            print('CLmax clean:       ', designperformance['CLmaxclean'])
+
+        Output:
+
+        ::
+
+            T/W:                [ 0.19920641  0.21420513  0.23243016]
+            Only feasible T/Ws: [ 0.19920641  0.21420513         nan]
+            CL required:        [ 1.06552292  1.2786275   1.49173209]
+            CLmax clean:        1.45
+
         """
 
         if self.turnspeed_ktas == -1:
@@ -589,22 +593,20 @@ class AircraftConcept:
     def twrequired_clm(self, wingloading_pa):
         """Calculates the T/W required for climbing for a range of wing loadings.
 
-        `PARAMETERS`
-        ------------
+        **Parameters**
 
-        `wingloading_pa` : float or numpy array, list of wing loading values in Pa.
+        wingloading_pa
+            float or numpy array, list of wing loading values in Pa.
 
-        `RETURNS`
-        -----------
+        **Returns**
 
-        `twratio` : array, thrust to weight ratio required for the given wing loadings.
+        twratio
+            array, thrust to weight ratio required for the given wing loadings.
 
-        `SEE ALSO`
-        ------------
-        ``twrequired``
+        **See also** ``twrequired``
 
-        `NOTES`
-        ---------
+        **Notes**
+
         1. Use `twrequired` if a full constraint analysis is desired, as this integrates
         the take-off, turn, climb, cruise, and service ceiling constraints, as well as
         computing the combined constraint boundary.
@@ -614,44 +616,45 @@ class AircraftConcept:
         climb speed as IAS, which is the operationally relevant figure) - a future version
         of the code will remove this approximation and assume constant IAS.
 
-        `EXAMPLE`
+        **Example**
 
         Given a climb rate (in feet per minute) and a climb speed (KIAS), as well as an
         altitude (in a given atmosphere) where these must be achieved, as well as
         a set of basic geometrical and aerodynamic performance parameters, compute the necessary
         T/W ratio to hold the specified climb rate.
-        ------------
-        ```python
-        from ADRpy import atmospheres as at
-        from ADRpy import constraintanalysis as ca
 
-        designbrief = {'climbalt_m': 0, 'climbspeed_kias': 101,
-                       'climbrate_fpm': 1398}
+        ::
 
-        etap = {'climb': 0.8}
+            from ADRpy import atmospheres as at
+            from ADRpy import constraintanalysis as ca
 
-        designperformance = {'CDminclean': 0.0254, 'etaprop' :etap}
+            designbrief = {'climbalt_m': 0, 'climbspeed_kias': 101,
+                        'climbrate_fpm': 1398}
 
-        designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2,
-                     'sweep_mt_deg': 0, 'bpr': -1}
+            etap = {'climb': 0.8}
 
-        TOW_kg = 1542.0
+            designperformance = {'CDminclean': 0.0254, 'etaprop' :etap}
 
-        designatm = at.Atmosphere()
+            designdef = {'aspectratio': 10.12, 'sweep_le_deg': 2,
+                        'sweep_mt_deg': 0, 'bpr': -1}
 
-        concept = ca.AircraftConcept(designbrief, designdef,
-                                     designperformance, designatm)
+            TOW_kg = 1542.0
 
-        wingloadinglist_pa = [1250, 1500, 1750]
+            designatm = at.Atmosphere()
 
-        twratio = concept.twrequired_clm(wingloadinglist_pa)
+            concept = ca.AircraftConcept(designbrief, designdef,
+                                        designperformance, designatm)
 
-        print('T/W: ', twratio)
-        ```
-        ---
-        ```python
-        T/W:  [ 0.20249491  0.2033384   0.20578177]
-        ```
+            wingloadinglist_pa = [1250, 1500, 1750]
+
+            twratio = concept.twrequired_clm(wingloadinglist_pa)
+
+            print('T/W: ', twratio)
+
+        Output: ::
+
+            T/W:  [ 0.20249491  0.2033384   0.20578177]
+
         """
 
         if self.climbspeed_kias == -1:
@@ -802,7 +805,34 @@ class AircraftConcept:
 
 
     def twrequired(self, wingloadinglist_pa, feasibleonly=True):
-        """Calculate the T/W required for t/o, trn, clm, crs, sec."""
+        """Calculate the T/W required for t/o, trn, clm, crs, sec.
+
+        This method integrates the full set of constraints and it gives the user a
+        compact way of performing a full constraint analysis.
+
+        **Parameters**
+
+        wingloading_pa
+            float or numpy array, list of wing loading values in Pa.
+
+        **Returns**
+
+        twreq
+            dictionary variable, wherein each entry contains vectors
+            related to one of the constraints: :code:`twreq['take-off']`
+            (T/W required for take-off), :code:`twreq['liftoffspeed_mps']`
+            (liftoff speed in m/s), :code:`twreq['avspeed_mps']` (average
+            speed of the take-off run, in m/s), :code:`twreq['turn']`
+            (T/W required for the turn), :code:`twreq['turnfeasible']` (same as
+            :code:`twreq['turn']`, but with *NaN* where the maximum lift
+            coefficient is exceeded), :code:`twreq['turncl']` (lift
+            coefficient required in the turn), :code:`twreq['climb']`
+            (T/W required for climb), :code:`twreq['cruise']` (T/W required
+            for cruise), :code:`twreq['servceil']` (T/W required for the
+            service ceiling constraint), :code:`twreq['combined']` (the
+            T/W required to meet all of the above).
+
+        """
 
         tw_to, liftoffspeed_mps, avspeed_mps = self.twrequired_to(wingloadinglist_pa)
         tw_trn, clrequired, feasibletw_trn = self.twrequired_trn(wingloadinglist_pa)
@@ -930,68 +960,66 @@ class AircraftConcept:
 def tw2pw(thrusttoweight, speed, etap):
     """Converts thrust to weight to power to weight (propeller-driven aircraft)
 
-    `PARAMETERS`
-    ------------
+    **Parameters**
 
-    `thrusttoweight` : thrust to weight ratio (non-dimensional)
+    thrusttoweight
+        thrust to weight ratio (non-dimensional)
 
-    `speed`: speed (in m/s if output in Watts / Newton is required)
+    speed
+        speed (in m/s if output in Watts / Newton is required)
 
-    `etap`: propeller efficiency (non-dimensional)
+    etap
+        propeller efficiency (non-dimensional), float
 
-    `RETURNS`
-    -----------
+    **Returns**
 
-    power to weight ratio (in W/N if speed is in m/s)
+        power to weight ratio (in W/N if speed is in m/s)
 
-    `SEE ALSO`
-    ------------
-    ``powerrequired``
+    **See also** ``powerrequired``
 
-    `NOTES`
-    ---------
+    **Notes**
+
     A note on units. If the input speed is in m/s, the other two inputs being
     non-dimensional, the output product is also in m/s, which is equal to W/N
     (W / N = (J/s) / N = (Nm/s) / N = m/s).
 
-    `EXAMPLE`
-    ---------
-    ```python
-    from ADRpy import constraintanalysis as ca
-    from ADRpy import atmospheres as at
-    from ADRpy import unitconversions as co
+    **Example**::
 
-    designbrief = {'stloadfactor': 2, 'turnalt_m': 3050, 'turnspeed_ktas': 140}
+        from ADRpy import constraintanalysis as ca
+        from ADRpy import atmospheres as at
+        from ADRpy import unitconversions as co
 
-    etap = {'turn': 0.85}
+        designbrief = {'stloadfactor': 2, 'turnalt_m': 3050, 'turnspeed_ktas': 140}
 
-    designperformance = {'CLmaxclean': 1.45, 'CDminclean': 0.02541,
-                            'etaprop': etap}
+        etap = {'turn': 0.85}
 
-    designdef = {'aspectratio': 10, 'sweep_le_deg': 2,
-                    'sweep_mt_deg': 0, 'bpr': -1}
+        designperformance = {'CLmaxclean': 1.45, 'CDminclean': 0.02541,
+                                'etaprop': etap}
 
-    TOW_kg = 1500
+        designdef = {'aspectratio': 10, 'sweep_le_deg': 2,
+                        'sweep_mt_deg': 0, 'bpr': -1}
 
-    designatm = at.Atmosphere()
-    concept = ca.AircraftConcept(designbrief, designdef,
-                                    designperformance, designatm)
+        TOW_kg = 1500
 
-    wingloading_pa = 1000
+        designatm = at.Atmosphere()
+        concept = ca.AircraftConcept(designbrief, designdef,
+                                        designperformance, designatm)
 
-    twreq, _, _ = concept.twrequired_trn(wingloading_pa)
+        wingloading_pa = 1000
 
-    turnspeed_mpstas = co.kts2mps(designbrief['turnspeed_ktas'])
+        twreq, _, _ = concept.twrequired_trn(wingloading_pa)
 
-    pw_trn_wpn = ca.tw2pw(twreq, turnspeed_mpstas, etap['turn'])
-    pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
-    p_trn_hp = pw_trn_hpkg * TOW_kg
+        turnspeed_mpstas = co.kts2mps(designbrief['turnspeed_ktas'])
 
-    print(p_trn_hp)
-    ```
-    ---
-    ```python
-    318.691213406
-    ```
+        pw_trn_wpn = ca.tw2pw(twreq, turnspeed_mpstas, etap['turn'])
+        pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
+        p_trn_hp = pw_trn_hpkg * TOW_kg
+
+        print(p_trn_hp)
+
+    Output::
+
+        318.691213406
+
     """
     return thrusttoweight * speed / etap
