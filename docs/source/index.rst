@@ -24,10 +24,10 @@ repository <https://github.com/sobester/ADRpy#aircraft-design-recipes-in-python>
 ADRpy Modules
 -------------
 
-.. automodule:: atmospheres
+.. automodule:: ADRpy.atmospheres
     :members:
 
-.. automodule:: constraintanalysis
+.. automodule:: ADRpy.constraintanalysis
     :members:
 
 * :ref:`genindex`

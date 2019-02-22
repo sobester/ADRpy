@@ -36,5 +36,5 @@ setup(
     author='Andras Sobester',
     install_requires=install_requires,
     dependency_links=dependency_links,
-    author_email='please get in touch by raising an issue at https://github.com/sobester/ADRpy'
+    author_email='sobester@live.com'
 )
