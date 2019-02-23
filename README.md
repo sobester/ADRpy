@@ -1,4 +1,4 @@
-![ADRpy](https://github.com/sobester/ADRpy/blob/master/docs/ADRpy/ADRpy_splash.png)
+![ADRpy](https://github.com/sobester/ADRpy/raw/master/docs/ADRpy/ADRpy_splash.png)
 
 Aircraft Design Recipes in Python
 =================================
