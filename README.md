@@ -42,6 +42,11 @@ at the command prompt and then executing the setup file in the same directory by
 A 'hello world' example: atmospheric properties
 -----------------------------------------------
 
+There are several options for running the examples shown here: you could copy and paste them 
+into a `.py` file, save it and run it in Python, or you could enter the lines, in sequence,
+at the prompt of a Python terminal. You could also copy and paste them into a Jupyter notebook
+(`.ipynb` file) cell and execute the cell.
+
 ```python
 from ADRpy import atmospheres as at
 from ADRpy import unitconversions as co
