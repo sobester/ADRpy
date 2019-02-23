@@ -21,13 +21,13 @@ Installing and running ADRpy
 
 On most systems you should be able to simply open an operating system terminal
 and at the command prompt type :code:`pip install ADRpy` or
-:code:`python -m pip install ADRpy` (:code:`pip` is a Python package: 
-if it is not available on your system, download `get-pip.py <https://bootstrap.pypa.io/get-pip.py>`_ 
+:code:`python -m pip install ADRpy` at the  operating system command prompt
+(:code:`pip` is a Python package: if it is not available on your system, 
+download `get-pip.py <https://bootstrap.pypa.io/get-pip.py>`_ 
 and run it in Python by entering :code:`python get-pip.py` at the operating system prompt).
 
-This is an open source project (released under a `GPLv3 <https://www.gnu.org/licenses/gpl-3.0.en.html>`_
-license) -- for the source code (and further installation instructions)
-see `the ADRpy GitHub repository <https://github.com/sobester/ADRpy#aircraft-design-recipes-in-python>`_.
+For the source code and alternative installation instructions see `the ADRpy GitHub 
+repository <https://github.com/sobester/ADRpy#aircraft-design-recipes-in-python>`_.
 
 ADRpy Modules
 -------------
