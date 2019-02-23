@@ -24,7 +24,7 @@ or
     $ python -m pip install ADRpy
     
 NOTE: `pip` is a Python package; if it is not available on your system, download
-[get-pip.py] (https://bootstrap.pypa.io/get-pip.py) and run it in Python by entering
+[get-pip.py](https://bootstrap.pypa.io/get-pip.py) and run it in Python by entering
 
     $ python get-pip.py
     
