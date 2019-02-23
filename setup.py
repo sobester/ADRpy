@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 here = path.abspath(path.dirname(__file__))
 
@@ -30,6 +30,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
+        'Topic :: Scientific/Engineering'
     ],
     keywords='',
     packages=find_packages(exclude=['docs', 'tests*']),

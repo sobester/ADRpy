@@ -3,23 +3,25 @@
 Aircraft Design Recipes in Python
 =================================
 
-A library of aircraft conceptual design and performance tools, including virtual (design) atmospheres,
-constraint analysis methods, propulsion system performance models, conversion functions and much else.
+A library of aircraft conceptual design and performance analysis tools, including
+virtual (design) atmospheres, constraint analysis methods, propulsion system 
+performance models, conversion functions and much else.
 
-version number: 0.1.0
+version number: 0.1.3
+
 author: Andras Sobester
 
 Installation / Usage
 --------------------
 
-To install use pip:
+On most systems you should be able to simply open an operating system terminal
+and at the command prompt type :code:`pip install ADRpy` or
+:code:`python -m pip install ADRpy` (:code:`pip` is a Python package: 
+if it is not available on your system, download `get-pip.py <https://bootstrap.pypa.io/get-pip.py>`_ 
+and run it in Python by entering :code:`python get-pip.py` at the operating system prompt).
 
-    $ pip install ADRpy
-
-Or clone the GitHub repository:
-
-    $ git clone https://github.com/sobester/ADRpy.git
-    $ python setup.py install
+You could also clone the GitHub repository, by typing :code:`git clone https://github.com/sobester/ADRpy.git`
+at the command prompt and then executing the setup file in the same directory by typing :code:`python setup.py install`.
     
 A 'hello world' example: atmospheric properties
 -----------------------------------------------
