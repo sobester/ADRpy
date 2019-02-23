@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""unitconversions.py:
-A module containing conversion methods for units commonly used in
-aircraft engineering.
+"""
+.. _unitconversions_module:
+
+Unit Conversions
+----------------
+
+This module contains tools for converting between units commonly used in
+aircraft design.
+
 """
 
 __author__ = "Andras Sobester"

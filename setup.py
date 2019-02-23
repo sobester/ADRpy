@@ -22,6 +22,7 @@ setup(
     version=__version__,
     description='A Python library of aircraft conceptual design tools.',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/sobester/ADRpy',
     download_url='https://github.com/sobester/ADRpy/tarball/' + __version__,
     license='GPLv3',

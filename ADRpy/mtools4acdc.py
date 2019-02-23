@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""mtools4acdc.py:
-Miscellaneous tools to support aircraft engineering calculations
+"""
+.. _mtools4acdc_module:
 
-METHODS:
+Miscellaneous Utilities
+-----------------------
 
-panelplot_with_shared_y, recastasnpfloatarray
+This module contains miscellaneous tools to support aircraft
+engineering calculations.
+
 """
 
 __author__ = "Andras Sobester"
