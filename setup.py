@@ -20,7 +20,7 @@ dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startsw
 setup(
     name='ADRpy',
     version=__version__,
-    description='A Python library of aircraft conceptual design tools.',
+    description='Aircraft Design Recipes in Python: a library of aircraft conceptual design tools.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/sobester/ADRpy',

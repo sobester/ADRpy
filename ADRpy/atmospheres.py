@@ -4,39 +4,29 @@
 """
 .. _atmospheres_module:
 
-Atmospheres Module
-------------------
+Atmospheres
+-----------
 
-This module contains tools for defining atmosphere models for use
-in aircraft engineering, as follows:
-
-1. The **International Standard Atmosphere** model. Based on ESDU
-Data Item 77022, `"Equations for calculation of International
-Standard Atmosphere and associated off-standard atmospheres"`,
-published in 1977, amended in 2008. It covers the first  50km of
-the atmosphere.
-
-2. Off-standard, temperature offset versions of the above.
-
-3. Extremely warm/cold, and low/high density atmospheres from US
-MIL HDBK 310
-
-4. User-defined atmospheres based on interpolated data.
+This module contains tools for defining the environment in which
+aircraft performance analyses, trade-off studies, conceptual sizing
+and other aircraft engineering calculations can be carried out.
 
 The module contains the following class definitions:
 
 ``Runway``
-    Definition of a runway object
-``Obsprofile``
-    Definition of an atmospheric observation (sounding) object
+    Definition of a runway object, including the capability to instantiate
+    a runway from a 'real world' database of the world's airports.
 ``Atmosphere``
-    Definition of a virtual atmosphere object.
+    Definition of a virtual atmosphere object. This includes a number of
+    methods that allow the user to query parameters of the atmosphere.
+``Obsprofile``
+    Definition of an atmospheric observation (sounding) object. This
+    allows the user to create bespoke atmospheres and any other
+    atmospheres derived from specified temperature, pressure, etc.
+    profiles (such as the MIL HDBK 310 atmospheres).
 
-The unit tests (found in tests/t_atmospheres.py in the GitHub
-repository) compare the results against data from the 1976 US
-Standard Atmosphere, NASA-TM-X-74335. ESDU 77022 describes its
-ISA model as being identical for all practical purposes with the US
-Standard Atmospheres.
+See, in what follows, detailed descriptions of these classes, their methods,
+functions, as well as usage examples.
 
 """
 
@@ -82,7 +72,20 @@ def geop2geom45m(altitude_m):
     return R_EARTH_M * altitude_m / (R_EARTH_M - altitude_m)
 
 class Runway:
-    """Parameters and methods of runway definition"""
+    """Runway model to be used for take-off/landing performance calculations.
+
+    **Parameters:**
+
+        icao_code
+            International Civil Aviation Organisation code of the airport. Required
+            if the user wishes to equip this object with the attributes of a specific,
+            existing runway. String. E.g., 'EGHI' (Southampton airport). Runway
+            data is obtained from an off-line image of the `ourairports.com` database.
+
+        rwyno
+            Integer. Specifies which of the runways at at the airport specified by the
+            code above we want to associate with the runway object.
+    """
 
     def __init__(self, icao_code=None, rwyno=0,
                  elevation_ft=0, heading=0, surf='ASP',
@@ -218,7 +221,60 @@ class Obsprofile:
 
 
 class Atmosphere:
-    """Standard or off-standard/custom atmospheres."""
+    """Standard or off-standard/custom atmospheres.
+
+    **Available atmosphere types**
+
+    1. The International Standard Atmosphere (**ISA**) model. Based on ESDU
+    Data Item 77022, `"Equations for calculation of International
+    Standard Atmosphere and associated off-standard atmospheres"`,
+    published in 1977, amended in 2008. It covers the first  50km of
+    the atmosphere.
+
+    2. Off-standard, temperature offset versions of the above.
+
+    3. Extremely warm/cold, and low/high density atmospheres from US
+    MIL HDBK 310
+
+    4. User-defined atmospheres based on interpolated data.
+
+    **Example** ::
+
+        from ADRpy import atmospheres as at
+        from ADRpy import unitconversions as co
+
+        # Instantiate an atmosphere object: an off-standard ISA
+        # with a -10C offset
+        isa_minus10 = at.Atmosphere(offset_deg=-10)
+
+        # Query altitude
+        altitude_ft = 38000
+        altitude_m = co.feet2m(altitude_ft)
+
+        # Query the ambient density in this model at the specified altitude
+        print("ISA-10C density at", str(altitude_ft), "feet (geopotential):",
+            isa_minus10.airdens_kgpm3(altitude_m), "kg/m^3")
+
+        # Query the speed of sound in this model at the specified altitude
+        print("ISA-10C speed of sound at", str(altitude_ft), "feet (geopotential):",
+            isa_minus10.vsound_mps(altitude_m), "m/s")
+
+    Output: ::
+
+        ISA-10C density at 38000 feet (geopotential): 0.348049478999 kg/m^3
+        ISA-10C speed of sound at 38000 feet (geopotential): 288.1792251702055 m/s
+
+    **Note**
+
+    The unit tests (found in tests/t_atmospheres.py in the GitHub
+    repository) compare the atmosphere outputs against data from the 1976 US
+    Standard Atmosphere, NASA-TM-X-74335. ESDU 77022 describes its
+    ISA model as being identical for all practical purposes with the US
+    Standard Atmospheres.
+
+    **Methods**
+
+    """
 
     # INTERNATIONAL STANDARD ATMOSPHERE CONSTANTS
     # _Level limits in m =======================================================
@@ -443,7 +499,33 @@ class Atmosphere:
 
 
     def airtemp_k(self, altitudes_m=0):
-        """Temperatures in the selected atmosphere, in K."""
+        """Temperatures in the selected atmosphere, in K.
+
+        **Parameter:**
+
+        altitudes_m
+            altitudes at which the temperature is to be interrogated (float
+            or array of floats)
+
+        **Output:**
+
+        Ambient temperature (Static Air Temperature) in Kelvin.
+
+        **Example** ::
+
+            from ADRpy import atmospheres as at
+
+            isa = at.Atmosphere()
+
+            print("ISA temperatures at SL, 5km, 10km (geopotential):", 
+                isa.airtemp_k([0, 5000, 10000]), "K")
+
+        Output: ::
+
+            ISA temperatures at SL, 5km, 10km (geopotential): [ 288.15  255.65  223.15] K
+
+        """
+
         altitudes_m = self._alttest(altitudes_m)
         if self.is_isa:
             temperatures_k = self._isatemp_k(altitudes_m)
