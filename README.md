@@ -7,7 +7,7 @@ A library of aircraft conceptual design and performance analysis tools, includin
 virtual (design) atmospheres, constraint analysis methods, propulsion system 
 performance models, conversion functions and much else.
 
-version number: 0.1.5
+version number: 0.1.6
 
 author: Andras Sobester
 
