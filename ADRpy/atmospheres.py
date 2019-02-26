@@ -77,14 +77,43 @@ class Runway:
     **Parameters:**
 
         icao_code
-            International Civil Aviation Organisation code of the airport. Required
+            String. International Civil Aviation Organisation code of the airport. Required
             if the user wishes to equip this object with the attributes of a specific,
-            existing runway. String. E.g., 'EGHI' (Southampton airport). Runway
+            existing runway, e.g., 'EGLL' (London Heathrow airport). Runway
             data is obtained from an off-line image of the `ourairports.com` database.
 
         rwyno
-            Integer. Specifies which of the runways at at the airport specified by the
-            code above we want to associate with the runway object.
+            Integer. Specifies which of the runways at the airport specified by the
+            ICAO code above we want to associate with the runway object.
+
+        elevation_ft, heading, surf, length_ft, width_ft
+            Parameters of bespoke, user-defined runways. The recommended use of these
+            is as indicated by their names, though the user may wish to adopt their
+            own definitions to suit particular applications (for example, `surf` can
+            be any string describing the runway surface).
+
+    **Example:** ::
+
+        from ADRpy import atmospheres as at
+
+        runway = at.Runway('EGLL', 0)
+
+        print('Runway: ', runway.le_ident, '/', runway.he_ident)
+
+        print('True headings: ',
+            runway.le_heading_degt, '/',
+            runway.he_heading_degt, 'degrees')
+
+        print('Elevation (low end): ', runway.le_elevation_ft, 'ft')
+
+        print('Length: ', runway.length_ft, 'ft')
+
+    Outputs: ::
+
+        Runway:  09L / 27R
+        True headings:  89.6 / 269.6 degrees
+        Elevation (low end):  79.0 ft
+        Length:  12799.0 ft
     """
 
     def __init__(self, icao_code=None, rwyno=0,
