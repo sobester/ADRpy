@@ -100,6 +100,10 @@ class Runway:
                 for row in runwaydata:
                     runwaylist.append(row)
             rindlst = [i for i, rwy in enumerate(runwaylist) if rwy[2] == icao_code]
+            if rwyno > len(rindlst) - 1:
+                print('Requested rwy. nr. exceeds the nr. of runways at ',
+                      icao_code, '(', len(rindlst), ')')
+                raise ValueError('Incorrect runway number.')
             rind = rindlst[0]
             self.ident = runwaylist[rind + rwyno][0]
             self.airport_ref = runwaylist[rind + rwyno][1]
