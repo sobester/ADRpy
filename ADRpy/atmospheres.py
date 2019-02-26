@@ -517,7 +517,7 @@ class Atmosphere:
 
             isa = at.Atmosphere()
 
-            print("ISA temperatures at SL, 5km, 10km (geopotential):", 
+            print("ISA temperatures at SL, 5km, 10km (geopotential):",
                 isa.airtemp_k([0, 5000, 10000]), "K")
 
         Output: ::

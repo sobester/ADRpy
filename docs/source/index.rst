@@ -29,7 +29,7 @@ of each class, method and function. Any problems, issues, questions, please
 Installing and running ADRpy
 ----------------------------
 
-First and foremost, you need to have Python installed - you can get the latest version
+First and foremost, you will need to have Python installed - you can get the latest version
 `here <https://www.python.org/downloads/>`_ or as part of a number of alternative
 `packages <https://www.python.org/download/alternatives/>`_. 
 
