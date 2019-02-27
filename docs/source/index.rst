@@ -1,3 +1,9 @@
+.. image:: https://badge.fury.io/py/ADRpy.svg
+    :target: https://badge.fury.io/py/ADRpy
+
+.. image:: https://travis-ci.com/sobester/ADRpy.svg?branch=master
+    :target: https://travis-ci.com/sobester/ADRpy
+
 Aircraft Design Recipes in Python -- User's Guide
 =================================================
 
