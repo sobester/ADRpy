@@ -7,7 +7,11 @@ A library of aircraft conceptual design and performance analysis tools, includin
 virtual (design) atmospheres, constraint analysis methods, propulsion system 
 performance models, conversion functions and much else.
 
-version number: 0.1.6
+For a detailed description of the library, please consult the
+[Documentation](https://adrpy.readthedocs.io/en/latest/). For getting started,
+follow the instructions below.
+
+version number: 0.1.7
 
 author: Andras Sobester
 
