@@ -8,7 +8,7 @@ virtual (design) atmospheres, constraint analysis methods, propulsion system
 performance models, conversion functions and much else.
 
 For a detailed description of the library, please consult the
-[Documentation](https://adrpy.readthedocs.io/en/latest/). For getting started,
+[Documentation](https://adrpy.readthedocs.io/en/latest/). To get started,
 follow the instructions below.
 
 version number: 0.1.7
