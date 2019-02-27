@@ -6,4 +6,4 @@ coverage
 pypi-publisher
 scipy
 matplotlib
-pytest
+pytest>=4.3.0
