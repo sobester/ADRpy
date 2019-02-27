@@ -74,7 +74,7 @@ def geop2geom45m(altitude_m):
 class Runway:
     """Runway model to be used for take-off/landing performance calculations.
 
-    **Parameters:**
+    **Parameters** (all optional):
 
         icao_code
             String. International Civil Aviation Organisation code of the airport. Required
@@ -84,7 +84,17 @@ class Runway:
 
         rwyno
             Integer. Specifies which of the runways at the airport specified by the
-            ICAO code above we want to associate with the runway object.
+            ICAO code above we want to associate with the runway object. A `ValueError`
+            will be thrown if `rwyno` exceeds the number of runways at the airport
+            specified by the `icao_code`. The number of runways can be found in
+            the `nrways` attribute of the runway object: ::
+
+                runway = at.Runway('KDEN')
+                runway.nrways
+
+            Output: ::
+
+                6
 
         elevation_ft, heading, surf, length_ft, width_ft
             Parameters of bespoke, user-defined runways. The recommended use of these
@@ -92,7 +102,7 @@ class Runway:
             own definitions to suit particular applications (for example, `surf` can
             be any string describing the runway surface).
 
-    **Example:** ::
+    **Example - creating and querying a Runway class object:** ::
 
         from ADRpy import atmospheres as at
 
@@ -129,9 +139,10 @@ class Runway:
                 for row in runwaydata:
                     runwaylist.append(row)
             rindlst = [i for i, rwy in enumerate(runwaylist) if rwy[2] == icao_code]
-            if rwyno > len(rindlst) - 1:
+            self.nrways = len(rindlst)
+            if rwyno > self.nrways - 1:
                 print('Requested rwy. nr. exceeds the nr. of runways at ',
-                      icao_code, '(', len(rindlst), ')')
+                      icao_code, '(', self.nrways, ')')
                 raise ValueError('Incorrect runway number.')
             rind = rindlst[0]
             self.ident = runwaylist[rind + rwyno][0]

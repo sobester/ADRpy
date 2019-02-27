@@ -80,6 +80,7 @@ class TestUM(unittest.TestCase):
         self.assertEqual(rwy.le_ident, '09L')
         self.assertEqual(round(rwy.le_heading_degt), 90)
         self.assertEqual(round(rwy.le_elevation_ft), 79)
+        self.assertEqual(rwy.nrways, 2)
 
         # Wind examples. Convention: headwind and right are +
 
