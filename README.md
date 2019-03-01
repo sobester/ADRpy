@@ -135,9 +135,9 @@ You should see the following output:
     Liftoff speed (KEAS): [  96.99203483  118.79049722  137.1674511   153.35787248]
 
 
-A complete example: wing/powerplant sizing for a single engine prop
--------------------------------------------------------------------
+More extensive examples - a library of notebooks
+------------------------------------------------
 
-[View the single engine prop example as a Jupyter notebook on nbviewer](https://nbviewer.jupyter.org/github/sobester/ADRpy/blob/master/docs/ADRpy/single_engine_prop_power_requirements.ipynb) (click on the binder icon in the top right corner for of the nbviewer page for an editable, 'live', online version of the notebook; click download to grab your own copy of the notebook - note
-that your browser may just render it as raw text, which you have to copy and paste into a blank document
-and save it as an ipynb).
+Click on the Binder icon to open a library of examples recorded in Jupyter notebooks. You can play
+with these 'live' in Binder, or you can click File / Download as / ... to create your own local 
+copy in any number of formats. [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks)
