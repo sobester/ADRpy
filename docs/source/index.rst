@@ -38,7 +38,7 @@ into a `Jupyter notebook <https://jupyter.org>`_. Any problems, issues, question
 Installing and running ADRpy
 ----------------------------
 
-ADRpy is written in Python 3 and is tested in Python 3.4, 3.5, 3.5-dev, 3.6, 3.6-dev
+ADRpy is written in Python 3 and tested in Python 3.4, 3.5, 3.5-dev, 3.6, 3.6-dev
 and 3.7-dev. It is not available for Python 2.
 
 First and foremost, you will need to have Python installed - you can get the latest version
