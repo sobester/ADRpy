@@ -64,6 +64,10 @@ print("ISA+10C density at 41,000 feet (geopotential):",
       isa.airdens_kgpm3(co.feet2m(41000)), "kg/m^3")
 ```
 
+You should see the following output:
+
+    ISA+10C density at 41,000 feet (geopotential): 0.274725888531 kg/m^3
+
 A design example: wing/powerplant sizing for take-off
 -----------------------------------------------------
 
@@ -122,7 +126,18 @@ print("\nT/W (std. day, SL, static thrust):", tw_sl)
 print("\nLiftoff speed (KEAS):", co.mps2kts(liftoffspeed_mpseas))
 ```
 
+You should see the following output:
+
+    Required T/W and V_liftoff under MIL-HDBK-310 conditions:
+
+    T/W (std. day, SL, static thrust): [ 0.19618164  0.2710746   0.34472518  0.41715311]
+
+    Liftoff speed (KEAS): [  96.99203483  118.79049722  137.1674511   153.35787248]
+
+
 A complete example: wing/powerplant sizing for a single engine prop
 -------------------------------------------------------------------
 
-[View the single engine prop example as a Jupyter notebook on nbviewer](https://nbviewer.jupyter.org/github/sobester/ADRpy/blob/master/docs/ADRpy/single_engine_prop_power_requirements.ipynb) (click on the binder icon in the top right corner for of the nbviewer page for an editable, 'live', online version of the notebook).
+[View the single engine prop example as a Jupyter notebook on nbviewer](https://nbviewer.jupyter.org/github/sobester/ADRpy/blob/master/docs/ADRpy/single_engine_prop_power_requirements.ipynb) (click on the binder icon in the top right corner for of the nbviewer page for an editable, 'live', online version of the notebook; click download to grab your own copy of the notebook - note
+that your browser may just render it as raw text, which you have to copy and paste into a blank document
+and save it as an ipynb).
