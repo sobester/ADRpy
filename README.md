@@ -138,6 +138,8 @@ You should see the following output:
 More extensive examples - a library of notebooks
 ------------------------------------------------
 
-Click on the Binder icon to open a library of examples recorded in Jupyter notebooks. You can play
+Click on [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks) to open a library of examples recorded in Jupyter notebooks. You can play
 with these 'live' in Binder, or you can click File / Download as / ... to create your own local 
-copy in any number of formats. [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks)
+copy in any number of formats. [* Note: if you don't want to wait for Binder to generate the library,
+you can still access the 'static' versions of the notebooks through nbviewer - click on the required
+notebook in the lower half of the holding page.* ]
