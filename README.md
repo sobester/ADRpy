@@ -19,7 +19,7 @@ author: Andras Sobester
 Installation / Usage
 --------------------
 
-ADRpy is written in Python 3 and is tested in Python 3.4, 3.5, 3.5-dev, 3.6, 3.6-dev
+ADRpy is written in Python 3 and tested in Python 3.4, 3.5, 3.5-dev, 3.6, 3.6-dev
 and 3.7-dev. It is not available for Python 2.
 
 On most systems you should be able to simply open an operating system terminal
