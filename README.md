@@ -19,6 +19,9 @@ author: Andras Sobester
 Installation / Usage
 --------------------
 
+ADRpy is written in Python 3 and is tested in Python 3.4, 3.5, 3.5-dev, 3.6, 3.6-dev
+and 3.7-dev. It is not available for Python 2.
+
 On most systems you should be able to simply open an operating system terminal
 and at the command prompt type
 
@@ -140,6 +143,6 @@ More extensive examples - a library of notebooks
 
 Click on [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks) to open a library of examples recorded in Jupyter notebooks. You can play
 with these 'live' in Binder, or you can click File / Download as / ... to create your own local 
-copy in any number of formats. [* Note: if you don't want to wait for Binder to generate the library,
+copy in any number of formats. [*Note: if you don't want to wait for Binder to generate the library,
 you can still access the 'static' versions of the notebooks through nbviewer - click on the required
 notebook in the lower half of the holding page.* ]

@@ -29,11 +29,17 @@ These can be found in the :ref:`constraints_module`.
 :ref:`mtools4acdc_module`.
 
 This document contains numerous usage examples and details on the inputs and outputs
-of each class, method and function. Any problems, issues, questions, please
+of each class, method and function. You can copy and paste these into .py files and 
+execute those in a development environment or from Python's command prompt, you can
+copy and paste them line by line into a Python terminal or (perhaps most usefully)
+into a `Jupyter notebook <https://jupyter.org>`_. Any problems, issues, questions, please
 `raise an issue on GitHub <https://github.com/sobester/ADRpy/issues>`_. Happy designing! 
 
 Installing and running ADRpy
 ----------------------------
+
+ADRpy is written in Python 3 and is tested in Python 3.4, 3.5, 3.5-dev, 3.6, 3.6-dev
+and 3.7-dev. It is not available for Python 2.
 
 First and foremost, you will need to have Python installed - you can get the latest version
 `here <https://www.python.org/downloads/>`_ or as part of a number of alternative
@@ -47,6 +53,20 @@ entering :code:`python get-pip.py` at the operating system prompt).
 
 For the ADRpy source code, license conditions (GPLv3), and alternative installation instructions
 see `the ADRpy GitHub repository <https://github.com/sobester/ADRpy#aircraft-design-recipes-in-python>`_.
+
+Notebooks
+---------
+
+ADRpy includes a library of examples recorded in Jupyter notebooks. You can play
+with these 'live' in Binder:
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks
+
+...or you can click File / Download as / ... to create your own local copy in any number of formats.
+[*Note: if you don't want to wait for Binder to generate the library, you can still access the 
+'static' versions of the notebooks through nbviewer - click on the required notebook in 
+the lower half of the holding page.*]
 
 ADRpy Modules
 -------------
