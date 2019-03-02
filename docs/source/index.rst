@@ -7,6 +7,8 @@
 Aircraft Design Recipes in Python -- User's Guide
 =================================================
 
+by `Andras Sobester <https://www.southampton.ac.uk/engineering/about/staff/as7.page>`_
+
 **Welcome to ADRpy**, a free library of aircraft design and performance analysis tools suitable for
 rapid sizing calculations. The models implemented in ADRpy are largely analytical, enabling 
 fast explorations of large design spaces. Most of the methods can already be used in the 
