@@ -697,6 +697,16 @@ class Atmosphere:
     def keas2kcas(self, keas, altitude_m):
         """Converts equivalent airspeed into calibrated airspeed.
 
+        The relationship between the two depends on the Mach number :math:`M` and the
+        ratio :math:`\\delta` of the pressure at the current altitude
+        :math:`P_\\mathrm{alt}` and the sea level pressure :math:`P_\\mathrm{0}`.
+        We approximate this relationship with the expression:
+
+        .. math::
+
+            \\mathrm{CAS}\\approx\\mathrm{EAS}\\left[1 + \\frac{1}{8}(1-\\delta)M^2 +
+            \\frac{3}{640}\\left(1-10\\delta+9\\delta^2 \\right)M^4 \\right]
+
         **Parameters**
 
         keas
