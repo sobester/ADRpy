@@ -861,7 +861,7 @@ class AircraftConcept:
 
 
     def powerrequired(self, wingloadinglist_pa, tow_kg, feasibleonly=True):
-        """Calculate the power required for t/o, trn, clm, crs, sec."""
+        """Calculate the power (in HP) required for t/o, trn, clm, crs, sec."""
 
         if self.etadefaultflag > 0:
             etamsg = str(self.etadefaultflag) + " prop etas set to defaults."
