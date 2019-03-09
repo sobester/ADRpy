@@ -963,6 +963,36 @@ class AircraftConcept:
 
         return 1.0
 
+    def wigfactor(self):
+        """Wing-in-ground-effect factor to account for the change in
+        induced drag as a result of the wing being in close proximity
+        of the ground. Specify the entry `wingheightratio` in the
+        `design` dictionary variable you instantiated the `AircraftConcept`
+        object with in order to compute this - if unspecified, a call to this
+        method will result in a value practically equal to 1 being returned.
+
+        The factor, following McCormick ("Aerodynamics, Aeronautics, and Flight
+        Mechanics", Wiley, 1979) and Gudmundsson (2013) is calculated as:
+
+        .. math::
+
+            \\Phi = \\frac{(16\\,h/b)^2}{1+(16\\,h/b)^2}
+
+        where :math:`h/b` is `design['wingheightratio']`: the ratio of the height
+        of the wing above the ground (when the aircraft is on the runway) and the
+        span of the main wing.
+
+        The induced drag coefficient adjusted for ground effect thus becomes:
+
+        .. math::
+
+            C_\\mathrm{Di} = \\Phi C_\\mathrm{Di}^\\mathrm{oge},
+
+        where the 'oge' superscript denotes the 'out of ground effect' value.
+
+        """
+        return ((16 * self.wingheightratio) ** 2) / (1 + (16 * self.wingheightratio) ** 2)
+
 
 def tw2pw(thrusttoweight, speed, etap):
     """Converts thrust to weight to power to weight (propeller-driven aircraft)
