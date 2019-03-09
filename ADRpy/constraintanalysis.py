@@ -147,6 +147,13 @@ class AircraftConcept:
         else:
             self.throttle_r = 1.07
 
+        if 'wingheightratio' in design:
+            self.wingheightratio = design['wingheightratio']
+        else:
+            # Set to a large number if unspecified, leading to
+            # WIG factor of near-unity
+            self.wingheightratio = 10
+
         if 'sweep_le_deg' in design:
             self.sweep_le_deg = design['sweep_le_deg']
             self.sweep_le_rad = math.radians(self.sweep_le_deg)
