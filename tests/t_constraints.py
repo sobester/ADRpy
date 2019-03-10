@@ -4,7 +4,7 @@
 """t_constraints.py:
 Unit tests for the constraints module
 """
-
+import math
 import unittest
 from ADRpy import constraintanalysis as ca
 from ADRpy import atmospheres as at
@@ -39,6 +39,20 @@ class TestUM(unittest.TestCase):
 
     def test_wig(self):
         """Tests the wing in ground effect factor calculation"""
+
+        print("WIG factor test.")
+
+        designdef = {'aspectratio':8}
+        wingarea_m2 = 10
+        wingspan_m = math.sqrt(designdef['aspectratio'] * wingarea_m2)
+
+        for wingheight_m in [0.6, 0.8, 1.0]:
+            designdef['wingheightratio'] = wingheight_m / wingspan_m
+            aircraft = ca.AircraftConcept({}, designdef, {}, {})
+
+        self.assertEqual(round(10000 * aircraft.wigfactor()),
+                         round(10000 * 0.7619047))
+
 
 if __name__ == '__main__':
     unittest.main()
