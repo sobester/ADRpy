@@ -61,3 +61,14 @@ def recastasnpfloatarray(scalarorvec):
     # Convert to Numpy array if list
     scalarorvec = np.asarray(scalarorvec, dtype=float)
     return scalarorvec
+
+
+def polyblend(time, time_f, signal_i, signal_f):
+    """A smooth blend between two levels of a signal."""
+    normtime = time / time_f
+    scale = signal_f - signal_i
+    if time < 0:
+        return signal_i
+    if time >= time_f:
+        return signal_f
+    return signal_i + scale * (normtime ** 2) * (3 - 2 * normtime)
