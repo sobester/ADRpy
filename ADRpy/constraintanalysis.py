@@ -1003,7 +1003,7 @@ class AircraftConcept:
 
                 designdef['wingheightratio'] = wingheight_m / wingspan_m
 
-                aircraft = co.AircraftConcept(_, designdef, _, _)
+                aircraft = co.AircraftConcept({}, designdef, {}, {})
 
                 print('h/b: ', designdef['wingheightratio'],
                     ' Phi: ', aircraft.wigfactor())
