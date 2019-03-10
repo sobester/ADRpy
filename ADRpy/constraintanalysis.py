@@ -152,7 +152,7 @@ class AircraftConcept:
         else:
             # Set to a large number if unspecified, leading to
             # WIG factor of near-unity
-            self.wingheightratio = 10
+            self.wingheightratio = 100
 
         if 'sweep_le_deg' in design:
             self.sweep_le_deg = design['sweep_le_deg']
