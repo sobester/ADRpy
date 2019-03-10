@@ -37,6 +37,8 @@ class TestUM(unittest.TestCase):
         self.assertEqual(round(10000 * tw_sl[3]), round(10000 * 0.41110154))
         self.assertEqual(round(10000 * liftoffspeed_mps[3]), round(10000 * 82.48028428))
 
+    def test_wig(self):
+        """Tests the wing in ground effect factor calculation"""
 
 if __name__ == '__main__':
     unittest.main()
