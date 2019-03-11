@@ -1027,7 +1027,7 @@ def tw2pw(thrusttoweight, speed, etap):
         thrust to weight ratio (non-dimensional)
 
     speed
-        speed (in m/s if output in Watts / Newton is required)
+        ground speed (in m/s if output in Watts / Newton is required)
 
     etap
         propeller efficiency (non-dimensional), float
