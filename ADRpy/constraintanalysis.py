@@ -1040,9 +1040,15 @@ def tw2pw(thrusttoweight, speed, etap):
 
     **Notes**
 
-    A note on units. If the input speed is in m/s, the other two inputs being
+    1. A note on units. If the input speed is in m/s, the other two inputs being
     non-dimensional, the output product is also in m/s, which is equal to W/N
     (W / N = (J/s) / N = (Nm/s) / N = m/s).
+
+    2. The speed input is a kinematic quantity, not an airspeed, so it is generally
+    a ground speed (GS) or a true airspeed (TAS) if we are assuming zero wind.
+
+    3. The inputs to the functioin are scalars or a mix of scalars and `numpy`
+    arrays.
 
     **Example**::
 
