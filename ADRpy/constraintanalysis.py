@@ -325,13 +325,13 @@ class AircraftConcept:
 
         vs1to_mps = np.sqrt((2 * wingloading_pa) / (density_kgpm3 * self.clmaxto))
 
-        liftoffspeed_mps = 1.1 * vs1to_mps
+        liftoffspeed_mpstas = 1.1 * vs1to_mps
 
-        thrusttoweightreqd = (liftoffspeed_mps ** 2) / (2 * constants.g * groundrun_m) + \
+        thrusttoweightreqd = (liftoffspeed_mpstas ** 2) / (2 * constants.g * groundrun_m) + \
         0.5 * self.cdto / self.clto + \
         0.5 * self.mu_r
 
-        return thrusttoweightreqd, liftoffspeed_mps
+        return thrusttoweightreqd, liftoffspeed_mpstas
 
 
     def thrusttoweight_sustainedturn(self, wingloading_pa):
