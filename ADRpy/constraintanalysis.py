@@ -957,7 +957,9 @@ class AircraftConcept:
 
 
     def map2static(self):
-        """Maps the average take-off thrust to static thrust"""
+        """Maps the average take-off thrust to static thrust. If a bypass ratio
+        is not specified, it returns a value of 1.
+        """
         if self.bpr > 1:
             return (4 / 3) * (4 + self.bpr) / (5 + self.bpr)
 
