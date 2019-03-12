@@ -1047,7 +1047,7 @@ def tw2pw(thrusttoweight, speed, etap):
     2. The speed input is a kinematic quantity, not an airspeed, so it is generally
     a ground speed (GS) or a true airspeed (TAS) if we are assuming zero wind.
 
-    3. The inputs to the functioin are scalars or a mix of scalars and `numpy`
+    3. The inputs to the function are scalars or a mix of scalars and `numpy`
     arrays.
 
     **Example**::
