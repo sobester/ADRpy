@@ -334,13 +334,18 @@ class AircraftConcept:
         is the ambient density and :math:`\\mu_\\mathrm{R}` is the coefficient of rolling
         resistance on the wheels.
 
+        This is a function exposed to the user for clarity and added flexibility.
         If you need to calculate the trust to weight ratio required for take-off, use
-        ``twrequired_to``; if you need the power required for take-off, use ``powerrequired`` -
-        these methods correct the output of this function to account for non-ISA
-        environmental conditions (including their impact on engine performance) and,
-        in the case of the former, include a mapping to static thrust. This function should
-        only be used if you would like to perform these corrections in a different way than
-        implemented in ``twrequired_to`` and ``powerrequired``.
+        ``twrequired_to``. This corrects the output of this function to account for the
+        environmental conditions (including their impact on engine performance) and includes
+        a mapping to static thrust. `thrusttoweight_takeoff` should only be used if you
+        would like to perform these corrections in a different way than implemented in
+        ``twrequired_to``.
+
+        If a full constraint analysis is required, ``twrequired`` should be used.
+        A similar 'full constraint set' function is available for calculating the
+        power demanded of the engine of a propeller-driven engine or electric motor
+        (to satisfy the constraint set) - this is called ``powerrequired``.
         """
 
         groundrun_m = self.groundrun_m
@@ -840,7 +845,11 @@ class AircraftConcept:
         """Calculate the T/W required for t/o, trn, clm, crs, sec.
 
         This method integrates the full set of constraints and it gives the user a
-        compact way of performing a full constraint analysis.
+        compact way of performing a full constraint analysis. If a specific constraint
+        is required only, the individual methods can be called separately:
+        :code:`twrequired_to` (take-off), :code:`twrequired_trn` (turn),
+        :code:`twrequired_clm` (climb), :code:`twrequired_trn` (turn),
+        :code:`twrequired_crs` (cruise), :code:`twrequired_sec` (service ceiling).
 
         **Parameters**
 
