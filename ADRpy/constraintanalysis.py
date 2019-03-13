@@ -916,8 +916,8 @@ class AircraftConcept:
 
         preq_hp = {
             'take-off': p_to_hp,
-            'liftoffspeed_mps': twreq['liftoffspeed_mps'],
-            'avspeed_mps': twreq['avspeed_mps'],
+            'liftoffspeed_mpstas': twreq['liftoffspeed_mpstas'],
+            'avspeed_mpstas': twreq['avspeed_mpstas'],
             'turn': p_trn_hp,
             'turncl': twreq['turncl'],
             'climb': p_clm_hp,

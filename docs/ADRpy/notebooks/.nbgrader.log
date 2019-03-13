@@ -1,0 +1,15 @@
+[NotebookApp | WARNING] No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)
+[NotebookApp | INFO] Loading the validate_assignment nbgrader serverextension
+[NotebookApp | INFO] Serving notebooks from local directory: /Users/andrassobester/Dropbox/ADRpy/docs/ADRpy/notebooks
+[NotebookApp | INFO] 0 active kernels 
+[NotebookApp | INFO] The Jupyter Notebook is running at: http://localhost:8807/?token=6c4ce57da13a645072d15553098ad3b9e27b592e3d5f9cab
+[NotebookApp | INFO] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[NotebookApp | CRITICAL] 
+    
+    Copy/paste this URL into your browser when you connect for the first time,
+    to login with a token:
+        http://localhost:8807/?token=6c4ce57da13a645072d15553098ad3b9e27b592e3d5f9cab
+[NotebookApp | INFO] Accepting one-time-token-authenticated connection from ::1
+[NotebookApp | INFO] Kernel started: b8c981af-a82d-463d-9743-9f15f459086d
+[NotebookApp | INFO] Kernel restarted: b8c981af-a82d-463d-9743-9f15f459086d
+[NotebookApp | INFO] Saving file at /single_engine_prop_power_requirements.ipynb
