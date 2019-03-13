@@ -390,8 +390,8 @@ class AircraftConcept:
         twratio
             array, thrust to weight ratio required for the given wing loadings.
 
-        liftoffspeed_mps
-            array, liftoff speeds (TAS) in m/s.
+        liftoffspeed_mpstas
+            array, liftoff speeds (TAS - true airspeed) in m/s.
 
         avspeed_mps
             average speed (TAS) during the take-off run, in m/s.
@@ -422,10 +422,10 @@ class AircraftConcept:
             concept = ca.AircraftConcept(designbrief, designdefinition,
                                         designperformance, atm)
 
-            tw_sl, liftoffspeed_mps, _ = concept.twrequired_to(wingloadinglist_pa)
+            tw_sl, liftoffspeed_mpstas, _ = concept.twrequired_to(wingloadinglist_pa)
 
             print(tw_sl)
-            print(liftoffspeed_mps)
+            print(liftoffspeed_mpstas)
 
         Output: ::
 
@@ -439,7 +439,7 @@ class AircraftConcept:
 
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
 
-        twratio, liftoffspeed_mps = self.thrusttoweight_takeoff(wingloading_pa)
+        twratio, liftoffspeed_mpstas = self.thrusttoweight_takeoff(wingloading_pa)
 
         # What does this required T/W mean in terms of static T/W required?
         twratio = self.map2static() * twratio
@@ -449,17 +449,17 @@ class AircraftConcept:
         pressure_pa = self.designatm.airpress_pa(self.rwyelevation_m)
         density_kgpm3 = self.designatm.airdens_kgpm3(self.rwyelevation_m)
 
-        for i, los_mps in enumerate(liftoffspeed_mps):
+        for i, los_mps in enumerate(liftoffspeed_mpstas):
             mach = self.designatm.mach(los_mps, self.rwyelevation_m)
             corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
             twratio[i] = twratio[i] / corr
 
-        avspeed_mps = liftoffspeed_mps / np.sqrt(2)
+        avspeed_mps = liftoffspeed_mpstas / np.sqrt(2)
 
         if len(twratio) == 1:
-            return twratio[0], liftoffspeed_mps[0], avspeed_mps[0]
+            return twratio[0], liftoffspeed_mpstas[0], avspeed_mps[0]
 
-        return twratio, liftoffspeed_mps, avspeed_mps
+        return twratio, liftoffspeed_mpstas, avspeed_mps
 
 
     def bank2turnradius(self, bankangle_deg):
