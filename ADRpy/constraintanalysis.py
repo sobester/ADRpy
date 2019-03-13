@@ -841,7 +841,7 @@ class AircraftConcept:
 
         """
 
-        tw_to, liftoffspeed_mps, avspeed_mps = self.twrequired_to(wingloadinglist_pa)
+        tw_to, liftoffspeed_mpstas, avspeed_mpstas = self.twrequired_to(wingloadinglist_pa)
         tw_trn, clrequired, feasibletw_trn = self.twrequired_trn(wingloadinglist_pa)
         tw_clm = self.twrequired_clm(wingloadinglist_pa)
         tw_crs = self.twrequired_crs(wingloadinglist_pa)
@@ -854,8 +854,8 @@ class AircraftConcept:
 
         twreq = {
             'take-off': tw_to,
-            'liftoffspeed_mps': liftoffspeed_mps,
-            'avspeed_mps': avspeed_mps,
+            'liftoffspeed_mpstas': liftoffspeed_mpstas,
+            'avspeed_mpstas': avspeed_mpstas,
             'turn': tw_trn,
             'turnfeasible': feasibletw_trn,
             'turncl': clrequired,
