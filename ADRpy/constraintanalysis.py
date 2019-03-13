@@ -316,7 +316,32 @@ class AircraftConcept:
 
 
     def thrusttoweight_takeoff(self, wingloading_pa):
-        """The thrust to weight ratio required for take-off"""
+        """The thrust to weight ratio required for take-off. This function is an
+        implementation of the following simple, analytical model:
+
+        .. math::
+
+            \\frac{\\overline{T}}{W} = 1.21\\frac{W/S}{\\rho C_\\mathrm{Lmax}^\\mathrm{TO}gd_
+            \\mathrm{G}}+\\frac{1}{2}\\frac{C_\\mathrm{D}^\\mathrm{TO}}{C_\\mathrm{L}^\\mathrm{TO}}
+            +\\frac{1}{2}\\mu_\\mathrm{R}
+
+        where :math:`\\overline{T}` is the average thrust during the take-off run,
+        :math:`W/S` is the wing loading, :math:`d_\\mathrm{G}` is the required ground
+        roll, :math:`C_\\mathrm{D}^\\mathrm{TO}` and :math:`C_\\mathrm{L}^\\mathrm{TO}`
+        are the 'all wheels on the runway' drag and lift coefficient respectively
+        in the take-off configuration, :math:`C_\\mathrm{Lmax}^\\mathrm{TO}` is the maximum
+        lift coefficient achieved during the take-off run (during rotation), :math:`\\rho`
+        is the ambient density and :math:`\\mu_\\mathrm{R}` is the coefficient of rolling
+        resistance on the wheels.
+
+        If you need to calculate the trust to weight ratio required for take-off, use
+        ``twrequired_to``; if you need the power required for take-off, use ``powerrequired`` -
+        these methods correct the output of this function to account for non-ISA
+        environmental conditions (including their impact on engine performance) and,
+        in the case of the former, include a mapping to static thrust. This function should
+        only be used if you would like to perform these corrections in a different way than
+        implemented in ``twrequired_to`` and ``powerrequired``.
+        """
 
         groundrun_m = self.groundrun_m
 
