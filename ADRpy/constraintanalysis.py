@@ -454,12 +454,12 @@ class AircraftConcept:
             corr = self._altcorr(temp_c, pressure_pa, mach, density_kgpm3)
             twratio[i] = twratio[i] / corr
 
-        avspeed_mps = liftoffspeed_mpstas / np.sqrt(2)
+        avspeed_mpstas = liftoffspeed_mpstas / np.sqrt(2)
 
         if len(twratio) == 1:
-            return twratio[0], liftoffspeed_mpstas[0], avspeed_mps[0]
+            return twratio[0], liftoffspeed_mpstas[0], avspeed_mpstas[0]
 
-        return twratio, liftoffspeed_mpstas, avspeed_mps
+        return twratio, liftoffspeed_mpstas, avspeed_mpstas
 
 
     def bank2turnradius(self, bankangle_deg):
