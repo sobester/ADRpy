@@ -338,7 +338,7 @@ class AircraftConcept:
         If you need to calculate the trust to weight ratio required for take-off, use
         ``twrequired_to``. This corrects the output of this function to account for the
         environmental conditions (including their impact on engine performance) and includes
-        a mapping to static thrust. `thrusttoweight_takeoff` should only be used if you
+        a mapping to static thrust. ``thrusttoweight_takeoff`` should only be used if you
         would like to perform these corrections in a different way than implemented in
         ``twrequired_to``.
 
