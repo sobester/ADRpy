@@ -29,13 +29,13 @@ class TestUM(unittest.TestCase):
         atm = at.Atmosphere()
         concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
 
-        tw_sl, liftoffspeed_mps, _ = concept.twrequired_to(wingloadinglist_pa)
+        tw_sl, liftoffspeed_mpstas, _ = concept.twrequired_to(wingloadinglist_pa)
 
         self.assertEqual(round(10000 * tw_sl[0]), round(10000 * 0.19397876))
-        self.assertEqual(round(10000 * liftoffspeed_mps[0]), round(10000 * 52.16511207))
+        self.assertEqual(round(10000 * liftoffspeed_mpstas[0]), round(10000 * 52.16511207))
 
         self.assertEqual(round(10000 * tw_sl[3]), round(10000 * 0.41110154))
-        self.assertEqual(round(10000 * liftoffspeed_mps[3]), round(10000 * 82.48028428))
+        self.assertEqual(round(10000 * liftoffspeed_mpstas[3]), round(10000 * 82.48028428))
 
     def test_wig(self):
         """Tests the wing in ground effect factor calculation"""
