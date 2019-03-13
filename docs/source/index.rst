@@ -19,7 +19,7 @@ as part of the analysis of the feasibility of the design requirements.
 The classes, methods and functions of the library fall into three broad categories:
 
 1. **Models of the operating environment.** These live in the :ref:`atmospheres_module`
-and include virtual atmospheres (ISA, MIL-HDBK-310, etc.), runway models (suitable 
+module and include virtual atmospheres (ISA, MIL-HDBK-310, etc.), runway models (suitable 
 for take-off and landing performance modelling using a 'real world' runway database)
 and models of propulsion performance response to variations in ambient conditions.
 
