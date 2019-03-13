@@ -877,7 +877,7 @@ class AircraftConcept:
         twreq = self.twrequired(wingloadinglist_pa, feasibleonly)
 
         # Take-off power required
-        pw_to_wpn = tw2pw(twreq['take-off'], twreq['avspeed_mps'], self.etaprop_to)
+        pw_to_wpn = tw2pw(twreq['take-off'], twreq['liftoffspeed_mps'], self.etaprop_to)
         pw_to_hpkg = co.wn2hpkg(pw_to_wpn)
         p_to_hp = pw_to_hpkg * tow_kg
 
