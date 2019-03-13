@@ -37,3 +37,21 @@
 [NotebookApp | INFO] Saving file at /example_from_Small_Unmanned_Fixed-wing_Aircraft_Design_Keane_et_al.ipynb
 [NotebookApp | INFO] Saving file at /example_from_Small_Unmanned_Fixed-wing_Aircraft_Design_Keane_et_al.ipynb
 [NotebookApp | INFO] Kernel shutdown: f85b0e62-4285-4d1a-a911-27096afdc9d9
+[NotebookApp | WARNING] No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)
+[NotebookApp | INFO] Loading the validate_assignment nbgrader serverextension
+[NotebookApp | INFO] Serving notebooks from local directory: /Users/andrassobester/Dropbox/ADRpy/docs/ADRpy/notebooks
+[NotebookApp | INFO] 0 active kernels 
+[NotebookApp | INFO] The Jupyter Notebook is running at: http://localhost:8832/?token=5a4abd3ebcd6a6a0bbfa30218da486a60a942b4d44aced02
+[NotebookApp | INFO] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[NotebookApp | CRITICAL] 
+    
+    Copy/paste this URL into your browser when you connect for the first time,
+    to login with a token:
+        http://localhost:8832/?token=5a4abd3ebcd6a6a0bbfa30218da486a60a942b4d44aced02
+[NotebookApp | INFO] Accepting one-time-token-authenticated connection from ::1
+[NotebookApp | WARNING] Notebook Introduction_to_Modelling_the_Atmosphere_for_Design_and_Perf_Calcs_with_ADRpy.ipynb is not trusted
+[NotebookApp | INFO] Kernel started: 51decc08-e17a-4bc9-b3e7-eb054f6a3238
+[NotebookApp | INFO] Kernel restarted: 51decc08-e17a-4bc9-b3e7-eb054f6a3238
+[NotebookApp | INFO] Kernel restarted: 51decc08-e17a-4bc9-b3e7-eb054f6a3238
+[NotebookApp | INFO] Saving file at /Introduction_to_Modelling_the_Atmosphere_for_Design_and_Perf_Calcs_with_ADRpy.ipynb
+[NotebookApp | INFO] Kernel shutdown: 51decc08-e17a-4bc9-b3e7-eb054f6a3238
