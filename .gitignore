@@ -38,3 +38,7 @@ docs/_build
 
 # Cookiecutter
 output/
+
+# MacOS
+.DS_Store
+.DS_Store?
