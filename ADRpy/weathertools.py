@@ -9,7 +9,7 @@ METHODS: readmethistfile, decodemetar
 
 # pylint: disable-msg=W0702
 # Non-critical if except fails too, also relying on error handling
-# from third party package here
+# from the metar package here
 
 __author__ = "Andras Sobester"
 
