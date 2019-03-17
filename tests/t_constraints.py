@@ -53,6 +53,19 @@ class TestUM(unittest.TestCase):
         self.assertEqual(round(10000 * aircraft.wigfactor()),
                          round(10000 * 0.7619047))
 
+    def test_vstall(self):
+        """Tests the stall speed method"""
+
+        print("Stall speed method (vstall_kias) test.")
+
+        designperformance = {'CLmaxTO':1.6}
+
+        concept = ca.AircraftConcept({}, {}, designperformance, {})
+
+        wingloading_pa = 3500
+
+        self.assertEqual(round(10000 * concept.vstall_kias(wingloading_pa, 'take-off')),
+                         round(10000 * 116.166934173))
 
 if __name__ == '__main__':
     unittest.main()
