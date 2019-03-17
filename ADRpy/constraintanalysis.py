@@ -989,7 +989,7 @@ class AircraftConcept:
 
         **Example**::
 
-            from ADRpy import constraintanalysis
+            from ADRpy import constraintanalysis as ca
 
             designperformance = {'CLmaxTO':1.6}
 
