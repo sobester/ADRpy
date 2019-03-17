@@ -962,6 +962,57 @@ class AircraftConcept:
         return preq_hp
 
 
+    def vstall_kias(self, wingloadinglist_pa, clmax):
+        """Calculates the stall speed (indicated) for a given wing loading
+        in a specified cofiguration.
+
+        **Parameters:**
+
+        wingloading_pa
+            float or numpy array, list of wing loading values in Pa.
+
+        clmax
+            maximum lift coefficient (float) or the name of a standard configuration
+            (string) for which a maximum lift coefficient was specified in the
+            :code:`performance` dictionary (currently implemented: 'take-off').
+
+        **Returns:**
+
+        stall speed in knots (float or numpy array)
+
+        **Note:**
+
+        The calculation is performed assuming standard day ISA sea level
+        conditions (not in the consitions specified in the atmosphere used
+        when instantiating the :code:`AircraftConcept` object!) so the
+        speed returned is an indicated (IAS) / calibrated (CAS) value.
+
+        **Example**::
+
+            from ADRpy import constraintanalysis
+
+            designperformance = {'CLmaxTO':1.6}
+
+            concept = ca.AircraftConcept({}, {}, designperformance, {})
+
+            wingloading_pa = 3500
+
+            print("VS1(take-off):",
+                concept.vstall_kias(wingloading_pa, 'take-off'))
+
+        """
+
+        isa = at.Atmosphere()
+        rho0_kgpm3 = isa.airdens_kgpm3()
+
+        if clmax == 'take-off':
+            clmax = self.clmaxto
+
+        vs_mps = math.sqrt(2 * wingloadinglist_pa / (rho0_kgpm3 * clmax))
+
+        return co.mps2kts(vs_mps)
+
+
     def wsmaxcleanstall_pa(self):
         """Maximum wing loading defined by the clean stall Clmax"""
 
