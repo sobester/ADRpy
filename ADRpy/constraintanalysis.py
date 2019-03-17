@@ -31,8 +31,80 @@ from ADRpy import mtools4acdc as actools
 
 
 class AircraftConcept:
-    """Definition of a basic aircraft concept. An aircraft concept object must
-    be defined for all constraint analysis functions.
+    """Definition of a basic aircraft concept. An object of this class defines an
+    aircraft design in terms of the *brief* it is aiming to meet, high
+    level *design* variables that specify it, key parameters that describe
+    its *performance*, as well as the *atmosphere* it operates in. These are
+    the four arguments that define an object of the AircraftConcept class.
+    The first three are dictionaries, as described below, the last is an object
+    of Atmosphere class.
+
+    **Parameters:**
+
+    brief
+        Dictionary. Definition of the design brief, that is, the requirements
+        the design seeks to meet. Contains the following key names:
+
+        rwyelevation_m
+            Float. The elevation (in metres) of the runway againts which the take-off
+            constraint is defined. Optional, defaults to zero (sea level).
+
+        groundrun_m
+            Float. Length (in metres) of take-off ground run in meters at the elevation
+            defined by the *rwyelevation_m* entry of the dictionary. This is a basic,
+            100% N1, no wind, zero runway gradient ground run.
+
+        stloadfactor
+            Float. Load factor to be sustained by the aircraft in a steady, level turn.
+
+        turnalt_m
+            Float. Altitude (in metres) where the turn requirement is defined.
+            Optional, defaults to zero (sea level).
+
+        turnspeed_ktas
+            Float. True airspeed (in knots) at which the turn requirement (above) has to be met.
+
+        climbalt_m
+            Float. The altitude (in metres) where the climb rate requirement is specified.
+            Optional, defaults to zero (sea level).
+
+        climbspeed_kias
+            Float. The airspeed (in knots, indicated) at which the required climb
+            rate has to be achieved.
+
+        climbrate_fpm
+            Float. Required climb rate (in feet per minute) at the altitude specified
+            in the *climbalt_m* entry (above).
+
+        cruisealt_m
+            Float. The altitude at which the cruise speed requirement will be defined.
+
+        cruisespeed_ktas
+            Float. The required cruise speed (in knots, true airspeed) at the 
+            altitude specified in the *cruisealt_m* entry (above).
+
+        cruisethrustfact
+            Float. The fraction (nondimensional) of the maximum available thrust at which
+            the cruise speed requirement must be achieved.
+        
+        servceil_m
+            Float. The required service ceiling in meters (that is, the altitude at which
+            the maximum rate of climb drops to 100 feet per minute).
+        
+        secclimbspd_kias
+            Float. The speed (knots indicated airspeed) at which the service ceiling
+            must be reached. This should be an estimate of the best rate of climb speed.
+
+        Example design brief::
+
+            brief = {'rwyelevation_m':0, 'groundrun_m':313,
+                     'stloadfactor': 1.5, 'turnalt_m': 1000, 'turnspeed_ktas': 100,
+                     'climbalt_m': 0, 'climbspeed_kias': 101, 'climbrate_fpm': 1398,
+                     'cruisealt_m': 3048, 'cruisespeed_ktas': 182, 'cruisethrustfact': 1.0,
+                     'servceil_m': 6580, 'secclimbspd_kias': 92,
+                     'vstallclean_kcas': 69}
+
+
     """
 
     def __init__(self, brief, design, performance, designatm):
