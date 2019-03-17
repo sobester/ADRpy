@@ -125,7 +125,7 @@ class AircraftConcept:
         if 'vstallclean_kcas' in brief:
             self.vstallclean_kcas = brief['vstallclean_kcas']
         else:
-            # Flag if not specified, error thrown by cruise constraint
+            # Flag if not specified, error thrown by stall constraint
             self.vstallclean_kcas = -1
 
 
