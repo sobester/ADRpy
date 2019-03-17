@@ -777,8 +777,8 @@ class AircraftConcept:
             raise ValueError(turnmsg)
         climbrate_mps = co.fpm2mps(self.climbrate_fpm)
 
-        climbspeed_mpstas = self.designatm.eas2tas(climbspeed_mpsias, self.servceil_m)
-        climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.servceil_m)
+        climbspeed_mpstas = self.designatm.eas2tas(climbspeed_mpsias, self.climbalt_m)
+        climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.climbalt_m)
 
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
 
