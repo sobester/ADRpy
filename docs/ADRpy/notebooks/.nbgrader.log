@@ -1,0 +1,18 @@
+[NotebookApp | WARNING] No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)
+[NotebookApp | INFO] Loading the validate_assignment nbgrader serverextension
+[NotebookApp | INFO] Serving notebooks from local directory: /Users/andrassobester/Dropbox/ADRpy/docs/ADRpy/notebooks
+[NotebookApp | INFO] 0 active kernels 
+[NotebookApp | INFO] The Jupyter Notebook is running at: http://localhost:8905/?token=b90668fc530465bfc31dd1bc5c8804e627bf13fb424d87df
+[NotebookApp | INFO] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[NotebookApp | CRITICAL] 
+    
+    Copy/paste this URL into your browser when you connect for the first time,
+    to login with a token:
+        http://localhost:8905/?token=b90668fc530465bfc31dd1bc5c8804e627bf13fb424d87df
+[NotebookApp | INFO] Accepting one-time-token-authenticated connection from ::1
+[NotebookApp | INFO] Kernel started: f33a93f9-2e73-4c34-8715-870d8bf9933f
+[NotebookApp | INFO] Saving file at /Initial scaling of an aircraft with ADRpy - the take-off constraint.ipynb
+[NotebookApp | INFO] Saving file at /Initial scaling of an aircraft with ADRpy - the take-off constraint.ipynb
+[NotebookApp | INFO] Saving file at /Initial scaling of an aircraft with ADRpy - the take-off constraint.ipynb
+[NotebookApp | INFO] Saving file at /Initial scaling of an aircraft with ADRpy - the take-off constraint.ipynb
+[NotebookApp | INFO] Kernel shutdown: f33a93f9-2e73-4c34-8715-870d8bf9933f
