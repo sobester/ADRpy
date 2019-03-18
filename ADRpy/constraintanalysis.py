@@ -31,7 +31,8 @@ from ADRpy import mtools4acdc as actools
 
 
 class AircraftConcept:
-    """Definition of a basic aircraft concept. An object of this class defines an
+    """Definition of a basic aircraft concept. **This is the most important
+    class in ADRpy.** An object of this class defines an
     aircraft design in terms of the *brief* it is aiming to meet, high
     level *design* variables that specify it, key parameters that describe
     its *performance*, as well as the *atmosphere* it operates in. These are
@@ -80,20 +81,23 @@ class AircraftConcept:
             Float. The altitude at which the cruise speed requirement will be defined.
 
         cruisespeed_ktas
-            Float. The required cruise speed (in knots, true airspeed) at the 
+            Float. The required cruise speed (in knots, true airspeed) at the
             altitude specified in the *cruisealt_m* entry (above).
 
         cruisethrustfact
             Float. The fraction (nondimensional) of the maximum available thrust at which
             the cruise speed requirement must be achieved.
-        
+
         servceil_m
             Float. The required service ceiling in meters (that is, the altitude at which
             the maximum rate of climb drops to 100 feet per minute).
-        
+
         secclimbspd_kias
             Float. The speed (knots indicated airspeed) at which the service ceiling
             must be reached. This should be an estimate of the best rate of climb speed.
+
+        vstallclean_kcas
+            Float. The maximum acceptable stall speed (in knots, indicated/calibrated).
 
         Example design brief::
 
@@ -103,6 +107,63 @@ class AircraftConcept:
                      'cruisealt_m': 3048, 'cruisespeed_ktas': 182, 'cruisethrustfact': 1.0,
                      'servceil_m': 6580, 'secclimbspd_kias': 92,
                      'vstallclean_kcas': 69}
+
+    design
+        Dictionary. Definition of key, high level design variables that define the future
+        design.
+
+        aspectratio
+            Float. Wing aspect ratio.
+
+        sweep_le_deg
+            Float. Main wing leading edge sweep angle (in degrees). Optional, defaults to
+            zero (no sweep).
+
+        sweep_mt_deg
+            Float. Main wing sweep angle measured at the maximum thickness point. Optional,
+            defaults to zero.
+
+        bpr
+            Float. Specifies the propulsion system type. For jet engines (powered by axial
+            gas turbines) this should be the bypass ratio (hence *'bpr'*). Set to -1 for
+            piston engines, -2 for turboprops and -3 if no power/thrust corrections are needed
+            (e.g., for electric motors).
+
+        weightfractions
+            Dictionary, specifying at what fraction of the maximum take-off weight do various
+            constraints have to be met. It should contain the following keys: *take-off*,
+            *climb*, *cruise*, *turn*, *servceil*. Optional, each defaults to 1.0 if not
+            specified.
+
+    performance
+        Dictionary. Definition of key, high level design performance estimates.
+
+        CDTO
+            Float. Take-off drag coefficient.
+
+        CLTO
+            Float. Take-off lift coefficient.
+
+        CLmaxTO
+            Float. Maximum lift coefficient in take-off conditions.
+
+        CLmaxclean
+            Float. Maximum lift coefficient in flight, in clean configuration.
+
+        mu_R
+            Float. Coefficient of rolling resistance on the wheels.
+
+        CDminclean
+            Float. Zero lift drag coefficient in clean configuration.
+
+        etaprop
+            Dictionary. Propeller efficiency in various phases of the mission.
+            It should contain the following keys: *take-off*, *climb*, *cruise*,
+            *turn*, *servceil*. Optional, each defaults to 1.0 if not specified.
+            Defaults to::
+
+                etap = {'take-off': 0.45, 'climb': 0.75, 'cruise': 0.85,
+                        'turn': 0.85, 'servceil': 0.65}
 
 
     """
