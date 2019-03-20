@@ -159,8 +159,7 @@ class AircraftConcept:
         etaprop
             Dictionary. Propeller efficiency in various phases of the mission.
             It should contain the following keys: *take-off*, *climb*, *cruise*,
-            *turn*, *servceil*. Optional, each defaults to 1.0 if not specified.
-            Defaults to::
+            *turn*, *servceil*. Optional, defaults to::
 
                 etap = {'take-off': 0.45, 'climb': 0.75, 'cruise': 0.85,
                         'turn': 0.85, 'servceil': 0.65}
