@@ -42,7 +42,14 @@ output/
 # MacOS
 .DS_Store
 .DS_Store?
+docs/.DS_Store
+
 
 # Notebooks
 .nbgrader.*
 docs/ADRpy/notebooks/.ipynb_checkpoints
+
+docs/Makefile
+docs/make.bat
+
+
