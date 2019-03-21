@@ -42,3 +42,7 @@ output/
 # MacOS
 .DS_Store
 .DS_Store?
+
+# Notebooks
+.nbgrader.*
+docs/ADRpy/notebooks/.ipynb_checkpoints
