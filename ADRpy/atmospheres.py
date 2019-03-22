@@ -675,7 +675,30 @@ class Atmosphere:
 
 
     def eas2tas(self, eas, altitude_m):
-        """Convert EAS to TAS at a given altitude"""
+        """Converts EAS to TAS at a given altitude.
+
+        The method first calculates the density ratio :math:`\\sigma`
+        (as the ratio of the ambient density at *altitude_m* and
+        at the ambient density at sea level); the true airspeed is then calculated
+        as:
+
+        .. math::
+
+            \\mathrm{TAS}=\\frac{\\mathrm{EAS}}{\\sqrt{\\sigma}}
+
+        **Parameters**
+
+        eas
+            Float or numpy array of floats. Equivalent airspeed (any unit,
+            returned TAS value will be in the same unit).abs
+
+        altitude_m
+            Float. Flight altitude in metres.
+
+        **Returns**
+
+        True airspeed in the same units as the EAS input.
+        """
         dratio = self.airdens_kgpm3(altitude_m) / self.airdens_kgpm3(0)
         return eas / math.sqrt(dratio)
 

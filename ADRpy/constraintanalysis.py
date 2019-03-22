@@ -64,6 +64,11 @@ class AircraftConcept:
 
         turnspeed_ktas
             Float. True airspeed (in knots) at which the turn requirement (above) has to be met.
+            Since the dynamics of turning flight is dominated by inertia, which depends
+            on ground speed, the turn speed is specified here as TAS (on the zero wind assumption).
+            If you'd rather specify this as IAS/CAS/EAS,
+            use `eas2tas <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere.eas2tas>`_
+            first to obtain the TAS value.
 
         climbalt_m
             Float. The altitude (in metres) where the climb rate requirement is specified.
@@ -159,12 +164,16 @@ class AircraftConcept:
         etaprop
             Dictionary. Propeller efficiency in various phases of the mission.
             It should contain the following keys: *take-off*, *climb*, *cruise*,
-            *turn*, *servceil*. Optional, defaults to::
+            *turn*, *servceil*. Optional, unspecified entries in the dictionary
+            default to the following values::
 
                 etap = {'take-off': 0.45, 'climb': 0.75, 'cruise': 0.85,
                         'turn': 0.85, 'servceil': 0.65}
 
-
+    designatm
+            `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`_
+            class object. Specifies the virtual atmosphere in which all the design
+            calculations within the *AircraftConcept* class will be performed.
     """
 
     def __init__(self, brief, design, performance, designatm):
