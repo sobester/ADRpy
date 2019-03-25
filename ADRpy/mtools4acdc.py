@@ -12,9 +12,6 @@ engineering calculations.
 
 """
 
-__author__ = "Andras Sobester"
-
-
 # pylint: disable-msg=W0102, R0913
 # W0102: erroneous warning from pylint, suggesting '[]' default
 # R0913: number of inputs (panelplot) - this feels more readable
@@ -23,7 +20,6 @@ __author__ = "Andras Sobester"
 from numbers import Number
 import numpy as np
 import matplotlib.pyplot as plt
-
 
 
 def panelplot_with_shared_y(vaxis, haxes, hlimits, vlabel,
