@@ -18,6 +18,7 @@ __author__ = "Andras Sobester"
 # pylint: disable-msg=W0102, R0913
 # W0102: erroneous warning from pylint, suggesting '[]' default
 # R0913: number of inputs (panelplot) - this feels more readable
+# pylint: disable=locally-disabled, too-many-locals
 
 from numbers import Number
 import numpy as np
@@ -26,16 +27,16 @@ import matplotlib.pyplot as plt
 
 
 def panelplot_with_shared_y(vaxis, haxes, hlimits, vlabel,
-                            hlabels, hlines, hlinecols, figpar=[10, 6, 100]):
+                            hlabels, hlines, hlinecols,
+                            figpar=[10, 6, 100],
+                            tex=False, fam='sans-serif'):
     """Multi-panel plots with a shared y-axis, e.g., for atmosphere profiles"""
 
     npanels = len(haxes)
     figobj, axes = plt.subplots(1, npanels, sharey=True)
 
-    # Use LaTeX to interpret figure labels, etc.
-    # (the cell may need to be run twice)
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='sans-serif')
+    plt.rc('text', usetex=tex)
+    plt.rc('font', family=fam)
 
     for i in range(npanels):
         axes[i].plot(haxes[i], vaxis)
