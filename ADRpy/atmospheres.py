@@ -597,7 +597,7 @@ class Atmosphere:
 
 
     def airdens_kgpm3(self, altitudes_m=0):
-        """Density in kg/m^3."""
+        """Ambient density in the current atmosphere in :math:`\\mathrm{kg/m}^3`."""
         altitudes_m = self._alttest(altitudes_m)
         if self.is_isa:
             densities_kgpm3 = self._isadens_kgpm3(altitudes_m)

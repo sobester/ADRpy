@@ -38,7 +38,8 @@ class AircraftConcept:
     its *performance*, as well as the *atmosphere* it operates in. These are
     the four arguments that define an object of the AircraftConcept class.
     The first three are dictionaries, as described below, the last is an object
-    of Atmosphere class.
+    of `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`_
+    class.
 
     **Parameters:**
 
