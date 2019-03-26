@@ -26,7 +26,10 @@ def panelplot_with_shared_y(vaxis, haxes, hlimits, vlabel,
                             hlabels, hlines, hlinecols,
                             figpar=[10, 6, 100],
                             tex=False, fam='sans-serif'):
-    """Multi-panel plots with a shared y-axis, e.g., for atmosphere profiles"""
+    """Multi-panel plots with a shared y-axis, e.g., for atmosphere profiles.
+    See the Jupyter notebook Introduction_to_Modelling_the_Atmosphere... in
+    the docs/ADRpy directory for usage examples.
+    """
 
     npanels = len(haxes)
     figobj, axes = plt.subplots(1, npanels, sharey=True)
@@ -52,7 +55,11 @@ def panelplot_with_shared_y(vaxis, haxes, hlimits, vlabel,
 
 
 def recastasnpfloatarray(scalarorvec):
-    """Recasts an arbitrary argument as a numpy float array"""
+    """Recasts an arbitrary argument as a numpy float array. Used
+    internally by some of the constraint calculations to increase
+    robustness, though the use of numpy arrays as inputs is the
+    recommended approach in most cases.
+    """
     if isinstance(scalarorvec, Number):
         scalarorvec = [scalarorvec]
     # Convert to Numpy array if list
@@ -61,7 +68,10 @@ def recastasnpfloatarray(scalarorvec):
 
 
 def polyblend(time, time_f, signal_i, signal_f):
-    """A smooth blend between two levels of a signal."""
+    """A smooth blend between two levels of a signal. Suitable for
+    approximating thrust variations associated with spool-up and
+    spool-down, etc.
+    """
     normtime = time / time_f
     scale = signal_f - signal_i
     if time < 0:
