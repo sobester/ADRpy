@@ -185,13 +185,13 @@ class Runway:
             self.le_latitude_deg = 0
             self.le_longitude_deg = 0
             self.le_elevation_ft = elevation_ft
-            self.le_heading_degt = str(heading)
+            self.le_heading_degt = heading
             self.le_displaced_threshold_ft = 0
             self.he_ident = str(int(reciprocalhdg(heading)/10))
             self.he_latitude_deg = 0
             self.he_longitude_deg = 0
             self.he_elevation_ft = elevation_ft
-            self.he_heading_degt = str(reciprocalhdg(heading))
+            self.he_heading_degt = reciprocalhdg(heading)
             self.he_displaced_threshold_ft = 0
 
         # Metric versions of the imperial fields listed above
