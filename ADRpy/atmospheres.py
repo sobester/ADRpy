@@ -219,12 +219,12 @@ class Runway:
         **Outputs:**
 
         runway_component
-            The runway direction component of the wind (sign convention: headwinds are
-            positive).
+            Scalar or numpy array. The runway direction component of the wind (sign
+            convention: headwinds are positive).
 
         crosswind_component
-            The cross component of the wind (sign convention: winds from the right are
-            positive).
+            Scalar or numpy array. The cross component of the wind (sign convention:
+            winds from the right are positive).
 
 
         **Example** ::
