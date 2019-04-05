@@ -204,7 +204,53 @@ class Runway:
 
 
     def windcomponents(self, wind_dirs_deg, wind_speeds):
-        """Resolves list of wind speeds and directions into runway/cross components"""
+        """Resolves list of wind speeds and directions into runway/cross components
+        on the current runway.
+
+        **Parameters:**
+
+        wind_dirs_deg
+            List of floats. Wind directions expressed in degrees true (e.g., directions
+            specified in a METAR).
+
+        wind_speeds
+            List of floats. Wind_speeds (in the units in which the output is desired).
+
+        **Outputs:**
+
+        runway_component
+            The runway direction component of the wind (sign convention: headwinds are
+            positive).
+
+        crosswind_component
+            The cross component of the wind (sign convention: winds from the right are
+            positive).
+
+
+        **Example** ::
+
+            # Given a METAR, calculate the wind components on Rwy 09 at Yeovilton
+
+            from ADRpy import atmospheres as at
+            from metar import Metar
+
+            runway = at.Runway('EGDY', 1)
+
+            egdywx = Metar.Metar('EGDY 211350Z 30017G25KT 9999 FEW028 BKN038 08/01 Q1031')
+
+            direction_deg = egdywx.wind_dir.value()
+            windspeed_kts = egdywx.wind_speed.value()
+
+            rwy_knots, cross_knots = runway.windcomponents(direction_deg, windspeed_kts)
+
+            print("Runway component:", rwy_knots)
+            print("Cross component:", cross_knots)
+
+        Output: ::
+
+            Runway component: -13.5946391943
+            Cross component: -10.2071438305
+        """
 
         speeds = mtools.recastasnpfloatarray(wind_speeds)
 
