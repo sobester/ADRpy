@@ -1125,7 +1125,7 @@ class AircraftConcept:
         **Note:**
 
         The calculation is performed assuming standard day ISA sea level
-        conditions (not in the consitions specified in the atmosphere used
+        conditions (not in the conditions specified in the atmosphere used
         when instantiating the :code:`AircraftConcept` object!) so the
         speed returned is an indicated (IAS) / calibrated (CAS) value.
 
