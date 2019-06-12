@@ -477,7 +477,7 @@ class AircraftConcept:
         resistance on the wheels.
 
         This is a function exposed to the user for clarity and added flexibility.
-        If you need to calculate the trust to weight ratio required for take-off, use
+        If you need to calculate the thrust to weight ratio required for take-off, use
         ``twrequired_to``. This corrects the output of this function to account for the
         environmental conditions (including their impact on engine performance) and includes
         a mapping to static thrust. ``thrusttoweight_takeoff`` should only be used if you
@@ -1125,7 +1125,7 @@ class AircraftConcept:
         **Note:**
 
         The calculation is performed assuming standard day ISA sea level
-        conditions (not in the consitions specified in the atmosphere used
+        conditions (not in the conditions specified in the atmosphere used
         when instantiating the :code:`AircraftConcept` object!) so the
         speed returned is an indicated (IAS) / calibrated (CAS) value.
 
