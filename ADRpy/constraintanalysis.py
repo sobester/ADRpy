@@ -135,6 +135,12 @@ class AircraftConcept:
             piston engines, -2 for turboprops and -3 if no power/thrust corrections are needed
             (e.g., for electric motors).
 
+        tr
+            Float. Throttle ratio for gas turbine engines. *tr = 1* means that the Turbine Entry
+            Temperature will reach its maximum allowable value in sea level standard day
+            conditions, so higher ambient temperatures will result in power loss. Higher *tr*
+            values mean thrust decay starting at higher altitudes.
+
         weightfractions
             Dictionary, specifying at what fraction of the maximum take-off weight do various
             constraints have to be met. It should contain the following keys: *take-off*,
