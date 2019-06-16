@@ -64,11 +64,11 @@ def idealgaspress_pa(rho_kgpm3, temp_k):
     return R_JPKGPK * rho_kgpm3 * temp_k
 
 def geom2geop45m(altitude_m):
-    """Convert geometric height to geopotential (m) assuming 45deg lat"""
+    """Converts geometric height to geopotential (m) assuming 45deg lat"""
     return R_EARTH_M * altitude_m / (R_EARTH_M + altitude_m)
 
 def geop2geom45m(altitude_m):
-    """Convert geometric height to geopotential (m) assuming 45deg lat"""
+    """Converts geopotential height to geometric (m) assuming 45deg lat"""
     return R_EARTH_M * altitude_m / (R_EARTH_M - altitude_m)
 
 class Runway:
