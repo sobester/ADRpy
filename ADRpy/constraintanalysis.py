@@ -1067,6 +1067,14 @@ class AircraftConcept:
         trnspeed_mpstas = co.kts2mps(self.turnspeed_ktas)
         if feasibleonly:
             pw_trn_wpn = tw2pw(twreq['turnfeasible'], trnspeed_mpstas, self.etaprop_turn)
+            if all(np.isnan(pw_trn_wpn)):
+                nanmsg = "All turns are infeasible for the given load factor, speed, and wing loadings."
+                warnings.warn(nanmsg, RuntimeWarning)
+            elif any(np.isnan(pw_trn_wpn)):
+                # Find maximum feasible wing loading
+                maxfeasiblewl = max([wl for wl, ptw in zip(wingloadinglist_pa, pw_trn_wpn) if not np.isnan(ptw)])
+                nanmsg = "Turns only feasible up to wingloading_pa = " + str(maxfeasiblewl)
+                warnings.warn(nanmsg, RuntimeWarning)
         else:
             pw_trn_wpn = tw2pw(twreq['turn'], trnspeed_mpstas, self.etaprop_turn)
         pw_trn_hpkg = co.wn2hpkg(pw_trn_wpn)
