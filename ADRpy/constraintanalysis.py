@@ -492,7 +492,7 @@ class AircraftConcept:
 
         If a full constraint analysis is required, ``twrequired`` should be used.
         A similar 'full constraint set' function is available for calculating the
-        power demanded of the engine of a propeller-driven engine or electric motor
+        power demanded of the engine or electric motor of a propeller-driven aircraft
         (to satisfy the constraint set) - this is called ``powerrequired``.
         """
 
