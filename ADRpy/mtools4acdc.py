@@ -136,7 +136,7 @@ def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
     """Generates a multi-panel time series plot, suitable, for example,
     for the analysis of flight test data.
 
-        **Example - visualising a take-off:** ::
+    **Example - visualising a take-off:** ::
 
         import ADRpy
         from ADRpy import mtools4acdc as adrpytools
