@@ -135,6 +135,34 @@ def panelplot_with_shared_x(haxis, vaxes, hlabel,
 def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
     """Generates a multi-panel time series plot, suitable, for example,
     for the analysis of flight test data.
+
+        **Example - visualising a take-off:** ::
+
+        import ADRpy
+        from ADRpy import mtools4acdc as adrpytools
+        import os
+
+        timeline = ['Time', 'Time (s)', 20, 60]
+
+        panels = [
+            ['Angles (deg)', 'True AoA', 'Pitch angle'],
+            ['Altitude (ft)', 'IRS Alt', 'GPS Alt', 'Press alt'],
+            ['Body rotation rates (deg/s)', 'Roll rate', 'Pitch rate', 'Yaw rate'],
+            ['Speed (knots)', 'IAS', 'TAS', 'GPS GS']
+        ]
+        
+        timeseriescsvfile = os.path.join(ADRpy.__path__[0], "data", "sample_takeoff_data.csv")
+
+        markers = [[40, 43.8], ['black','black']]
+
+        figpars = [[6, 10, 300], [8, 8, 8]]
+
+        figobj, axes, flightdata = adrpytools.fdrplot(
+            timeseriescsvfile, timeline, panels, markers, figpars)
+
+    Outputs: ::
+
+        A five-panel time series plot of 11 channels of data.
     """
 
     # Unpacking the timeline - contains the header of the time 
