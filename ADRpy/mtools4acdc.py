@@ -89,8 +89,8 @@ def panelplot_with_shared_x(haxis, vaxes, hlabel,
                             tex=False, fam='sans-serif',
                             fontsizes=[8, 8, 8]):
     """Multi-panel plots with a shared x-axis, e.g., for time series.
-    Might be useful for plotting flight data (e.g., as seen in accident
-    reports).
+    For plotting flight data (e.g., as seen in accident reports), use
+    `fdrplot`.  
     """
 
     npanels = len(vaxes)
@@ -136,6 +136,52 @@ def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
     """Generates a multi-panel time series plot, suitable, for example,
     for the analysis of flight test data.
 
+    **Parameters:**
+
+        timeseriescsvfile
+            CSV file containing the data to be visualised. It must have a
+            header containing the names of the channels, with each corresponding
+            signal in the column underneath its name. There should be a time
+            column (elapsed time in seconds) and the data should be ordered
+            according to this column.
+
+        timeline
+            List with four entries: the header of the time column in the CSV
+            file (string), the label of the time (horizontal) axis (string),
+            the time at which the plot should start (float) and the time at
+            which the plot should end (float).
+
+        panels
+            List of lists of variables to be plotted. Each list represents
+            one panel on the plot, and is of the form `[panel y-label, channel1,
+            channel2, ...]` (all strings), `channel1`, `channel2`, etc. should
+            be column headings from the CSV file. They will also become
+            the legend labels. There should be at least two lines (two
+            panels). See example below.
+
+        markers
+            A list of two lists, specifying the location and color of
+            vertical marker lines (e.g., to mark some landmark point
+            in the flight, such as the beginning of rotation and 
+            lift-off in the example below).
+
+        figpars
+            A list of two lists of the form `[[fig width, fig height, dpi],
+            [axes label font size, tick font size, legend font size]]`.
+            See example below.
+
+    **Outputs:**
+
+        f
+            figure object
+
+        axes
+            subplot axes handles
+
+        flightdata_tf
+            `pandas` dataframe containing the plotted data (the original CSV
+            file data trimmed as specified by the time limits). 
+
     **Example - visualising a take-off:** ::
 
         import ADRpy
@@ -160,9 +206,9 @@ def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
         figobj, axes, flightdata = adrpytools.fdrplot(
             timeseriescsvfile, timeline, panels, markers, figpars)
 
-    Outputs: ::
+    Output: ::
 
-        A five-panel time series plot of 11 channels of data.
+        A four-panel time series plot of 11 channels of data.
     """
 
     # Unpacking the timeline - contains the header of the time 
