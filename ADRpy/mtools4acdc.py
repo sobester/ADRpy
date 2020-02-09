@@ -166,8 +166,10 @@ def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
             lift-off in the example below).
 
         figpars
-            A list of two lists of the form `[[fig width, fig height, dpi],
-            [axes label font size, tick font size, legend font size]]`.
+            A list of two lists and an integer of the form `[[fig width,
+            fig height, dpi], [axes label font size, tick font size, 
+            legend font size], colourscheme]`. Set `colourscheme` to
+            1 for a clean, minimalistic look (recommended).
             See example below.
 
     **Outputs:**
@@ -199,9 +201,9 @@ def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
         
         timeseriescsvfile = os.path.join(ADRpy.__path__[0], "data", "sample_takeoff_data.csv")
 
-        markers = [[40, 43.8], ['black','black']]
+        markers = [[40, 43.8], ['grey','grey']]
 
-        figpars = [[6, 10, 300], [8, 8, 8]]
+        figpars = [[6, 10, 300], [8, 8, 8], 1]
 
         figobj, axes, flightdata = adrpytools.fdrplot(
             timeseriescsvfile, timeline, panels, markers, figpars)
@@ -246,7 +248,20 @@ def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
         timeaxis, data_per_panel, tlabel, panels,
         vlines, vlinecols,
         figpar=figpars[0], fontsizes=figpars[1])
-    
+
+    if len(figpars)>2 and figpars[2]==1:
+        for ax in axes:
+            ax.patch.set_facecolor('#deedfa')
+            ax.spines['bottom'].set_color('white')
+            ax.spines['top'].set_color('white')
+            ax.spines['right'].set_color('white')
+            ax.spines['left'].set_color('white')
+            ax.grid(color='white')
+            ax.tick_params(axis='x', colors='white')
+            ax.tick_params(axis='x', labelcolor='black')
+            ax.tick_params(axis='y', colors='white')
+            ax.tick_params(axis='y', labelcolor='black')
+
     plt.tight_layout(pad=0, h_pad=0, w_pad=None, rect=None)
     plt.show()
     
