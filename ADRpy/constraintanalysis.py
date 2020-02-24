@@ -1067,7 +1067,7 @@ class AircraftConcept:
         trnspeed_mpstas = co.kts2mps(self.turnspeed_ktas)
         if feasibleonly:
             pw_trn_wpn = tw2pw(twreq['turnfeasible'], trnspeed_mpstas, self.etaprop_turn)
-            if all(np.isnan(pw_trn_wpn)):
+            if np.all(np.isnan(pw_trn_wpn)):
                 nanmsg = "All turns are infeasible for the given load factor, speed, and wing loadings."
                 warnings.warn(nanmsg, RuntimeWarning)
         else:

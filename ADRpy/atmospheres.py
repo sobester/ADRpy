@@ -736,7 +736,7 @@ class Atmosphere:
 
         eas
             Float or numpy array of floats. Equivalent airspeed (any unit,
-            returned TAS value will be in the same unit).abs
+            returned TAS value will be in the same unit).
 
         altitude_m
             Float. Flight altitude in metres.
