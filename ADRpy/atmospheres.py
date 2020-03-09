@@ -35,6 +35,7 @@ __author__ = "Andras Sobester"
 
 import math
 from numbers import Number
+import warnings
 import csv
 import os
 import numpy as np
@@ -654,6 +655,12 @@ class Atmosphere:
 
     def mach(self, airspeed_mps, altitude_m=0):
         """Mach number at a given speed (m/s) and altitude (m)"""
+
+        # Airspeed may be negative, e.g., when simulating a tailwind, but Mach must be >0
+        if airspeed_mps < 0:
+            negmsg = "Airspeed < 0. If intentional, ignore this. Positive Mach no. returned."
+            warnings.warn(negmsg, RuntimeWarning)
+            airspeed_mps = abs(airspeed_mps)
 
         # Check altitude range
         altitude_m = self._alttest(altitude_m)
