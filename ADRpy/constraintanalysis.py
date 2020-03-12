@@ -276,6 +276,16 @@ class AircraftConcept:
             # Flag if not specified, error thrown by stall constraint
             self.vstallclean_kcas = -1
 
+        if 'to_headwind_kts' in brief:
+            self.to_headwind_kts = brief['to_headwind_kts']
+        else:
+            self.to_headwind_kts = 0
+
+        if 'to_slope_perc' in brief:
+            self.to_slope_perc = brief['to_slope_perc']
+        else:
+            self.to_slope_perc = 0
+
 
         # Unpick the design dictionary next:
 
@@ -339,6 +349,31 @@ class AircraftConcept:
             self.sec_weight_fraction = 1.0
             self.turn_weight_fraction = 1.0
             self.climb_weight_fraction = 1.0
+
+        if 'totalstaticthrust_n' in design:
+            self.totalstaticthrust_n = design['totalstaticthrust_n']
+        else:
+            self.totalstaticthrust_n = -1
+
+        if 'wingarea_m2' in design:
+            self.wingarea_m2 = design['wingarea_m2']
+        else:
+            self.wingarea_m2 = -1
+
+        if 'weight_n' in design:
+            self.weight_n = design['weight_n']
+        else:
+            self.weight_n = -1
+        
+        if 'spooluptime_s' in design:
+            self.spooluptime_s = design['spooluptime_s']
+        else:
+            self.spooluptime_s = 5
+
+        if 'runwayalpha_deg' in design:
+            self.runwayalpha_deg = design['runwayalpha_deg']
+        else:
+            self.runwayalpha_deg = 0
 
         # Next, unpick the performance dictionary
 
