@@ -375,6 +375,11 @@ class AircraftConcept:
         else:
             self.runwayalpha_deg = 0
 
+        if 'runwayalpha_max_deg' in design:
+            self.runwayalpha_max_deg = design['runwayalpha_max_deg']
+        else:
+            self.runwayalpha_max_deg = -1
+
         # Next, unpick the performance dictionary
 
         if 'CDTO' in performance:
@@ -412,6 +417,16 @@ class AircraftConcept:
         else:
             self.clmaxclean = -1
 
+        if 'CD0TO' in performance:
+            self.CD0TO = performance['CD0TO']
+        else:
+            self.CD0TO = -1
+
+        if 'CL0TO' in performance:
+            self.CL0TO = performance['CL0TO']
+        else:
+            self.CL0TO = -1
+        
         self.etadefaultflag = 0
         if 'etaprop' in performance:
             if 'take-off' in performance['etaprop']:
