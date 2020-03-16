@@ -1198,8 +1198,7 @@ class AircraftConcept:
 
             wingloading_pa = 3500
 
-            print("VS1(take-off):",
-                concept.vstall_kias(wingloading_pa, 'take-off'))
+            print("VS_to:", concept.vstall_kias(wingloading_pa, 'take-off'))
 
         """
 
