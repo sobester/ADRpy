@@ -1302,7 +1302,11 @@ class AircraftConcept:
             h/b:  0.11180339887498948  Phi:  0.761904761904762
 
         """
-        return ((16 * self.wingheightratio) ** 2) / (1 + (16 * self.wingheightratio) ** 2)
+        return _wig(self.wingheightratio)
+
+
+def _wig(h_over_b):
+    return ((16 * h_over_b) ** 2) / (1 + (16 * h_over_b) ** 2)
 
 
 def tw2pw(thrusttoweight, speed, etap):
