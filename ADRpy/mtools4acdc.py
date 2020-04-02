@@ -17,6 +17,7 @@ engineering calculations and data analysis.
 # R0913: number of inputs (panelplot) - this feels more readable
 # pylint: disable=locally-disabled, too-many-locals
 
+import math
 from numbers import Number
 import numpy as np
 import matplotlib.pyplot as plt
@@ -266,3 +267,12 @@ def fdrplot(timeseriescsvfile, timeline, panels, markers, figpars):
     plt.show()
     
     return f, axes, flightdata_tf
+
+
+def _coordtrans(x, z, theta_rad):
+    xt = []
+    zt = []
+    for i, _  in enumerate(x):
+        xt.append(x[i] * math.cos(theta_rad)  + z[i] * math.sin(theta_rad))
+        zt.append(-x[i] * math.sin(theta_rad) + z[i] * math.cos(theta_rad))
+    return xt, zt

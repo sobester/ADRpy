@@ -283,6 +283,8 @@ class AircraftConcept:
 
         if 'to_slope_perc' in brief:
             self.to_slope_perc = brief['to_slope_perc']
+            self.to_slope_rad = math.atan(self.to_slope_perc / 100)
+            self.to_slope_deg = math.degrees(self.to_slope_rad)
         else:
             self.to_slope_perc = 0
 
