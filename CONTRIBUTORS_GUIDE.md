@@ -1,7 +1,7 @@
 Aircraft Design Recipes in Python -- a Guide for Contributors
 =============================================================
 
-Thank you for considering to contribute to ADRpy! Please follow these
+Thank you for considering to contribute to ADRpy! Please follow these...
 
 General principles
 ------------------
@@ -15,22 +15,27 @@ Names of internal function/method names not meant to be called directly by the u
 should start with an underscore, e.g., `_somefunction(x)`.
 
 3. Each function/method exposed to the user must have a docstring containing three
-main sections: Parameters, Returns and a simple Example. Use an existing function
-(e.g., `twrequired_trn(wingloading_pa)` in the `constraintanalysis` module as a 
-template. Include equations if appropriate (see, as an example, `thrusttoweight_takeoff`).
-Always check that your docstring has rendered correctly on `readthedocs`.
+main sections: Parameters, Returns and a simple Example (plus an optional Notes section
+if it helps with clarity and usability, e.g., to place the item in a broader context).
+Use an existing function (e.g., `twrequired_trn(wingloading_pa)` in the `constraintanalysis`
+module) as a template. Include equations if appropriate (see, as an example, 
+`thrusttoweight_takeoff`). Always check afterwards that your docstring has rendered 
+correctly on `readthedocs`.
 
-4. Every new function/method needs a test, the more extensive the better. If the test
-is based on public domain data, please include a reference to the data, going back
-as close to its original source as you can get within the public domain. If your new
-code/test has new dependencies, remember to add these to the `requirements.txt` file
-at the top level of this directory structure.
+4. Beyond the simple example in each docstring, a more extensive case study, with
+detailed, step-by-step explanations, should be included in a Jupyter notebook and
+placed in ADRpy/docs/ADRpy/notebooks.
 
-5. If your code requires a unit conversion, always use the `unitconversions.py` module
+5. Every new function/method needs a test, the more extensive the better. The test
+should be based on public domain data. Please include a reference to the data, going back
+as close to its original source as you can get. If your new code/test has new dependencies,
+remember to add these to the `requirements.txt` file at the top level of this directory structure.
+
+6. If your code requires a unit conversion, always use the `unitconversions.py` module
 and never code conversions locally into the method. If `unitconversions.py` does not
 have the conversion you're after, please add it (along with an appropriate test).
 
-6. DRY - Don't Repeat Yourself (a generalisation of 5.) - never write the same code
+7. DRY - Don't Repeat Yourself (a generalisation of 6.) - never write the same code
 in multiple different places. "Every piece of knowledge must have a single, unambiguous,
 authoritative representation within a system." (Hunt and Thomas)
 
