@@ -917,7 +917,9 @@ def turbofanthrustfactor(temp_c, pressure_pa, mach, \
 throttleratio=1, ptype="highbpr"):
     """Multiply SL static thrust by this to get thrust at specified conditions"""
 
-    # Model based on Mattingly et al.
+    # Model based on Mattingly, J. D., "Elements of Gas Turbine Propulsion", 
+    # McGraw-Hill, 1996 and Mattingly, J. D. et al., "Aircraft Engine Design",
+    # AIAA, 2000.
 
     theta0 = tempratio(temp_c, mach)
     delta0 = pressratio(pressure_pa, mach)
@@ -941,7 +943,9 @@ throttleratio=1, ptype="highbpr"):
 def turbopropthrustfactor(temp_c, pressure_pa, mach, throttleratio=1):
     """Multiply SL static thrust by this to get thrust at specified conditions"""
 
-    # Model based on Mattingly et al.
+    # Model based on Mattingly, J. D., "Elements of Gas Turbine Propulsion", 
+    # McGraw-Hill, 1996 and Mattingly, J. D. et al., "Aircraft Engine Design",
+    # AIAA, 2000.
 
     theta0 = tempratio(temp_c, mach)
     delta0 = pressratio(pressure_pa, mach)
@@ -959,7 +963,9 @@ def turbojetthrustfactor(temp_c, pressure_pa, mach, \
 throttleratio=1, afterburner=False):
     """Multiply SL static thrust by this to get thrust at specified conditions"""
 
-    # Model based on Mattingly et al.
+    # Model based on Mattingly, J. D., "Elements of Gas Turbine Propulsion", 
+    # McGraw-Hill, 1996 and Mattingly, J. D. et al., "Aircraft Engine Design",
+    # AIAA, 2000.
 
     theta0 = tempratio(temp_c, mach)
     delta0 = pressratio(pressure_pa, mach)
