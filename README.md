@@ -14,6 +14,8 @@ For a detailed description of the library, please consult the
 [Documentation](https://adrpy.readthedocs.io/en/latest/). To get started,
 follow the instructions below.
 
+For video tutorials and explainers (a.k.a. *ADRpy Shorts*) scroll to the bottom of this page.
+
 author: Andras Sobester
 
 Installation / Usage
@@ -146,3 +148,13 @@ with these 'live' in Binder, or you can click File / Download as / ... to create
 copy in any number of formats. [*Note: if you don't want to wait for Binder to generate the library,
 you can still access the 'static' versions of the notebooks through nbviewer - click on the required
 notebook in the lower half of the holding page.* ]
+
+
+ADRpy Shorts - video tutorials and explainers
+---------------------------------------------------------
+
+**1. An Aircraft Engineer's Brief Introduction to Modelling the Atmosphere**
+
+[![1. An Aircraft Engineer's Brief Introduction to Modelling the Atmosphere](http://img.youtube.com/vi/II9vuVCgV-w/0.jpg)](http://www.youtube.com/watch?v=II9vuVCgV-w)
+
+More ADRpy Shorts coming soon!
