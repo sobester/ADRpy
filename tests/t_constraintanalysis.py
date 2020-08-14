@@ -6,7 +6,6 @@ import numpy as np
 
 from ADRpy import constraintanalysis as ca
 
-
 class TestConstraintAnalysisModule(unittest.TestCase):
 
     def setUp(self):
@@ -19,7 +18,8 @@ class TestConstraintAnalysisModule(unittest.TestCase):
                        'cruisealt_m': 15000, 'cruisespeed_ktas': 445,  # Cruise Constraint
                        'servceil_m': 16000, 'secclimbspd_kias': 250,  # Service Ceiling Constraint
                        'stloadfactor': 2, 'turnalt_m': 5000, 'turnspeed_ktas': 300}  # Turn Constraint
-        l45xr_def = {'aspectratio': 7.3, 'sweep_le_deg': 10, 'sweep_25_deg': 8, 'bpr': 3.9, 'tr': 1.05,
+        l45xr_def = {'aspectratio': 7.3, 'sweep_le_deg': 10, 'sweep_mt_deg': 8, 'bpr': 3.9, 'tr': 1.05,
+                     'weight_n': 95000,
                      'weightfractions': {'turn': 1.0, 'climb': 1.0, 'cruise': 0.85, 'servceil': 0.85}}
         l45xr_perf = {'CDTO': 0.04, 'CLTO': 0.9, 'CLmaxTO': 1.6, 'CLmaxclean': 1.42, 'mu_R': 0.02,
                       'CDminclean': 0.02}
@@ -32,7 +32,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
                       'cruisealt_m': 3048, 'cruisespeed_ktas': 182, 'cruisethrustfact': 1.0,  # Cruise Constraint
                       'servceil_m': 6580, 'secclimbspd_kias': 92,  # Service Ceiling Constraint
                       'vstallclean_kcas': 69}  # Minimum Stall speed
-        cr22_def = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_25_deg': 0, 'bpr': -1, 'wingarea_m2': 13.46,
+        cr22_def = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1, 'wingarea_m2': 13.46,
                     'weightfractions': {'turn': 1.0, 'climb': 1.0, 'cruise': 0.853, 'servceil': 1.0}}
         cr22_perf = {'CDTO': 0.0414, 'CLTO': 0.59, 'CLmaxTO': 1.69, 'CLmaxclean': 1.45, 'mu_R': 0.02,
                      'CDminclean': 0.0254, 'etaprop': {'take-off': 0.65, 'climb': 0.8, 'cruise': 0.85,
@@ -48,12 +48,12 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         self.ac_lib.append([fa18c_brief, fa18c_def, fa18c_perf])
 
         # AIRCRAFT 3: Business Jet (Aircraft Concept)
-        conceptjet_brief = {'rwyelevation_m': [-100, 1000], 'groundrun_m': [1200, 1400],
+        conceptjet_brief = {'rwyelevation_m': [-100, 1000], 'groundrun_m': [1000, 1400],
                             'climbalt_m': [-100, 1000], 'climbspeed_kias': [240, 250], 'climbrate_fpm': [1000, 1200],
                             'cruisealt_m': [14000, 15000], 'cruisespeed_ktas': [440, 480],
                             'servceil_m': [16000, 17000], 'secclimbspd_kias': [240, 260],
                             'stloadfactor': [2, 2.5], 'turnalt_m': [4000, 5000], 'turnspeed_ktas': [280, 330]}
-        conceptjet_def = {'aspectratio': [6, 8], 'sweep_le_deg': [9, 12], 'sweep_25_deg': [6, 8], 'bpr': [4.9, 5.2],
+        conceptjet_def = {'aspectratio': [6, 8], 'sweep_le_deg': [9, 12], 'sweep_25_deg': [6, 8], 'bpr': [3.7, 4.2],
                           'tr': [1.05, 1.5], 'weight_n': 95000,
                           'weightfractions': {'turn': 1.0, 'climb': 1.0, 'cruise': 0.85, 'servceil': 0.85}}
         conceptjet_perf = {'CDTO': [0.04, 0.045], 'CLTO': [0.85, 0.9], 'CLmaxTO': [1.6, 1.8],
@@ -74,6 +74,23 @@ class TestConstraintAnalysisModule(unittest.TestCase):
                            'CDminclean': [0.0254, 0.026], 'etaprop': {'take-off': 0.65, 'climb': 0.8, 'cruise': 0.85,
                                                                       'turn': 0.85, 'servceil': 0.8}}
         self.ac_lib.append([conceptsep_brief, conceptsep_def, conceptsep_perf])
+
+        # AIRCRAFT 5: Small Unmanned Fixed-Wing (Keane et al.)
+        keane_uav_brief = {'rwyelevation_m': 0, 'groundrun_m': 60,  # <- Take-off requirements
+                       'stloadfactor': 1.41, 'turnalt_m': 0, 'turnspeed_ktas': 40,  # <- Turn requirements
+                       'climbalt_m': 0, 'climbspeed_kias': 46.4, 'climbrate_fpm': 591,  # <- Climb requirements
+                       'cruisealt_m': 122, 'cruisespeed_ktas': 58.3, 'cruisethrustfact': 1.0,  # <- Cruise requirements
+                       'servceil_m': 152, 'secclimbspd_kias': 40,  # <- Service ceiling requirements
+                       'vstallclean_kcas': 26.4}  # <- Required clean stall speed
+
+        keane_uav_def = {'aspectratio': 9.0, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1,
+                     'weightfractions': {'turn': 1.0, 'climb': 1.0, 'cruise': 1.0, 'servceil': 1.0},
+                     'weight_n': 15 * 9.81}
+
+        keane_uav_perf = {'CDTO': 0.0898, 'CLTO': 0.97, 'CLmaxTO': 1.7, 'CLmaxclean': 1.0, 'mu_R': 0.17,
+                      'CDminclean': 0.0418,
+                      'etaprop': {'take-off': 0.6, 'climb': 0.6, 'cruise': 0.6, 'turn': 0.6, 'servceil': 0.6}}
+        self.ac_lib.append([keane_uav_brief, keane_uav_def, keane_uav_perf])
 
         return
 
@@ -130,7 +147,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         macharray = np.arange(0.1, 4, 0.1)
         liftslopelist = []
         for mach_inf in macharray:
-            liftslopelist.append(concept.estimate_liftslope(mach_inf=mach_inf))
+            liftslopelist.append(concept.liftslope(mach_inf=mach_inf))
 
         # Assert that the lift curve slope is never below or equal to zero
         self.assertGreater(min(liftslopelist), 0)
@@ -154,8 +171,8 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         return
 
-    def test_induceddragfact(self):
-        """Tests the induced drag factor K calculation"""
+    def test_kfactorlesm(self):
+        """Tests the induced drag factor K calculation using LESM"""
 
         print("Induced drag factor test.")
 
@@ -167,7 +184,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         kpredlist = []
 
         for mach_inf in macharray:
-            kpredlist.append(concept.induceddragfact(mach_inf=mach_inf, cl_req=1.2))
+            kpredlist.append(concept.induceddragfact_lesm(mach_inf=mach_inf, cl_real=0.455))
 
         # Assert that the induced drag is never below or equal to zero
         self.assertGreater(min(kpredlist), 0)
@@ -230,28 +247,51 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         print("T/W Sensitivity (One-at-a-time) test.")
 
+        # Use Aircraft 0: Business jet
+        acindex = 0
+        concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
+        wingloadinglist_pa = np.arange(2000, 5000, 10)
+
+        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='tw', x_var='ws',
+                                                 show=False)
+
         # Use Aircraft 3: Custom Business Jet
         acindex = 3
         concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
-        wingloadinglist_pa = np.arange(2000, 8000, 50)
+        wingloadinglist_pa = np.arange(2000, 8000, 500)
 
         customlabelling = {'aspectratio': 'AR',
                            'sweep_le_deg': '$\\Lambda_{LE}$',
                            'sweep_mt_deg': '$\\Lambda_{MT}$'}
 
-        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='tw', x_var='ws',
-                                                 customlabels=customlabelling)
+        returned = concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='tw', x_var='ws',
+                                                            customlabels=customlabelling, show=False, maskbool=False,
+                                                            returnbool=True)
+        testdict = {'valid_x': [np.array([2000., 2500., 3000., 3500., 4000., 4500., 5000., 5500.]), 'ws'],
+                    'valid_y': [np.array([1.33442955, 1.18735618, 1.11034814, 1.07337745, 1.0614301,
+                                          1.06616497, 1.0825774, 1.1074826]), 'tw']}
+        self.assertEqual(returned['valid_x'][0].all(), testdict['valid_x'][0].all())
+        self.assertEqual(returned['valid_y'][0].all(), testdict['valid_y'][0].all())
 
         # Use Aircraft 4: Custom SEPPA
         acindex = 4
         concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
-        wingloadinglist_pa = np.arange(700, 2500, 5)
+        wingloadinglist_pa = np.arange(700, 2500, 150)
 
-        customlabelling = {'aspectratio': 'AR',
-                           'sweep_le_deg': '$\\Lambda_{LE}$',
-                           'sweep_mt_deg': '$\\Lambda_{MT}$'}
-        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='p', x_var='s',
-                                                 customlabels=customlabelling)
+        returned = concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='hp', x_var='s',
+                                                            show=False, returnbool=True)
+        testdict = {'valid_x': [np.array([21.42857143, 17.64705882, 15.]), 's'],
+                    'valid_y': [np.array([0.21290116, 0.2069362, 0.23549822]), 'hp']}
+        self.assertEqual(returned['valid_x'][0].all(), testdict['valid_x'][0].all())
+        self.assertEqual(returned['valid_y'][0].all(), testdict['valid_y'][0].all())
+
+        # Use Aircraft 5: Keane's Small UAV
+        acindex = 5
+        concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
+        wingloadinglist_pa = np.arange(50, 2500, 100)
+
+        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_lim=5, y_var='hp', x_var='s',
+                                                 show=False)
 
         return
 
