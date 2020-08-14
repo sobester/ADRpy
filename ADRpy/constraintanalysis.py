@@ -12,7 +12,7 @@ wing aircraft.
 
 """
 
-__author__ = "Andras Sobester, Yaseen Reza"
+__author__ = "Andras Sobester"
 
 # pylint: disable=locally-disabled, too-many-instance-attributes
 # pylint: disable=locally-disabled, too-many-branches
@@ -27,6 +27,7 @@ from copy import deepcopy
 import numpy as np
 from matplotlib import pyplot
 from scipy import constants
+from scipy.interpolate import interp1d
 
 from ADRpy import atmospheres as at
 from ADRpy import unitconversions as co
@@ -41,7 +42,7 @@ class AircraftConcept:
     its *performance*, as well as the *atmosphere* it operates in. These are
     the four arguments that define an object of the AircraftConcept class.
     The first three are dictionaries, as described below, the last is an object
-    of `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`_
+    of `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`
     class.
 
     **Parameters:**
@@ -131,15 +132,19 @@ class AircraftConcept:
         design.
 
         aspectratio
-            Float. Wing aspect ratio.
+            Float. Wing aspect ratio. Optional, defaults to 8.
 
         sweep_le_deg
             Float. Main wing leading edge sweep angle (in degrees). Optional, defaults to
             zero (no sweep).
 
+        sweep_mt_deg
+            Float. Main wing sweep angle measured at the maximum thickness point. Optional,
+            defaults to value of 'sweep_le_deg'.
+
         sweep_25_deg
             Float. Main wing sweep angle measured at the quarter chord point. Optional,
-            defaults to zero.
+            defaults to ~29% sweep_le_deg, ~71% sweep_mt_deg.
 
         roottaperratio
             Float. Standard definition of wing tip chord to root chord ratio, zero for sharp,
@@ -160,10 +165,10 @@ class AircraftConcept:
             (e.g., for electric motors).
 
         spooluptime_s
-            Float. I'M NOT DEFINED YET! Optional, defaults to 5.
+            Float. Time in seconds for the engine to reach take-off thrust. Optional, defaults to 5.
 
         totalstaticthrust_n
-            Float. I'M NOT DEFINED YET!
+            Float. Maximum thrust achievable at zero airspeed.
 
         tr
             Float. Throttle ratio for gas turbine engines. *tr = 1* means that the Turbine Entry
@@ -178,18 +183,17 @@ class AircraftConcept:
             specified.
 
         runwayalpha_deg
-            Float. I'M NOT DEFINED YET! Optional, defaults to 0.
+            Float. Angle of attack the main wing encounters during take-off roll. Optional,
+            defaults to 0.
 
         runwayalpha_max_deg
-            Float. I'M NOT DEFINED YET!
-
-
+            Float. Maximum permitted angle of attack before lift-off.
 
     performance
         Dictionary. Definition of key, high level design performance estimates.
 
         CD0TO
-            Float. I'M NOT DEFINED YET!
+            Float. Zero-lift drag coefficient in the take-off configuration
 
         CDTO
             Float. Take-off drag coefficient. Optional, defaults to 0.09.
@@ -201,7 +205,7 @@ class AircraftConcept:
             Float. Coefficient of rolling resistance on the wheels. Optional, defaults to 0.03.
 
         CL0TO
-            Float. I'M NOT DEFINED YET!
+            Float. Zero-alpha lift coefficient.
 
         CLTO
             Float. Take-off lift coefficient. Optional, defaults to 0.95.
@@ -213,8 +217,9 @@ class AircraftConcept:
             Float. Maximum lift coefficient in flight, in clean configuration.
 
         CLslope
-            Float. Lift-curve slope gradient, or Cl/alpha of a design wing in incompressible flow.
-            Optional, defaults to the flat plate theory maximum of 2*Pi.
+            Float. Lift-curve slope gradient, or Cl/alpha of a design aerofoil (or wing that may
+            be considered 2D) in incompressible flow. Optional, defaults to the flat plate theory
+            maximum of 2*Pi.
 
         etaprop
             Dictionary. Propeller efficiency in various phases of the mission.
@@ -222,22 +227,21 @@ class AircraftConcept:
             *turn*, *servceil*. Optional, unspecified entries in the dictionary
             default to the following values:
 
-                etap = {'take-off': 0.45, 'climb': 0.75, 'cruise': 0.85,
-                        'turn': 0.85, 'servceil': 0.65}
+            :code: `etap = {'take-off': 0.45, 'climb': 0.75, 'cruise': 0.85, 'turn': 0.85, 'servceil': 0.65}`
 
     designatm
             `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`_
-            class object. Specifies the virtual atmosphere in which all the design
-            calculations within the *AircraftConcept* class will be performed. Optional,
-            defaults to the International Standard Atmosphere.
+            class object. Specifies the virtual atmosphere in which all the design calculations
+            within the *AircraftConcept* class will be performed. Optional, defaults to the
+            International Standard Atmosphere.
     """
 
-    def __init__(self, brief, definition, performance, atmosphere=None):
+    def __init__(self, brief, design, performance, designatm=None):
 
         # Assign a default, if needed, to the atmosphere
-        if not atmosphere:
-            atmosphere = at.Atmosphere(offset_deg=0)
-        self.designatm = atmosphere
+        if not designatm:
+            designatm = at.Atmosphere(offset_deg=0)
+        self.designatm = designatm
 
         # Specify the default flags or parameters for the design brief, if parameter is left unspecified
 
@@ -273,10 +277,11 @@ class AircraftConcept:
 
         # Specify the default flags or parameters for the design definition, if parameter is left unspecified
 
-        default_definition = {
+        default_design = {
             # Definitions of basic aircraft geometry
             'aspectratio': 8,
             'sweep_le_deg': False,  # Flag as not specified (further comprehension required)
+            'sweep_mt_deg': False,  # Flag as not specified (further comprehension required)
             'sweep_25_deg': False,  # Flag as not specified (further comprehension required)
             'roottaperratio': False,  # Flag as not specified (further comprehension required)
             'wingarea_m2': False,  # Flag as not specified
@@ -322,9 +327,9 @@ class AircraftConcept:
 
         # Use the templates (default dictionaries) to populate missing values in the provided design dictionaries
 
-        # Aggregate the design brief, definition, and performance dictionaries, as a "library" of design dictionaries
-        default_designlib = [default_brief, default_definition, default_performance]
-        designlib = [brief, definition, performance]
+        # Aggregate the design brief, design, and performance dictionaries, as a "library" of design dictionaries
+        default_designlib = [default_brief, default_design, default_performance]
+        designlib = [brief, design, performance]
         # Take a single design dictionary out of the library
         for chapter_i in range(len(default_designlib)):
             # Iterate through the items in the default design dictionary pulled from the default volume
@@ -344,20 +349,23 @@ class AircraftConcept:
 
         # Populate the AircraftConcept object with attributes
 
-        # FURTHER COMPREHENSION: If leading edge sweep angle or aerofoil quarter chord sweep angle was not specified
-        if definition['sweep_le_deg'] is False:
-            definition['sweep_le_deg'] = 0
-        if definition['sweep_25_deg'] is False:
-            definition['sweep_25_deg'] = definition['sweep_le_deg']
+        # FURTHER COMPREHENSION: If sweep angles were not specified
+        if design['sweep_le_deg'] is False:
+            design['sweep_le_deg'] = 0
+        if design['sweep_mt_deg'] is False:
+            design['sweep_mt_deg'] = design['sweep_le_deg']
+        # If x/c=25% sweep not specified, assume max thickness occurs at x/c=35% and interpolate
+        if design['sweep_25_deg'] is False:
+            design['sweep_25_deg'] = ((2 * design['sweep_le_deg']) + (5 * design['sweep_mt_deg']) / 7)
 
         # FURTHER COMPREHENSION: If taper ratio was not given, use an estimate for the optimal taper ratio
         # https://www.fzt.haw-hamburg.de/pers/Scholz/OPerA/OPerA_PRE_DLRK_12-09-10_MethodOnly.pdf
-        if definition['roottaperratio'] is False:
-            if type(definition['sweep_25_deg']) == list:
-                avgsweep25deg = sum(definition['sweep_25_deg']) / len(definition['sweep_25_deg'])
+        if design['roottaperratio'] is False:
+            if type(design['sweep_25_deg']) == list:
+                avgsweep25deg = sum(design['sweep_25_deg']) / len(design['sweep_25_deg'])
             else:
-                avgsweep25deg = definition['sweep_25_deg']
-            definition['roottaperratio'] = 0.35659 + (-0.35659 + 0.45 * math.exp(-0.0375 * avgsweep25deg))
+                avgsweep25deg = design['sweep_25_deg']
+            design['roottaperratio'] = 0.45 * math.exp(-0.0375 * avgsweep25deg)
 
         # FURTHER COMPREHENSION: If flight-phase etaprop was not declared, assign defaults
         self.etadefaultflag = 0
@@ -380,7 +388,7 @@ class AircraftConcept:
                     designlib[chapter_i][dict_k] = sum(designlib[chapter_i][dict_k]) / len(designlib[chapter_i][dict_k])
 
         # Package all parameters, specified and unspecified, into a library of nominal design values
-        self.designstate = [brief, definition, performance]
+        self.designstate = [brief, design, performance]
 
         # Climb Constraint
         self.climbalt_m = brief['climbalt_m']
@@ -413,31 +421,33 @@ class AircraftConcept:
         self.stloadfactor = brief['stloadfactor']
 
         # Aircraft Geometry
-        self.aspectratio = definition['aspectratio']
-        self.sweep_le_deg = definition['sweep_le_deg']
+        self.aspectratio = design['aspectratio']
+        self.sweep_le_deg = design['sweep_le_deg']
         self.sweep_le_rad = math.radians(self.sweep_le_deg)
-        self.sweep_25_deg = definition['sweep_25_deg']
+        self.sweep_25_deg = design['sweep_25_deg']
         self.sweep_25_rad = math.radians(self.sweep_25_deg)
-        self.roottaperratio = definition['roottaperratio']
-        self.wingarea_m2 = definition['wingarea_m2']
-        self.wingheightratio = definition['wingheightratio']
+        self.sweep_mt_deg = design['sweep_mt_deg']
+        self.sweep_mt_rad = math.radians(self.sweep_mt_deg)
+        self.roottaperratio = design['roottaperratio']
+        self.wingarea_m2 = design['wingarea_m2']
+        self.wingheightratio = design['wingheightratio']
 
         # Properties of Propulsion System
-        self.bpr = definition['bpr']
-        self.spooluptime_s = definition['spooluptime_s']
-        self.totalstaticthrust_n = definition['totalstaticthrust_n']
-        self.throttle_r = definition['tr']
+        self.bpr = design['bpr']
+        self.spooluptime_s = design['spooluptime_s']
+        self.totalstaticthrust_n = design['totalstaticthrust_n']
+        self.throttle_r = design['tr']
 
         # Aircraft Loading
-        self.weight_n = definition['weight_n']
-        self.climb_weight_fraction = definition['weightfractions']['climb']
-        self.cruise_weight_fraction = definition['weightfractions']['cruise']
-        self.sec_weight_fraction = definition['weightfractions']['servceil']
-        self.turn_weight_fraction = definition['weightfractions']['turn']
+        self.weight_n = design['weight_n']
+        self.climb_weight_fraction = design['weightfractions']['climb']
+        self.cruise_weight_fraction = design['weightfractions']['cruise']
+        self.sec_weight_fraction = design['weightfractions']['servceil']
+        self.turn_weight_fraction = design['weightfractions']['turn']
 
         # Runway alpha
-        self.runwayalpha_deg = definition['runwayalpha_deg']
-        self.runwayalpha_max_deg = definition['runwayalpha_max_deg']
+        self.runwayalpha_deg = design['runwayalpha_deg']
+        self.runwayalpha_max_deg = design['runwayalpha_max_deg']
 
         # Drag/Resistive coefficients
         self.CD0TO = performance['CD0TO']
@@ -461,223 +471,49 @@ class AircraftConcept:
 
         return
 
-    def findchordsweep_rad(self, xc_findsweep):
-        """Calculates the sweep angle at a given chord fraction, for a constant taper wing
+    # Three different estimates the Oswald efficiency factor:
 
-        **Parameters:**
-        xc_findsweep
-            Float. The fraction of chord along which the function is being asked to determine the
-            sweep angle of. Inputs are bounded as 0 <= xc_findsweep <= 1 (0% to 100% chord),
-            where x/c = 0 is defined as the leading edge.
+    def oswaldspaneff1(self):
+        """Raymer's Oswald span efficiency estimate, sweep < 30, moderate AR"""
+        return 1.78 * (1 - 0.045 * (self.aspectratio ** 0.68)) - 0.64
 
-        **Returns:**
-        sweep_find_rad
-            Float. This is the sweep angle of the given chord fraction, for a constant taper wing.
-        """
+    def oswaldspaneff2(self):
+        """Oswald span efficiency estimate due to Brandt et al."""
+        sqrtterm = 4 + self.aspectratio ** 2 * (1 + (math.tan(self.sweep_mt_rad)) ** 2)
+        return 2 / (2 - self.aspectratio + math.sqrt(sqrtterm))
 
-        if xc_findsweep is None:
-            argmsg = "Function can not find the sweep angle without knowing the x/c to investigate"
-            raise ValueError(argmsg)
+    def oswaldspaneff3(self):
+        """Raymer's Oswald span efficiency estimate, swept wings"""
+        return 4.61 * (1 - 0.045 * (self.aspectratio ** 0.68)) * ((math.cos(self.sweep_le_rad)) ** 0.15) - 3.1
 
-        elif not (0 <= xc_findsweep <= 1):
-            argmsg = "Function was called with an out of bounds chord, tried (0 <= x/c <= 1)"
-            raise ValueError(argmsg)
-
-        sweeple_rad = self.sweep_le_rad
-        sweep25_rad = self.sweep_25_rad
-
-        # Use rate of change of sweep angle with respect to chord progression
-        sweep_roc = (sweeple_rad - sweep25_rad) / -0.25
-        sweep_find_rad = sweeple_rad + sweep_roc * xc_findsweep
-
-        return sweep_find_rad
-
-    def estimate_liftslope(self, mach_inf=None):
-        """Method for estimating the lift-curve slope from aircraft geometry, methods from:
-        http://www.stengel.mycpanel.princeton.edu/MAE331Lecture5.pdf (slide 30), R. Stengel;
-        https://people.clarkson.edu/~pmarzocc/AE429/AE-429-4.pdf;
-        https://www.fzt.haw-hamburg.de/pers/Scholz/HOOU/AircraftDesign_7_WingDesign.pdf
-        http://naca.central.cranfield.ac.uk/reports/arc/rm/2935.pdf (Eqn. 80), by D. Kuchemann;
-
-        **Parameters:**
-        mach_inf
-            Float. The freestream flight mach number. Optional, defaults to zero (incompressible
-            flow prediction).
-
-        **Returns:**
-        avg_liftslope
-            Float. The predicted lift slope as an average of several methods of computing it, for
-            a 'thin' aerofoil (t/c < 5%) - assuming the aircraft is designed with supersonic flight
-            in mind."""
-
-        if mach_inf is None:
-            argmsg = "Mach number unspecified, defaulting to incompressible flow condition"
-            warnings.warn(argmsg, RuntimeWarning)
-            mach_inf = 0
-
-        aspectr = self.aspectratio
-        a_0i = self.a_0i
-        piar = math.pi * aspectr
-        oswald = 0.7
-        sweep_25_rad = self.sweep_25_rad
-        sweep_le_rad = self.sweep_le_rad
-
-        def a_subsonic(machsub):
-            """From subsonic mach, determine an approximate lift slope"""
-            # Subsonic 3-D Wing Lift Slope, with Air Compressibility and Sweep Effects
-            sqrt_term = 1 + (piar / a_0i / math.cos(sweep_25_rad)) ** 2 * (1 - (machsub * math.cos(sweep_25_rad)) ** 2)
-            a_m0 = piar / (1 + math.sqrt(sqrt_term))
-
-            # High-Aspect-Ratio Straight Wings
-            a_m3 = a_0i / (math.sqrt(1 - machsub ** 2) + (a_0i / piar / oswald))
-
-            # Low-Aspect-Ratio Straight Wings
-            a_m4 = a_0i / (math.sqrt(1 - machsub ** 2 + (a_0i / piar) ** 2) + (a_0i / piar))
-
-            # Low-Aspect-Ratio Swept Wings
-            a_0s_le = a_0i * math.cos(sweep_le_rad)
-            mach_s = machsub * math.cos(sweep_le_rad)
-            a_m5 = a_0s_le / (math.sqrt(1 - mach_s ** 2 + (a_0s_le / piar) ** 2) + (a_0s_le / piar))
-
-            # DATCOM model for sub-sonic lift slope
-            sweep_50_rad = self.findchordsweep_rad(xc_findsweep=0.5)
-            beta = math.sqrt(1 - machsub ** 2)
-            kappa = 1  # To be implemented at a later date
-            a_m6 = (2 * piar) / (
-                    2 + math.sqrt((aspectr * beta / kappa) ** 2 * (1 + (math.tan(sweep_50_rad) / beta) ** 2) + 4))
-
-            # D. Kuchemann's method for subsonic, straight or swept wings
-            sweep_50_rad = self.findchordsweep_rad(xc_findsweep=0.5)
-            beta = math.sqrt(1 - machsub ** 2)
-            a_0c = a_0i / beta
-            a_0s_50 = a_0c * math.cos(sweep_50_rad)  # Mid-chord sweep, lift slope
-            sweep_eff = sweep_50_rad / (1 + (a_0s_50 / piar) ** 2) ** 0.25
-            a_0eff = a_0c * math.cos(sweep_eff)  # Effective sweep
-            powerterm = 1 / (4 * (1 + (abs(sweep_eff) / (0.5 * math.pi))))
-            n_s = 1 - (1 / (2 * (1 + (a_0eff / piar) ** 2) ** powerterm))  # Shape parameter, swept wing
-            a_m7 = ((2 * a_0eff * n_s) / (1 - (math.pi * n_s) * (1 / math.tan(math.pi * n_s)) + (
-                    (4 * a_0eff * n_s ** 2) / piar)))
-
-            # D. Kuchemann's method for delta wings with pointed tips and straight trailing edges, up to AR ~ 2.5
-            beta = math.sqrt(1 - machsub ** 2)
-            a_0c = a_0i / beta
-            a_m8 = (a_0c * aspectr) / (math.sqrt(4 + aspectr ** 2 + (a_0c / math.pi) ** 2) + a_0c / math.pi)
-
-            slopeslist = [a_m0, a_m3, a_m4, a_m5, a_m6, a_m7, a_m8]
-
-            return sum(slopeslist) / len(slopeslist)
-
-        def a_supersonic(machsuper):
-            """From supersonic mach, determine an approximate lift slope"""
-            # Supersonic Delta Wings
-            if machsuper < 1:
-                sweep_shock_rad = 0
-            else:
-                sweep_shock_rad = math.acos(1 / machsuper)  # NOT MACH ANGLE, this is sweep! Mach 1 = 0 deg sweep
-
-            m = math.tan(sweep_shock_rad) / math.tan(sweep_le_rad)
-            if 0 <= m <= 1:  # Subsonic leading edge case
-                lambda_polynomial = m * (0.38 + (2.26 * m) - (0.86 * m ** 2))
-                a_m2 = (2 * math.pi ** 2 * (1 / math.tan(sweep_le_rad))) / (math.pi + lambda_polynomial)
-            else:  # Supersonic leading edge case, linear inviscid theory
-                a_m2 = 4 / math.sqrt(machsuper ** 2 - 1)
-
-            # High-Aspect-Ratio Straight Wings
-            a_m3 = 4 / math.sqrt(machsuper ** 2 - 1)
-
-            # Low-Aspect-Ratio Straight Wings
-            a_m4 = 4 / math.sqrt(machsuper ** 2 - 1) * (1 - (1 / 2 / aspectr / math.sqrt(machsuper ** 2 - 1)))
-
-            slopeslist = [a_m2, a_m3, a_m4]
-
-            return sum(slopeslist) / len(slopeslist)
-
-        if mach_inf < 0.8:  # Subsonic regime, Mach_inf < 0.8
-
-            avg_liftslope = a_subsonic(mach_inf)
-
-        elif mach_inf > 1.2:  # Supersonic regime, Mach_inf > 1.2
-
-            avg_liftslope = a_supersonic(mach_inf)
-
-        else:  # Transonic regime, 0.8 < Mach_inf < 1.2
-
-            # Transonic region must be described using fitted curves between these limits
-            x_sub = 0.8
-            x_son = 1.0
-            x_sup = 1.2
-
-            # Boundary conditions
-            delta = 1e-3
-            y_subsonic = a_subsonic(x_sub)
-            y_sonic = a_0i * (aspectr / 4) * 0.85
-            y_supersonic = a_supersonic(x_sup)
-            m_subsonic = (a_subsonic(x_sub + 0.5 * delta) - a_subsonic(x_sub - 0.5 * delta)) / delta
-            m_sonic = 0
-            m_supersonic = (a_supersonic(x_sup + 0.5 * delta) - a_supersonic(x_sup - 0.5 * delta)) / delta
-
-            # Solve simultaneous equations for a polynomial where gradients at the spline/function transition are equal
-            mat_a = np.array([[x_sub ** 2, x_sub, 1],
-                              [x_son ** 2, x_son, 1],
-                              [x_sup ** 2, x_sup, 1]])
-            mat_b = np.array([m_subsonic, m_sonic, m_supersonic])
-            mat_x = np.linalg.solve(mat_a, mat_b)  # Array of constants abc for f(x) = ax^2 + bx + c
-            a = mat_x[0]
-            b = mat_x[1]
-            c = mat_x[2]
-
-            # Solve simultaneous equations for a polynomial where the coordinates at the transitions are equal
-            mat_a = np.array([[x_sub ** 3, x_sub ** 2, x_sub, 1],
-                              [x_son ** 3, x_son ** 2, x_son, 1],
-                              [x_sup ** 3, x_sup ** 2, x_sup, 1],
-                              [1, 1, 1, 0]])
-            mat_b = np.array([y_subsonic, y_sonic, y_supersonic, (a / 3 + b / 2 + c)])
-            mat_x = np.linalg.solve(mat_a, mat_b)
-
-            # The polynomial describing the transonic region
-            y_transonic = 0
-            order = 3
-            for index in range(order + 1):
-                y_transonic += (mat_x[index] * mach_inf ** (order - index))
-
-            avg_liftslope = y_transonic
-
-        # To be implemented later: weighted averages for the subsonic and supersonic regimes
-        # Lift slope values: Straight Wing (Highest a values) > Delta Wing > Swept Wing (Lowest a values)
-        # Lift slope values: High aspect ratio (Highest a values) > Low aspect ratio (Lowest a values)
-
-        return avg_liftslope
-
-    def estimate_subsonicoswald(self, mach_inf=None):
-        """Method for estimating the oswald factor from basic aircraft geometrical parameters
-
-        Original method by Mihaela Nita and Dieter Scholz,  Hamburg University of Applied Sciences
+    def oswaldspaneff4(self, mach_inf=None):
+        """Method for estimating the oswald factor from basic aircraft geometrical parameters;
+        Original method by Mihaela Nita and Dieter Scholz, Hamburg University of Applied Sciences
         https://www.dglr.de/publikationen/2012/281424.pdf
-        https://www.fzt.haw-hamburg.de/pers/Scholz/OPerA/OPerA_PRE_DLRK_12-09-10_MethodOnly.pdf
 
         The method returns an estimate for the Oswald efficiency factor of a planar wing. The mach
         correction factor was fitted around subsonic transport aircraft, and therefore this method
-        is recommended only for use in subsonic analysis with free-stream Mach < 0.68.
+        is recommended only for use in subsonic analysis with free-stream Mach < 0.69.
 
         **Parameters:**
-        machnumber
-            Float. Mach number at which the Oswald efficiency factor is to be estimated, required
-            to evaluate compressibility effects. Optional, defaults to zero (incompressible flow).
+        mach_inf
+            float, Mach number at which the Oswald efficiency factor is to be estimated, required
+            to evaluate compressibility effects. Optional, defaults to 0.3 (incompressible flow).
 
         **Returns:**
         e
-            Float. Predicted Oswald efficiency factor for subsonic transport aircraft (M < 0.7)
+            float, predicted Oswald efficiency factor for subsonic transport aircraft
         """
 
         if mach_inf is None:
             parammsg = "Mach number unspecified, defaulting to incompressible flow condition"
             warnings.warn(parammsg, RuntimeWarning)
-            mach_inf = 0
+            mach_inf = 0.3
 
         # THEORETICAL OSWALD FACTOR: For calculating the inviscid drag due to lift only
         taperratio = self.roottaperratio
 
-        # Calculate Hoerner's k/AR factor for unswept wings (with NASA's swept wing study, fitted for c=25% sweep)
+        # Calculate Hoerner's delta/AR factor for unswept wings (with NASA's swept wing study, fitted for c=25% sweep)
         dtaperratio = -0.357 + 0.45 * math.exp(-0.0375 * self.sweep_25_deg)
         tapercorr = taperratio - dtaperratio
         k_hoernerfactor = (0.0524 * tapercorr ** 4) - (0.15 * tapercorr ** 3) + (0.1659 * tapercorr ** 2) - (
@@ -695,59 +531,391 @@ class AircraftConcept:
         mach_compressible = 0.3
         # M. Nita and D. Scholz, constants from statistical analysis of subsonic aircraft
         if mach_inf > mach_compressible:
-            ke_mach = -0.001521 * (((min(mach_inf, 0.68) / mach_compressible) - 1) ** 10.82) + 1
+            ke_mach = -0.001521 * (((mach_inf / mach_compressible) - 1) ** 10.82) + 1
         else:
             ke_mach = 1
 
         e = e_theo * ke_fuse * ke_d0 * ke_mach
 
+        if e < 1e-3:
+            e = 1e-3
+            calcmsg = "Specified Mach " + str(mach_inf) + " is out of bounds for oswaldspaneff4, e_0 ~= 0"
+            warnings.warn(calcmsg, RuntimeWarning)
+
         return e
 
-    def induceddragfact(self, wingloading_pa=None, cl_req=None, mach_inf=None):
-        """Lift induced drag factor k estimate (Cd = Cd0 + k.Cl^2)"""
+    def induceddragfact(self, whichoswald=None, mach_inf=None):
+        """Lift induced drag factor k estimate (Cd = Cd0 + K.Cl^2) based on the relationship
+            k = 1 / pi * AR * e_0
+
+        **Parameters**
+
+        whichoswald
+            integer, used to specify the method(s) to estimate e_0 from. Specifying a single digit
+            integer selects a single associated method, however a concatenated string of integers
+            can be used to specify that e_0 should be calculated from the average of several.
+            Optional, defaults to methods 2 and 4.
+
+        mach_inf
+            float, the free-stream flight mach number. Optional, defaults to 0.3 (incompressible
+            flow prediction).
+
+        **Returns**
+
+        induceddragfactor
+            float, an estimate for the coefficient of Cl^2 in the drag polar (Cd = Cd0 + K.Cl^2)
+            based on various estimates of the oswald efficiency factor.
+
+        """
+
+        # Identify all the digit characters passed in the whichoswald argument, and assemble as a list of single digits
+        oswaldeff_list = []
+        if type(whichoswald) == int:
+            selection_list = [int(i) for i in str(whichoswald)]
+            # k = 1 / pi.AR.e
+            if 1 in selection_list:
+                oswaldeff_list.append(self.oswaldspaneff1())
+            if 2 in selection_list:
+                oswaldeff_list.append(self.oswaldspaneff2())
+            if 3 in selection_list:
+                oswaldeff_list.append(self.oswaldspaneff3())
+            if 4 in selection_list:
+                # If whichoswald = 4 was *specifically* selected, then throw a warning if Mach was not given
+                if mach_inf is None:
+                    argmsg = "Mach number unspecified, defaulting to incompressible flow condition"
+                    warnings.warn(argmsg, RuntimeWarning)
+                    mach_inf = 0.3
+                oswaldeff_list.append(self.oswaldspaneff4(mach_inf=mach_inf))
+
+        # If valid argument(s) were given, take the average of their Oswald results
+        if len(oswaldeff_list) > 0:
+            oswaldeff = sum(oswaldeff_list) / len(oswaldeff_list)
+        # Else default to estimate 2 and 4, Brandt and Nita incompressible
+        else:
+            oswaldeff = 0.5 * (self.oswaldspaneff2() + self.oswaldspaneff4(mach_inf=0.3))
+
+        return 1.0 / (math.pi * self.aspectratio * oswaldeff)
+
+    def findchordsweep_rad(self, xc_findsweep):
+        """Calculates the sweep angle at a given chord fraction, for a constant taper wing
+
+        **Parameters**
+        xc_findsweep
+            float, the fraction of chord along which the function is being asked to determine the
+            sweep angle of. Inputs are bounded as 0 <= xc_findsweep <= 1 (0% to 100% chord),
+            where x/c = 0 is defined as the leading edge.
+
+        **Returns**
+        sweep_rad
+            float, this is the sweep angle of the given chord fraction, for a constant taper wing.
+        """
+
+        if xc_findsweep is None:
+            argmsg = "Function can not find the sweep angle without knowing the x/c to investigate"
+            raise ValueError(argmsg)
+
+        elif not (0 <= xc_findsweep <= 1):
+            argmsg = "Function was called with an out of bounds chord, tried (0 <= x/c <= 1)"
+            raise ValueError(argmsg)
+
+        sweeple_rad = self.sweep_le_rad
+        sweep25_rad = self.sweep_25_rad
+
+        # Use rate of change of sweep angle with respect to chord progression
+        sweep_roc = (sweeple_rad - sweep25_rad) / -0.25
+        sweep_rad = sweeple_rad + sweep_roc * xc_findsweep
+
+        return sweep_rad
+
+    def liftslope(self, mach_inf=None):
+        """Method for estimating the lift-curve slope from aircraft geometry; Methods from
+        https://www.fzt.haw-hamburg.de/pers/Scholz/HOOU/AircraftDesign_7_WingDesign.pdf,
+        http://naca.central.cranfield.ac.uk/reports/arc/rm/2935.pdf (Eqn. 80), by D. Kuchemann;
+
+        Several methods for calculating supersonic and subsonic lift-slopes are aggregated to
+        produce a model for the lift curve with changing free-stream Mach number.
+
+        **Parameters**
+        mach_inf
+            float, the free-stream flight mach number. Optional, defaults to 0.3 (incompressible
+            flow prediction).
+
+        **Returns**
+        liftslope
+            float, the predicted lift slope as an average of several methods of computing it, for
+            a 'thin' aerofoil (t/c < 5%) - assuming the aircraft is designed with supersonic flight
+            in mind. Units of rad^-1.
+
+        **Notes:**
+
+        1. Care must be used when interpreting this function in the transonic flight regime. This
+        function departs from theoretical models for 0.6 <= Mach_free-stream <= 1.4, and instead
+        uses a weighted average of estimated curve-fits and theory to predict transonic behaviour.
+
+        """
 
         if mach_inf is None:
             argmsg = "Mach number unspecified, defaulting to incompressible flow condition"
             warnings.warn(argmsg, RuntimeWarning)
-            mach_inf = 0
+            mach_inf = 0.3
 
-        if cl_req is None:
-            parammsg = "Coefficient of lift unspecified, defaulting to 1"
+        aspectr = self.aspectratio
+        a_0i = self.a_0i
+        piar = math.pi * aspectr
+        oswald = self.oswaldspaneff2()
+        sweep_25_rad = self.sweep_25_rad
+        sweep_le_rad = self.sweep_le_rad
+
+        # Define transition points of models by Mach
+        puresubsonic_mach = 0.6
+        puresupsonic_mach = 1.4
+        lowertranson_mach = 0.8
+        uppertranson_mach = 1.3
+
+        def a_subsonic(machsub):
+            """From subsonic mach, determine an approximate lift slope"""
+            slopeslist_sub = []
+
+            beta_00 = math.sqrt(1 - machsub ** 2)
+            beta_le = math.sqrt(1 - (machsub * math.cos(sweep_le_rad)) ** 2)
+            beta_25 = math.sqrt(1 - (machsub * math.cos(sweep_25_rad)) ** 2)
+
+            # Subsonic 3-D Wing Lift Slope, with Air Compressibility and Sweep Effects
+            sqrt_term = 1 + (piar / a_0i / math.cos(sweep_25_rad)) ** 2 * beta_00 ** 2
+            a_m0 = piar / (1 + math.sqrt(sqrt_term))
+            slopeslist_sub.append(a_m0)
+
+            # High-Aspect-Ratio Straight Wings
+            a_m3 = a_0i / (beta_00 + (a_0i / piar / oswald))
+            slopeslist_sub.append(a_m3)
+
+            # Low-Aspect-Ratio Straight Wings
+            a_m4 = a_0i / (math.sqrt(beta_00 ** 2 + (a_0i / piar) ** 2) + (a_0i / piar))
+            slopeslist_sub.append(a_m4)
+
+            # Low-Aspect-Ratio Swept Wings
+            a_0_le = a_0i * math.cos(sweep_le_rad)
+            a_m5 = a_0_le / (math.sqrt(beta_le ** 2 + (a_0_le / piar) ** 2) + (a_0_le / piar))
+            slopeslist_sub.append(a_m5)
+
+            # DATCOM model for sub-sonic lift slope
+            sweep_50_rad = self.findchordsweep_rad(xc_findsweep=0.5)
+            kappa = a_0i / (2 * math.pi)  # Implementation of 2D lift slope needs checking here
+            a_m6 = (2 * piar) / (
+                    2 + math.sqrt((aspectr * beta_00 / kappa) ** 2 * (1 + (math.tan(sweep_50_rad) / beta_00) ** 2) + 4))
+            slopeslist_sub.append(a_m6)
+
+            # D. Kuchemann's method for subsonic, straight or swept wings
+            sweep_50_rad = self.findchordsweep_rad(xc_findsweep=0.5)
+            a_0c = a_0i / beta_00
+            a_0_50 = a_0c * math.cos(sweep_50_rad)  # Mid-chord sweep, lift slope
+            sweep_eff = sweep_50_rad / (1 + (a_0_50 / piar) ** 2) ** 0.25
+            a_0eff = a_0c * math.cos(sweep_eff)  # Effective sweep
+            powerterm = 1 / (4 * (1 + (abs(sweep_eff) / (0.5 * math.pi))))
+            n_s = 1 - (1 / (2 * (1 + (a_0eff / piar) ** 2) ** powerterm))  # Shape parameter, swept wing
+            a_m7 = ((2 * a_0eff * n_s) / (1 - (math.pi * n_s) * (1 / math.tan(math.pi * n_s)) + (
+                    (4 * a_0eff * n_s ** 2) / piar)))
+            slopeslist_sub.append(a_m7)
+
+            # D. Kuchemann's method for delta wings with pointed tips and straight trailing edges, up to AR ~ 2.5
+            a_0c = a_0i / beta_00
+            a_m8 = (a_0c * aspectr) / (math.sqrt(4 + aspectr ** 2 + (a_0c / math.pi) ** 2) + a_0c / math.pi)
+            slopeslist_sub.append(a_m8)
+
+            return sum(slopeslist_sub) / len(slopeslist_sub)
+
+        def a_supersonic(machsuper):
+            """From supersonic mach, determine an approximate lift slope"""
+            slopeslist_sup = []
+
+            beta_00 = math.sqrt(machsuper ** 2 - 1)
+            beta_le = math.sqrt((machsuper * math.cos(sweep_le_rad)) ** 2 - 1)
+            beta_25 = math.sqrt((machsuper * math.cos(sweep_25_rad)) ** 2 - 1)
+
+            # Supersonic Delta Wings
+            if sweep_le_rad != 0:  # Catch a divide by zero if the LE sweep is zero (can't be a delta wing)
+                if machsuper < 1:
+                    sweep_shock_rad = 0
+                else:
+                    sweep_shock_rad = math.acos(1 / machsuper)  # NOT MACH ANGLE, this is sweep! Mach 1 = 0 deg sweep
+
+                m = math.tan(sweep_shock_rad) / math.tan(sweep_le_rad)
+                if 0 <= m <= 1:  # Subsonic leading edge case
+                    lambda_polynomial = m * (0.38 + (2.26 * m) - (0.86 * m ** 2))
+                    a_m2 = (2 * math.pi ** 2 * (1 / math.tan(sweep_le_rad))) / (math.pi + lambda_polynomial)
+                else:  # Supersonic leading edge case, linear inviscid theory
+                    a_m2 = 4 / beta_00
+                slopeslist_sup.append(a_m2)
+
+            # High-Aspect-Ratio Straight Wings
+            a_m3 = 4 / beta_00
+            slopeslist_sup.append(a_m3)
+
+            # Low-Aspect-Ratio Straight Wings
+            a_m4 = 4 / beta_00 * (1 - (1 / 2 / aspectr / beta_00))
+            slopeslist_sup.append(a_m4)
+
+            return sum(slopeslist_sup) / len(slopeslist_sup)
+
+        if mach_inf < puresubsonic_mach:  # Subsonic regime, Mach_inf < mach_sub
+            liftslope = a_subsonic(mach_inf)
+
+        elif mach_inf > puresupsonic_mach:  # Supersonic regime, Mach_inf > mach_sup
+            liftslope = a_supersonic(mach_inf)
+
+        else:  # Transonic regime, mach_sub < Mach_inf < mach_sup
+
+            # Thickness-to-chord ratio
+            tcratio = 0.05
+
+            # Find where the lift-slope peaks
+            def slopepeak_mach(aspectratio):
+                # http://naca.central.cranfield.ac.uk/reports/1955/naca-report-1253.pdf
+                # Assume quadratic fit of graph data from naca report 1253
+                def genericquadfunc(x, a, b, c):
+                    return a * x ** 2 + b * x + c
+                # These are pregenerated static values, to save computational resources
+                popt = np.array([3.2784414, -9.73119668, 6.0546588])
+
+                # Create x-data for A(t/c)^(1/3), and then y-data for Speed parameter (M ** 2 - 1) / ((t/c) ** (2/3))
+                xfitdata = np.linspace(0, 1.5, 200)
+                yfitdata = genericquadfunc(xfitdata, *popt)
+
+                # Convert to x-data for AR, and y-data for Mach
+                arfitdata = xfitdata / (tcratio ** (1 / 3))
+                machfitdata = (yfitdata * (tcratio ** (2 / 3)) + 1) ** 0.5
+
+                # For a provided aspect ratio, determine if the quadratic or the linear relation should be used
+                arinfit_index = np.where(arfitdata >= aspectratio)[0]
+                if len(arinfit_index) > 0:
+                    machquery = machfitdata[min(arinfit_index)]
+                else:
+                    machquery = min(machfitdata)
+                return machquery
+
+            # This is the Mach number where the liftslope should peak
+            mach_apk = slopepeak_mach(aspectratio=aspectr)
+            cla_sub = a_subsonic(machsub=puresubsonic_mach)
+            cla_son = (math.pi / 2) * aspectr  # Strictly speaking, an approximation only true for A(t/c)^(1/3) < 1
+            cla_sup = a_supersonic(machsuper=puresupsonic_mach)
+
+            delta = 3e-2
+            x_mach = []; y_cla = []
+            # Subsonic transition points
+            x_mach.extend([puresubsonic_mach, puresubsonic_mach + delta])
+            y_cla.extend([a_subsonic(machsub=x_mach[0]), a_subsonic(machsub=x_mach[1])])
+
+            # Lift-slope peak transition points
+            x_mach.extend([mach_apk - 2 * delta, mach_apk + 2 * delta])
+            y_cla.extend([0.95 * cla_son, 0.95 * cla_son])
+
+            # Supersonic transition points
+            x_mach.extend([puresupsonic_mach - delta, puresupsonic_mach])
+            y_cla.extend([a_supersonic(machsuper=x_mach[-2]), a_supersonic(machsuper=x_mach[-1])])
+
+            # Recast lists as arrays
+            x_mach = np.array(x_mach)
+            y_cla = np.array(y_cla)
+
+            interpf = interp1d(x_mach, y_cla, kind='cubic')
+            a_transonic = interpf(mach_inf)
+
+            # The slope is weighted either as pure subsonic, subsonic, pure transonic, supersonic, or pure supersonic
+            if mach_inf < 1:
+                weight_sub = max(min(np.interp(mach_inf, [puresubsonic_mach, lowertranson_mach], [1, 0]), 1), 0)
+                weight_sup = 0
+            else:
+                weight_sub = 0
+                weight_sup = max(min(np.interp(mach_inf, [uppertranson_mach, puresupsonic_mach], [0, 1]), 1), 0)
+
+            liftslope = 0
+            if puresubsonic_mach < mach_inf < puresupsonic_mach:
+                liftslope += (1 - weight_sub - weight_sup) * a_transonic
+            if mach_inf < lowertranson_mach:
+                liftslope += weight_sub * a_subsonic(machsub=mach_inf)
+            elif mach_inf > uppertranson_mach:
+                liftslope += weight_sup * a_supersonic(machsuper=mach_inf)
+
+        # To be implemented later: weighted averages for the subsonic and supersonic regimes
+        # Lift slope values: Straight Wing (Highest a values) > Delta Wing > Swept Wing (Lowest a values)
+        # Lift slope values: High aspect ratio (Highest a values) > Low aspect ratio (Lowest a values)
+
+        return liftslope
+
+    def induceddragfact_lesm(self, wingloading_pa=None, cl_real=None, mach_inf=None):
+        """Lift induced drag factor k estimate (Cd = Cd0 + k.Cl^2), from LE suction theory, for aircraft
+        capable of supersonic flight
+
+        **Parameters**
+        wingloading_pa
+            float or numpy array, list of wing-loading values in Pa. Optional, provided that an
+            aircraft weight and wing area are specified in the design definitions dictionary.
+
+        cl_real
+            float or array, the coefficient of lift demanded to perform a maneuver. Optional,
+            defaults to cl at cruise.
+
+        mach_inf
+            float, Mach number at which the Oswald efficiency factor is to be estimated, required
+            to evaluate compressibility effects. Optional, defaults to 0.3 (incompressible flow).
+
+        **Returns**
+        k
+            float, predicted lift-induced drag factor K, as used in (Cd = Cd0 + k.Cl^2)
+
+        """
+
+        if mach_inf is None:
+            argmsg = "Mach number unspecified, defaulting to incompressible flow condition"
+            warnings.warn(argmsg, RuntimeWarning)
+            mach_inf = 0.3
+
+        if cl_real is None:
+            parammsg = "Coefficient of lift attained unspecified, defaulting to cruise Cl"
             warnings.warn(parammsg, RuntimeWarning)
-            cl_req = 1
 
         if wingloading_pa is None:
+            if self.weight_n is False:
+                designmsg = "Take-off weight not specified in the design definitions dictionary."
+                raise ValueError(designmsg)
+            if self.wingarea_m2 is False:
+                designmsg = "Wing area not specified in the design definitions dictionary."
+                raise ValueError(designmsg)
             wingloading_pa = self.weight_n / self.wingarea_m2
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
 
-        if self.cruisespeed_ktas is False:
-            cruisemsg = "Cruise speed not specified in the designbrief dictionary."
-            raise ValueError(cruisemsg)
-        cruisespeed_mps = co.kts2mps(self.cruisespeed_ktas)
-
-        if self.cruisealt_m is False:
-            cruisemsg = "Cruise altitude not specified in the designbrief dictionary."
-            raise ValueError(cruisemsg)
+        if (self.cruisespeed_ktas is False) or (self.cruisealt_m is False):
+            cruisemsg = "Cruise Cl could not be determined (missing cruise speed/altitude" \
+                        " in the designbrief dictionary), defaulting to 0.6."
+            warnings.warn(cruisemsg, RuntimeWarning)
+            cl_cruise = 0.6
+        else:
+            cruisespeed_mps = co.kts2mps(self.cruisespeed_ktas)
+            qcruise_pa = self.designatm.dynamicpressure_pa(cruisespeed_mps, self.cruisealt_m)
+            cl_cruise = wingloading_pa * self.cruise_weight_fraction / qcruise_pa
 
         aspectr = self.aspectratio
         sweep_le_rad = self.sweep_le_rad
-        mach_le = mach_inf * math.cos(sweep_le_rad)  # Mach number that the leading edge "sees"
-        mach_inf_lesonic = 1.0 / math.cos(sweep_le_rad)  # Free-stream mach number required for sonic LE condition
+        machstar_le = 1.0 / math.cos(sweep_le_rad)  # Free-stream mach number required for sonic LE condition
+
+        # Estimate subsonic k with the oswald factor
+        k_oswald = self.induceddragfact(whichoswald=24, mach_inf=min(mach_inf, 0.6))
 
         # Estimate full regime k from Leading-Edge-Suction method (Aircraft Design, Daniel P. Raymer)
 
         # Zero-suction case
-        k_0 = 1 / self.estimate_liftslope(mach_inf=mach_inf)
+        k_0 = 1 / self.liftslope(mach_inf=mach_inf)
 
-        # Non-zero-suction case
+        # Non-zero-suction case (This function for k_100 produces a messy curve, this needs smoothing somehow)
         if mach_inf < 1:  # Aircraft free-stream mach number is subsonic
 
             k_100 = 1.0 / (math.pi * aspectr)  # Full-suction case, oswald e = 1
 
-        elif mach_le < 1:  # Free-stream is (super)sonic, but wing leading edge sees subsonic flow
+        elif mach_inf < machstar_le:  # Free-stream is (super)sonic, but wing leading edge sees subsonic flow
 
             # Boundary conditions
-            x1, x2 = 1.0, mach_inf_lesonic
-            y1, y2 = 1.0 / (math.pi * aspectr), 1 / self.estimate_liftslope(mach_inf=mach_inf_lesonic)
+            x1, x2 = 1.0, machstar_le
+            y1, y2 = 1.0 / (math.pi * aspectr), 1 / self.liftslope(mach_inf=machstar_le)
             m1 = 0
 
             # Solve simultaneous equations
@@ -767,30 +935,35 @@ class AircraftConcept:
 
             k_100 = k_0  # Suction can not take place, therefore k_100 = k_0
 
-        # Find the leading edge suction factor S
+        # Find the leading edge suction factor S(from model of Raymer data, assuming max suction ~93 %)
 
-        # Regime 1: Subsonic aircraft suction factor (from Oswald efficiency method)
-        oswald_eff = self.estimate_subsonicoswald(mach_inf=mach_inf)
-        k_oswald = 1.0 / (math.pi * oswald_eff * aspectr)
+        # Suction model
+        def y_suction(cl_delta, cl_crs, a, c, r):
+            k = (-0.5 * cl_crs ** 2) - (0.25 * cl_crs) - 0.22
+            b = 1 + r * k
+            x = cl_delta
+            y = a * (x - b) * np.exp(-c * (x - 0.1)) * -np.tan(0.1 * (x - k))
+            return y
 
-        # Regime 2: Transonic aircraft suction factor (from guesswork model of Raymer data, assuming max suction ~90 %)
-        qcruise_pa = self.designatm.dynamicpressure_pa(cruisespeed_mps, self.cruisealt_m)
-        cl_cruise = wingloading_pa * self.cruise_weight_fraction / qcruise_pa
-        cl_delta = cl_req - cl_cruise
-        s_transonic_emp = 0.8354 * (cl_delta - 1.22) * np.sin(1.6 * (cl_delta - 1.22)) - 0.05
-        k_transonic = s_transonic_emp * k_100 + (1 - s_transonic_emp) * k_0
-
-        # Regime 3: Quick and dirty supersonic prediction
-        if mach_inf > 1.02:
-            k_supersonic = aspectr * (mach_inf ** 2 - 1) * math.cos(sweep_le_rad) / (
-                    4 * aspectr * math.sqrt(mach_inf ** 2 - 1) - 2)
+        if (cl_real is None) or (cl_cruise is None):
+            cl_diff = 0
         else:
-            k_supersonic = k_oswald
+            cl_diff = cl_real - cl_cruise
 
-        # Find suction across the entire mach space
-        r1weight = max(min(np.interp(mach_inf, [1, mach_inf_lesonic], [1, 0]), 1), 0)
-        r2weight = 1 - r1weight
-        k_predicted = (k_oswald * r1weight + 0.5 * (k_transonic + k_supersonic) * r2weight)
+        # Suction model for design Cl=0.3 and Cl=0.8
+        y_03 = y_suction(cl_delta=cl_diff, cl_crs=0.3, a=22.5, c=1.95, r=0)
+        y_08 = y_suction(cl_delta=cl_diff, cl_crs=0.8, a=5.77, c=1, r=-1.29)
+
+        # Find suction at actual cl as a weight of the two sample curves
+        weight = np.interp(cl_cruise, [0.3, 0.8], [1, 0])
+        suctionfactor = weight * y_03 + (1 - weight) * y_08
+
+        k_suction = suctionfactor * k_100 + (1 - suctionfactor) * k_0
+
+        # Take k to be the weighted average between a subsonic oswald, and supersonic suction prediction
+        weight = max(min(np.interp(mach_inf, [0, machstar_le], [1, 0]), 1), 0) ** 0.2
+
+        k_predicted = (k_oswald * weight + k_suction * (1 - weight))
 
         return k_predicted
 
@@ -798,7 +971,7 @@ class AircraftConcept:
         """The best rate of climb speed for a propeller aircraft"""
 
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
-        dragfactor = np.sqrt(self.induceddragfact(wingloading_pa=wingloading_pa) / (3 * self.cdminclean))
+        dragfactor = np.sqrt(self.induceddragfact() / (3 * self.cdminclean))
         densfactor = 2 / self.designatm.airdens_kgpm3(altitude_m)
 
         # Gudmundsson, eq. (18-27)
@@ -831,7 +1004,7 @@ class AircraftConcept:
         **Parameters**
 
         wingloading_pa
-            float or numpy array, list of wing loading values in Pa.
+            float or array, list of wing-loading values in Pa.
 
         **Returns**
 
@@ -903,6 +1076,8 @@ class AircraftConcept:
             raise ValueError(turnmsg)
         climbrate_mps = co.fpm2mps(self.climbrate_fpm)
 
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
         climbspeed_mpstas = self.designatm.eas2tas(climbspeed_mpsias, self.climbalt_m)
         climbrate_mpstroc = self.designatm.eas2tas(climbrate_mps, self.climbalt_m)
 
@@ -919,8 +1094,7 @@ class AircraftConcept:
 
         qclimb_pa = self.designatm.dynamicpressure_pa(climbspeed_mpstas, self.climbalt_m)
         cl_climb = wsclimb_pa / qclimb_pa
-        inddragfact = self.induceddragfact(wingloading_pa=wingloading_pa, cl_req=cl_climb, mach_inf=mach)
-
+        inddragfact = self.induceddragfact_lesm(wingloading_pa=wingloading_pa, cl_real=cl_climb, mach_inf=mach)
         cos_sq_theta = (1 - (climbrate_mpstroc / climbspeed_mpstas) ** 2)
 
         # To be implemented, as 1 + (V/g)*(dV/dh)
@@ -965,7 +1139,7 @@ class AircraftConcept:
 
         qcruise_pa = self.designatm.dynamicpressure_pa(cruisespeed_mps, self.cruisealt_m)
         cl_cruise = wscruise_pa / qcruise_pa
-        inddragfact = self.induceddragfact(wingloading_pa=wingloading_pa, cl_req=cl_cruise, mach_inf=mach)
+        inddragfact = self.induceddragfact_lesm(wingloading_pa=wingloading_pa, cl_real=cl_cruise, mach_inf=mach)
 
         twratio = (1 / wscruise_pa) * qcruise_pa * self.cdminclean + (inddragfact / qcruise_pa) * wscruise_pa
 
@@ -1008,7 +1182,7 @@ class AircraftConcept:
 
         qservceil_pa = self.designatm.dynamicpressure_pa(secclimbspeed_mpstas, self.servceil_m)
         cl_servceil = wsservceil_pa / qservceil_pa
-        inddragfact = self.induceddragfact(wingloading_pa=wingloading_pa, cl_req=cl_servceil, mach_inf=mach)
+        inddragfact = self.induceddragfact_lesm(wingloading_pa=wingloading_pa, cl_real=cl_servceil, mach_inf=mach)
 
         # Service ceiling typically defined in terms of climb rate (at best climb speed) of
         # dropping to 100feet/min ~ 0.508m/s
@@ -1083,7 +1257,8 @@ class AircraftConcept:
         **Parameters**
 
         wingloading_pa
-            float or numpy array, list of wing loading values in Pa.
+            wingloading_pa
+            float or array, list of wing-loading values in Pa.
 
         **Returns**
 
@@ -1184,7 +1359,7 @@ class AircraftConcept:
 
         qturn = self.designatm.dynamicpressure_pa(airspeed_mps=turnspeed_mps, altitudes_m=turnalt_m)
         cl_turn = wsclimb_pa * nturn / qturn
-        inddragfact = self.induceddragfact(wingloading_pa=wingloading_pa, cl_req=cl_turn, mach_inf=mach)
+        inddragfact = self.induceddragfact_lesm(wingloading_pa=wingloading_pa, cl_real=cl_turn, mach_inf=mach)
 
         twreqtrn = qturn * (cdmin / wingloading_pa + inddragfact * ((nturn / qturn) ** 2) * wsclimb_pa)
 
@@ -1196,7 +1371,7 @@ class AircraftConcept:
         **Parameters**
 
         wingloading_pa
-            float or numpy array, list of wing loading values in Pa.
+            float or array, list of wing-loading values in Pa.
 
         **Returns**
 
@@ -1313,7 +1488,7 @@ class AircraftConcept:
 
         return twratio, clrequired, feasibletw
 
-    def twrequired(self, wingloadinglist_pa, feasibleonly=True):
+    def twrequired(self, wingloading_pa, feasibleonly=True):
         """Calculate the T/W required for t/o, trn, clm, crs, sec.
 
         This method integrates the full set of constraints and it gives the user a
@@ -1326,7 +1501,7 @@ class AircraftConcept:
         **Parameters**
 
         wingloading_pa
-            float or numpy array, list of wing loading values in Pa.
+            float or array, list of wing-loading values in Pa.
 
         **Returns**
 
@@ -1347,11 +1522,13 @@ class AircraftConcept:
 
         """
 
-        tw_to, liftoffspeed_mpstas, avspeed_mpstas = self.twrequired_to(wingloadinglist_pa)
-        tw_trn, clrequired, feasibletw_trn = self.twrequired_trn(wingloadinglist_pa)
-        tw_clm = self.twrequired_clm(wingloadinglist_pa)
-        tw_crs = self.twrequired_crs(wingloadinglist_pa)
-        tw_sec = self.twrequired_sec(wingloadinglist_pa)
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        tw_to, liftoffspeed_mpstas, avspeed_mpstas = self.twrequired_to(wingloading_pa)
+        tw_trn, clrequired, feasibletw_trn = self.twrequired_trn(wingloading_pa)
+        tw_clm = self.twrequired_clm(wingloading_pa)
+        tw_crs = self.twrequired_crs(wingloading_pa)
+        tw_sec = self.twrequired_sec(wingloading_pa)
 
         if feasibleonly:
             tw_combined = np.amax([tw_to, feasibletw_trn, tw_clm, tw_crs, tw_sec], 0)
@@ -1372,14 +1549,14 @@ class AircraftConcept:
 
         return twreq
 
-    def powerrequired(self, wingloadinglist_pa, tow_kg, feasibleonly=True):
+    def powerrequired(self, wingloading_pa, tow_kg, feasibleonly=True):
         """Calculate the power (in HP) required for t/o, trn, clm, crs, sec."""
 
         if self.etadefaultflag > 0:
             etamsg = str(self.etadefaultflag) + " prop etas set to defaults."
             warnings.warn(etamsg, RuntimeWarning)
 
-        twreq = self.twrequired(wingloadinglist_pa, feasibleonly)
+        twreq = self.twrequired(wingloading_pa, feasibleonly)
 
         # Take-off power required
         pw_to_wpn = tw2pw(twreq['take-off'], twreq['liftoffspeed_mpstas'], self.etaprop_to)
@@ -1441,7 +1618,8 @@ class AircraftConcept:
 
         return preq_hp
 
-    def propulsionsensitivity_monothetic(self, wingloading_pa, y_var='tw', x_var='ws', customlabels=None):
+    def propulsionsensitivity_monothetic(self, wingloading_pa, y_var='tw', y_lim=None, x_var='ws', customlabels=None,
+                                         show=True, maskbool=False, returnbool=False):
         """One-Factor-at-a-Time investigation of thrust-to-weight constraints, also known
         as monothetic analysis, iterates through a "design-space", in which changes are
         made to and investigated for one aircraft design parameter at a time. For some
@@ -1451,18 +1629,22 @@ class AircraftConcept:
         across the entire wing-loading space, demonstrating which parameters the propulsion
         constraints are most sensitive to.
 
-        This function depends on the constraints in :code: `twrequired` being fully defined,
+        This function depends on the constraints in :code:`twrequired` being fully defined,
         failure to do so will likely raise errors.
 
         **Parameters**
 
         wingloading_pa
-            numpy array, list of wing loading values to investigate in Pa.
+            array, a list of wing-loadings to investigate, in Pa.
 
         y_var
             string, used to indicate what should be plotted along the y-axis of the combined
             constraint diagram. Set to 'tw' for dimensionless thrust-to-weight, or 'hp' for
             the power required in horsepower. Optional, defaults to 'tw'.
+
+        y_lim
+            float, used to define the plot y-limit. Optional, defaults to 105% of the maximum
+            propulsion constraint requirement.
 
         x_var
             string, used to indicate what should be plotted along the x-axis of the combined
@@ -1473,7 +1655,43 @@ class AircraftConcept:
             dictionary, used to remap design parameter labels, such that they appear in the
             plot legends with custom keying. Optional, defaults to None.
 
+        show
+            boolean, used to indicate whether or not the method should produce a figure as a
+            means of interpreting the sensitivity plots (see notes). Optional, defaults to True.
+
+        maskbool
+            boolean, used to indicate whether or not constraints that do not contribute to the
+            combined minimum T/W constraint, should be obscured (on the basis of irrelevancy).
+            Optional, defaults to False.
+
+        returnbool
+        EXPERIMENTAL INPUT FOR VALIDATION PURPOSES, NOT TO BE RELIED UPON IN FUTURE BUILDS
+            boolean, used to indicate whether or not the method should return anything. Optional,
+            defaults to False.
+
+        **Returns**
+
+        validpropulsionreq
+            EXPERIMENTAL OUTPUT FOR VALIDATION PURPOSES, NOT TO BE RELIED UPON IN FUTURE BUILDS
+            dictionary variable, wherein each of the two entries contain a numpy array that describe
+            the lower limit with which a valid T/W solution may be bounded, as well as what units
+            the boundary is presented in (same as the units provided in :code:`y_var` and :code:`x_var`).
+            An example dictionary with feasible x and y vectors 'xfeas' and 'yfeas' is shown below:
+            :code:`validpropulsionreq = {'valid_x': [xfeas, 'ws'], 'valid_y': [yfeas, 'p']}`. This
+            output only returns, if the "returnbool" input argument is set to True.
+
         **See also** ``twrequired``
+
+        **Notes**
+
+        1. There is no way to perform a sensitivity analysis of the T/W constraints and have the
+        sensitivity data return as a function output. The data is purely for visual reference so
+        that a designer may make an informed decision on compliance with design constraints for
+        an aircraft concept.
+
+        2. The code does not yet support the functionality required to investigate sensitivities of
+        design parameters embedded within dictionaries, such as weight fractions or propeller
+        efficiencies that vary between constraint cases.
 
         **Example** ::
 
@@ -1504,16 +1722,36 @@ class AircraftConcept:
             atm = at.Atmosphere()
             concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
 
-            concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='p', x_var='s',
+            concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='hp', x_var='s',
                                                  customlabels=customlabelling)
 
         """
+
+        y_types_list = ['tw', 'hp']
+        if y_var not in y_types_list:
+            argmsg = "Unsupported y-axis variable specified '" + str(y_var) + "', using default 'tw'."
+            warnings.warn(argmsg, RuntimeWarning)
+            y_var = 'tw'
+
+        if y_lim:
+            if (type(y_lim) == float) or (type(y_lim) == int):
+                pass
+            else:
+                argmsg = "Unsupported plot y-limit specified '" + str(y_lim) + "', using default."
+                warnings.warn(argmsg, RuntimeWarning)
+                y_lim = None
+
+        x_types_list = ['ws', 's']
+        if x_var not in x_types_list:
+            argmsg = "Unsupported x-axis variable specified '" + str(x_var) + "', using default 'ws'."
+            warnings.warn(argmsg, RuntimeWarning)
+            x_var = 'ws'
 
         if customlabels is None:
             customlabels = {}
 
         if self.weight_n is False:
-            defmsg = "Aircraft weight was not specified in the aircraft definition dictionary"
+            defmsg = "Aircraft weight was not specified in the aircraft design definitions dictionary"
             raise ValueError(defmsg)
 
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
@@ -1530,9 +1768,9 @@ class AircraftConcept:
 
         def y_function(aircraft_object, y_type):
             if y_type == 'hp':  # If Horsepower is to be plotted on the y-axis
-                propulsionrequirement = aircraft_object.powerrequired(wingloadinglist_pa=wingloading_pa, tow_kg=mass_kg)
+                propulsionrequirement = aircraft_object.powerrequired(wingloading_pa=wingloading_pa, tow_kg=mass_kg)
             else:  # Else default to T/W plotting on the y-axis
-                propulsionrequirement = aircraft_object.twrequired(wingloadinglist_pa=wingloading_pa)
+                propulsionrequirement = aircraft_object.twrequired(wingloading_pa=wingloading_pa)
             return propulsionrequirement
 
         def x_function(x_type):
@@ -1580,12 +1818,12 @@ class AircraftConcept:
 
                     # Evaluate the dictionaries as aircraft concepts
                     briefmax, briefmin = temp_designstatemax[0], temp_designstatemin[0]
-                    definitionmax, definitionmin = temp_designstatemax[1], temp_designstatemin[1]
+                    designdefmax, designdefmin = temp_designstatemax[1], temp_designstatemin[1]
                     performancemax, performancemin = temp_designstatemax[2], temp_designstatemin[2]
 
                     # Evaluate T/W or P
-                    acmax = AircraftConcept(briefmax, definitionmax, performancemax, designatmosphere)
-                    acmin = AircraftConcept(briefmin, definitionmin, performancemin, designatmosphere)
+                    acmax = AircraftConcept(briefmax, designdefmax, performancemax, designatmosphere)
+                    acmin = AircraftConcept(briefmin, designdefmin, performancemin, designatmosphere)
                     propulsionreqmax = y_function(aircraft_object=acmax, y_type=y_var)
                     propulsionreqmin = y_function(aircraft_object=acmin, y_type=y_var)
 
@@ -1596,8 +1834,8 @@ class AircraftConcept:
                             propulsionreqprime[constraint].update({dp_k: propulsionreq_range})
 
         # Produce data for the combined constraint
-        brief, definition, performance = designstate_list[0], designstate_list[1], designstate_list[2]
-        acmed = AircraftConcept(brief, definition, performance, designatmosphere)
+        brief, designdef, performance = designstate_list[0], designstate_list[1], designstate_list[2]
+        acmed = AircraftConcept(brief, designdef, performance, designatmosphere)
         propulsionreqmed = y_function(aircraft_object=acmed, y_type=y_var)
         # Refactor the x-axis
         x_axis = x_function(x_type=x_var)
@@ -1622,10 +1860,10 @@ class AircraftConcept:
             'focusmask': {'colour': 'white',
                           'alpha': 0.70},
             'inv_soln': {'colour': 'crimson',
-                         'alpha': 0.04}
+                         'alpha': 0.06}
         }
-        clr_list = ['red', 'darkorange', 'gold', 'mediumseagreen', 'skyblue',
-                    'blue', 'mediumpurple', 'darkmagenta', 'fuchsia', 'deeppink']
+        clr_list = ['red', 'darkorange', 'gold', 'yellowgreen', 'mediumseagreen', 'deepskyblue',
+                    'blue', 'mediumpurple', 'darkmagenta', 'fuchsia', 'orchid', 'pink']
 
         # Plot INDIVIDUAL constraint diagrams
         for constraint in con_sensitivity_list:
@@ -1663,7 +1901,7 @@ class AircraftConcept:
                                         loc='center left', bbox_to_anchor=(1, 0.5))
 
         # Plot COMBINED constraint diagram
-        feasindex = np.where(propulsionreqmed['combined'] > 0)[0]  # Where on the x-axis is a turn solution valid?
+        feasindex = np.where(np.isfinite(propulsionreqmed['combined']))[0]  # Where on the x-axis is a solution valid?
         infeas_x_axis = list(set(x_axis) - set(x_axis[feasindex[0: -1]]))  # Where on the x-axis is a solution invalid?
         x_maxinvcl = max(infeas_x_axis)
         x_mininvcl = min(infeas_x_axis)
@@ -1675,16 +1913,22 @@ class AircraftConcept:
             axs_dict['combined'].plot(x_axis, propulsionreqmed[constraint], label=constraint, lw=2.0, ls='--',
                                       color=clr_list[len(ylim_hi)])
             ylim_hi.append(max(propulsionreqmed[constraint]))
-        ylim_hi = max(ylim_hi) * 1.05
+        # Set the upper bound for the y-axis plotting
+        if y_lim is None:
+            ylim_hi = max(ylim_hi) * 1.05
+        else:
+            ylim_hi = y_lim
 
         # If the code could figure out where the clean stall takes place, plot it
         if xcrit_stall:
             if min(x_axis) < xcrit_stall < max(x_axis):
-                axs_dict['combined'].plot([xcrit_stall, xcrit_stall], [0, ylim_hi], label="clean stall")
+                axs_dict['combined'].plot([xcrit_stall, xcrit_stall], [0, ylim_hi], label="clean stall h=0 m")
 
         # If the code could figure out where the turn stall takes place, plot it
-        if min(x_axis) < x_axis[feasindex[-1]] < max(x_axis):
-            axs_dict['combined'].plot([x_axis[feasindex[-1]], x_axis[feasindex[-1]]], [0, ylim_hi], label="turn stall")
+        if len(feasindex) > 0:
+            xturn_stall = x_axis[feasindex[-1]]
+            if min(x_axis) < xturn_stall < max(x_axis):
+                axs_dict['combined'].plot([xturn_stall, xturn_stall], [0, ylim_hi], label="turn stall")
 
         axs_dict['combined'].set_title('Aggregated Propulsion constraints')
         axs_dict['combined'].set_ylim(0, ylim_hi)
@@ -1696,9 +1940,11 @@ class AircraftConcept:
 
         # For sensitivity plots, focus user attention with transparent masks
         for constraint in con_sensitivity_list:
-            maskindex = np.where(propulsionreqmed[constraint] < propulsionreqmed['combined'])[0]
+            propreqcomb = np.nan_to_num(propulsionreqmed['combined'], copy=True)
+            maskindex = np.where(propulsionreqmed[constraint] < propreqcomb)[0]  # Mask wherever constraint < combined
+
             # If the constraint being plotted is less than combined constraint, mask it
-            if len(maskindex) > 0:
+            if (len(maskindex) > 0) and maskbool:
                 x_maxclmask = max(max(x_axis[maskindex]), x_maxinvcl)
                 x_minclmask = min(min(x_axis[maskindex]), x_mininvcl)
                 axs_dict[constraint].fill([x_minclmask, x_maxclmask, x_maxclmask, x_minclmask],
@@ -1718,32 +1964,40 @@ class AircraftConcept:
                                       color=style['inv_soln']['colour'], alpha=style['inv_soln']['alpha'])
 
         # For the combined plot, obscure the remaining region in which the minimum combined constraint is not satisfied
-        def twmask(index_array):
-            if len(index_array) <= 1:
-                return
-            else:
-                xfeas = np.append(x_axis[index_array], [x_axis[index_array][-1], x_axis[index_array][0]])
-                yfeas = np.append(propulsionreqmed['combined'][index_array], [0, 0])
-                axs_dict['combined'].fill(xfeas, yfeas, color=style['inv_soln']['colour'],
-                                          alpha=style['inv_soln']['alpha'])
-            return
+        def twmask(index_arr):
+            """Produce a set of coordinates that produces a lower bound for the feasible region"""
+            if len(index_arr) < 1:
+                index_arr = [0]
+            x_invalidregion = np.append(x_axis[index_arr], [x_axis[index_arr][-1], x_axis[index_arr][0]])
+            y_invalidregion = np.append(propulsionreqmed['combined'][index_arr], [0, 0])
+            return x_invalidregion, y_invalidregion
 
         # Mask invalid T/W solutions using an argument that finds where the clmask does not obscure the solution
-        twmask(index_array=np.where(x_maxclmask <= x_axis)[0])
-        twmask(index_array=np.where(x_minclmask >= x_axis)[0])
+        x_inv, y_inv = twmask(index_arr=np.append(np.where(x_maxclmask < x_axis)[0], np.where(x_minclmask > x_axis)[0]))
+        axs_dict['combined'].fill(x_inv, y_inv, color=style['inv_soln']['colour'], alpha=style['inv_soln']['alpha'])
+        xfeas, yfeas = x_inv[0:-2], y_inv[0:-2]  # Map the list of coords from the region, to a lower bound for feas T/W
 
-        # Finally show the plot to the user
-        pyplot.show()
-        return
+        # Show the plot if specified to do so by method argument, then clear the plot and figure
+        if show:
+            pyplot.show()
+        fig.clear()
+        pyplot.close(fig=fig)
 
-    def vstall_kias(self, wingloadinglist_pa, clmax):
+        validpropulsionreq = {'valid_x': [xfeas, x_var], 'valid_y': [yfeas, y_var]}
+
+        if returnbool:
+            return validpropulsionreq
+        else:
+            return None
+
+    def vstall_kias(self, wingloading_pa, clmax):
         """Calculates the stall speed (indicated) for a given wing loading
         in a specified cofiguration.
 
         **Parameters:**
 
         wingloading_pa
-            float or numpy array, list of wing loading values in Pa.
+            float or array, list of wing-loading values in Pa.
 
         clmax
             maximum lift coefficient (float) or the name of a standard configuration
@@ -1775,13 +2029,15 @@ class AircraftConcept:
 
         """
 
+        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
         isa = at.Atmosphere()
         rho0_kgpm3 = isa.airdens_kgpm3()
 
         if clmax == 'take-off':
             clmax = self.clmaxto
 
-        vs_mps = math.sqrt(2 * wingloadinglist_pa / (rho0_kgpm3 * clmax))
+        vs_mps = math.sqrt(2 * wingloading_pa / (rho0_kgpm3 * clmax))
 
         return co.mps2kts(vs_mps)
 
