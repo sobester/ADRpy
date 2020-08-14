@@ -1940,7 +1940,7 @@ class AircraftConcept:
 
         # For sensitivity plots, focus user attention with transparent masks
         for constraint in con_sensitivity_list:
-            propreqcomb = np.nan_to_num(propulsionreqmed['combined'], copy=True, nan=0.0, posinf=None, neginf=None)
+            propreqcomb = np.nan_to_num(propulsionreqmed['combined'], copy=True)
             maskindex = np.where(propulsionreqmed[constraint] < propreqcomb)[0]  # Mask wherever constraint < combined
 
             # If the constraint being plotted is less than combined constraint, mask it
