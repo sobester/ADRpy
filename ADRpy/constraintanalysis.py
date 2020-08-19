@@ -25,7 +25,7 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
-from matplotlib import pyplot
+from matplotlib import pyplot as plt
 from scipy import constants
 from scipy.interpolate import interp1d
 
@@ -236,9 +236,15 @@ class AircraftConcept:
             International Standard Atmosphere.
     """
 
-    def __init__(self, brief, design, performance, designatm=None):
+    def __init__(self, brief=None, design=None, performance=None, designatm=None):
 
         # Assign a default, if needed, to the atmosphere
+        if brief is None:
+            brief = {}
+        if design is None:
+            design = {}
+        if performance is None:
+            performance = {}
         if not designatm:
             designatm = at.Atmosphere(offset_deg=0)
         self.designatm = designatm
@@ -360,12 +366,14 @@ class AircraftConcept:
 
         # FURTHER COMPREHENSION: If taper ratio was not given, use an estimate for the optimal taper ratio
         # https://www.fzt.haw-hamburg.de/pers/Scholz/OPerA/OPerA_PRE_DLRK_12-09-10_MethodOnly.pdf
+        self.taperdefaultflag = False
         if design['roottaperratio'] is False:
             if type(design['sweep_25_deg']) == list:
                 avgsweep25deg = sum(design['sweep_25_deg']) / len(design['sweep_25_deg'])
             else:
                 avgsweep25deg = design['sweep_25_deg']
             design['roottaperratio'] = 0.45 * math.exp(-0.0375 * avgsweep25deg)
+            self.taperdefaultflag = True
 
         # FURTHER COMPREHENSION: If flight-phase etaprop was not declared, assign defaults
         self.etadefaultflag = 0
@@ -511,6 +519,7 @@ class AircraftConcept:
             mach_inf = 0.3
 
         # THEORETICAL OSWALD FACTOR: For calculating the inviscid drag due to lift only
+
         taperratio = self.roottaperratio
 
         # Calculate Hoerner's delta/AR factor for unswept wings (with NASA's swept wing study, fitted for c=25% sweep)
@@ -678,7 +687,6 @@ class AircraftConcept:
 
             beta_00 = math.sqrt(1 - machsub ** 2)
             beta_le = math.sqrt(1 - (machsub * math.cos(sweep_le_rad)) ** 2)
-            beta_25 = math.sqrt(1 - (machsub * math.cos(sweep_25_rad)) ** 2)
 
             # Subsonic 3-D Wing Lift Slope, with Air Compressibility and Sweep Effects
             sqrt_term = 1 + (piar / a_0i / math.cos(sweep_25_rad)) ** 2 * beta_00 ** 2
@@ -729,8 +737,6 @@ class AircraftConcept:
             slopeslist_sup = []
 
             beta_00 = math.sqrt(machsuper ** 2 - 1)
-            beta_le = math.sqrt((machsuper * math.cos(sweep_le_rad)) ** 2 - 1)
-            beta_25 = math.sqrt((machsuper * math.cos(sweep_25_rad)) ** 2 - 1)
 
             # Supersonic Delta Wings
             if sweep_le_rad != 0:  # Catch a divide by zero if the LE sweep is zero (can't be a delta wing)
@@ -795,12 +801,11 @@ class AircraftConcept:
 
             # This is the Mach number where the liftslope should peak
             mach_apk = slopepeak_mach(aspectratio=aspectr)
-            cla_sub = a_subsonic(machsub=puresubsonic_mach)
             cla_son = (math.pi / 2) * aspectr  # Strictly speaking, an approximation only true for A(t/c)^(1/3) < 1
-            cla_sup = a_supersonic(machsuper=puresupsonic_mach)
 
             delta = 3e-2
-            x_mach = []; y_cla = []
+            x_mach = []
+            y_cla = []
             # Subsonic transition points
             x_mach.extend([puresubsonic_mach, puresubsonic_mach + delta])
             y_cla.extend([a_subsonic(machsub=x_mach[0]), a_subsonic(machsub=x_mach[1])])
@@ -1618,13 +1623,13 @@ class AircraftConcept:
 
         return preq_hp
 
-    def propulsionsensitivity_monothetic(self, wingloading_pa, y_var='tw', y_lim=None, x_var='ws', customlabels=None,
-                                         show=True, maskbool=False, returnbool=False):
+    def propulsionsensitivity_monothetic(self, wingloading_pa, y_var='tw', y_lim=None, x_var='ws_pa', customlabels=None,
+                                         show=True, maskbool=False, textsize=None, figsize_in=None):
         """One-Factor-at-a-Time investigation of thrust-to-weight constraints, also known
         as monothetic analysis, iterates through a "design-space", in which changes are
         made to and investigated for one aircraft design parameter at a time. For some
         iteration of the design-space, the change in T/W required against wing-loading for
-        a specific wing-load is taken as the local-derivative or local-sensitivity of the
+        a specific wing-load is taken as the local-change or local-sensitivity of the
         parameter. The relative proportions of these local-sensitivities are then computed
         across the entire wing-loading space, demonstrating which parameters the propulsion
         constraints are most sensitive to.
@@ -1639,7 +1644,7 @@ class AircraftConcept:
 
         y_var
             string, used to indicate what should be plotted along the y-axis of the combined
-            constraint diagram. Set to 'tw' for dimensionless thrust-to-weight, or 'hp' for
+            constraint diagram. Set to 'tw' for dimensionless thrust-to-weight, or 'p_hp' for
             the power required in horsepower. Optional, defaults to 'tw'.
 
         y_lim
@@ -1648,8 +1653,8 @@ class AircraftConcept:
 
         x_var
             string, used to indicate what should be plotted along the x-axis of the combined
-            constraint diagram. Set to 'ws' for wing-loading in Pa, or 's' for wing-area in
-            metres squared. Optional, defaults to 'ws'.
+            constraint diagram. Set to 'ws_pa' for wing-loading in Pa, or 's_m2' for wing-area
+            in metres squared. Optional, defaults to 'ws_pa'.
 
         customlabels
             dictionary, used to remap design parameter labels, such that they appear in the
@@ -1664,21 +1669,19 @@ class AircraftConcept:
             combined minimum T/W constraint, should be obscured (on the basis of irrelevancy).
             Optional, defaults to False.
 
-        returnbool
-        EXPERIMENTAL INPUT FOR VALIDATION PURPOSES, NOT TO BE RELIED UPON IN FUTURE BUILDS
-            boolean, used to indicate whether or not the method should return anything. Optional,
-            defaults to False.
+        textsize
+            integer, sets an arbitraty reference fontsize that text in the output plot scale
+            themselves in accordance to. Optional, defaults to 10 for six-way subplots, and
+            defaults to 14 for singular plots as selected with the 'show' argument.
+
+        figsize_in
+            list, used to specify custom dimensions of the output plot in inches. Image width
+            must be specified as a float in the first entry of a two-item list, with height as
+            the remaining item. Optional, defaults to 14.1 inches wide by 10 inches tall.
 
         **Returns**
 
-        validpropulsionreq
-            EXPERIMENTAL OUTPUT FOR VALIDATION PURPOSES, NOT TO BE RELIED UPON IN FUTURE BUILDS
-            dictionary variable, wherein each of the two entries contain a numpy array that describe
-            the lower limit with which a valid T/W solution may be bounded, as well as what units
-            the boundary is presented in (same as the units provided in :code:`y_var` and :code:`x_var`).
-            An example dictionary with feasible x and y vectors 'xfeas' and 'yfeas' is shown below:
-            :code:`validpropulsionreq = {'valid_x': [xfeas, 'ws'], 'valid_y': [yfeas, 'p']}`. This
-            output only returns, if the "returnbool" input argument is set to True.
+        None
 
         **See also** ``twrequired``
 
@@ -1692,6 +1695,13 @@ class AircraftConcept:
         2. The code does not yet support the functionality required to investigate sensitivities of
         design parameters embedded within dictionaries, such as weight fractions or propeller
         efficiencies that vary between constraint cases.
+
+        3. The code does not yet support the functionality required to investigate sensitivities of
+        the aircraft concept to variations in the design atmosphere, and simply inherits the atmosphere
+        provided in the class argument 'designatm', which defaults to the ISA with 0 degree offset.
+
+        4. This code does not use partial derivatives for analysis, as it then becomes redundant
+        to specify maximum and minimum allowable design values for parameters.
 
         **Example** ::
 
@@ -1722,12 +1732,12 @@ class AircraftConcept:
             atm = at.Atmosphere()
             concept = ca.AircraftConcept(designbrief, designdefinition, designperformance, atm)
 
-            concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='hp', x_var='s',
+            concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='p_hp', x_var='s_m2',
                                                  customlabels=customlabelling)
 
         """
 
-        y_types_list = ['tw', 'hp']
+        y_types_list = ['tw', 'p_hp']
         if y_var not in y_types_list:
             argmsg = "Unsupported y-axis variable specified '" + str(y_var) + "', using default 'tw'."
             warnings.warn(argmsg, RuntimeWarning)
@@ -1741,20 +1751,47 @@ class AircraftConcept:
                 warnings.warn(argmsg, RuntimeWarning)
                 y_lim = None
 
-        x_types_list = ['ws', 's']
+        x_types_list = ['ws_pa', 's_m2']
         if x_var not in x_types_list:
-            argmsg = "Unsupported x-axis variable specified '" + str(x_var) + "', using default 'ws'."
+            argmsg = "Unsupported x-axis variable specified '" + str(x_var) + "', using default 'ws_pa'."
             warnings.warn(argmsg, RuntimeWarning)
-            x_var = 'ws'
+            x_var = 'ws_pa'
 
         if customlabels is None:
+            # There is no need to throw a warning if the following method arguments are left unspecified.
             customlabels = {}
+
+        if textsize is None:
+            if show is True:
+                textsize = 10
+            else:
+                textsize = 14
+
+        if figsize_in is None:
+            figsize_in = [14.1, 10]
 
         if self.weight_n is False:
             defmsg = "Aircraft weight was not specified in the aircraft design definitions dictionary"
             raise ValueError(defmsg)
 
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+
+        # Colour/alpha dictionary
+        style = {
+            'focusmask': {'colour': 'white', 'alpha': 0.70},
+            'inv_soln': {'colour': 'crimson', 'alpha': 0.06}
+        }
+        # Pick a colour (red)
+        # Step clockwise on the colour wheel and go darker (darkviolet)
+        # Use the complementary colour and go lighter (yellowgreen)
+        # Step clockwise on the colour wheel and go darker (olive)
+        # Use the complementary colour and go lighter (mediumslateblue)
+        # etc... until you end up at the start colour. Bright colours on even index, dark colours on odd
+        clr_list = ['limegreen', 'olivedrab', 'darkorchid', 'indigo', 'yellow', 'darkgoldenrod',
+                    'royalblue', 'darkslategrey', 'orange', 'sienna', 'darkturquoise', 'forestgreen',
+                    'red', 'darkviolet', 'yellowgreen', 'olive', 'mediumslateblue', 'navy',
+                    'gold', 'chocolate', 'dodgerblue', 'teal', 'lightcoral', 'darkred']
+        clr_dict = {}
 
         # Potential design space and nominal design state, design dictionaries stored in lists
         designspace_list = self.designspace
@@ -1763,39 +1800,40 @@ class AircraftConcept:
         mass_kg = self.weight_n / constants.g
 
         # If a design can take a range of values, its value is bounded by the max and min value items of the list
-        con_sensitivity_list = ['climb', 'cruise', 'servceil', 'take-off', 'turn']
-        propulsionreqprime = dict(zip(con_sensitivity_list, [{} for _ in range(len(con_sensitivity_list))]))
+        sensitivityplots_list = ['climb', 'cruise', 'servceil', 'take-off', 'turn']
+        propulsionreqprime = dict(zip(sensitivityplots_list, [{} for _ in range(len(sensitivityplots_list))]))
 
+        # It's probably not necessary to have these all as functions since they are static - needs future optimisation
         def y_function(aircraft_object, y_type):
-            if y_type == 'hp':  # If Horsepower is to be plotted on the y-axis
+            if y_type == 'p_hp':  # If Horsepower is to be plotted on the y-axis
                 propulsionrequirement = aircraft_object.powerrequired(wingloading_pa=wingloading_pa, tow_kg=mass_kg)
             else:  # Else default to T/W plotting on the y-axis
                 propulsionrequirement = aircraft_object.twrequired(wingloading_pa=wingloading_pa)
             return propulsionrequirement
 
         def x_function(x_type):
-            if x_type == 's':  # If wing-area is to be plotted on the x-axis
+            if x_type == 's_m2':  # If wing-area is to be plotted on the x-axis
                 plt_x_axis = self.weight_n / wingloading_pa
             else:  # Else default to W/S plotting on the x-axis
                 plt_x_axis = wingloading_pa
             return plt_x_axis
 
         def y_labelling(y_type):
-            if y_type == 'hp':  # Horsepower is to be plotted on the y-axis
+            if y_type == 'p_hp':  # Horsepower is to be plotted on the y-axis
                 ylabel = 'Power Required [hp]'
             else:  # Else default to T/W plotting on the y-axis
                 ylabel = 'Thrust-to-Weight [-]'
             return ylabel
 
         def x_labelling(x_type):
-            if x_type == 's':  # If wing-area is to be plotted on the x-axis
+            if x_type == 's_m2':  # If wing-area is to be plotted on the x-axis
                 xlabel = 'Wing Area [m$^2$]'
             else:  # Else default to W/S plotting on the x-axis
                 xlabel = 'Wing Loading [Pa]'
             return xlabel
 
-        def x_wherestallcrit(x_type):
-            if x_type == 's':  # If wing-area is to be plotted on the x-axis
+        def wherecleanstall(x_type):
+            if x_type == 's_m2':  # If wing-area is to be plotted on the x-axis
                 x_stall = self.smincleanstall_m2(mass_kg)
             else:  # Else default to W/S plotting on the x-axis
                 x_stall = self.wsmaxcleanstall_pa()
@@ -1828,10 +1866,14 @@ class AircraftConcept:
                     propulsionreqmin = y_function(aircraft_object=acmin, y_type=y_var)
 
                     # If after evaluating OFAT there was a change in T/W for a constraint, record magnitude of the range
-                    for constraint in con_sensitivity_list:
+                    for constraint in sensitivityplots_list:
                         propulsionreq_range = abs(propulsionreqmax[constraint] - propulsionreqmin[constraint])
+                        # If the range is non-zero at any point, then the OFAT parameter had an impact on the constraint
                         if propulsionreq_range.all() != np.zeros(len(propulsionreq_range)).all():
                             propulsionreqprime[constraint].update({dp_k: propulsionreq_range})
+                            # If parameter impacting the constraint was not previously recorded, assign a unique colour
+                            if dp_k not in clr_dict:
+                                clr_dict.update({dp_k: clr_list[len(clr_dict)]})
 
         # Produce data for the combined constraint
         brief, designdef, performance = designstate_list[0], designstate_list[1], designstate_list[2]
@@ -1842,153 +1884,205 @@ class AircraftConcept:
 
         # If a stall constraint exists, create plot data
         if self.vstallclean_kcas and self.clmaxclean:  # If the stall condition is available to plot
-            xcrit_stall = x_wherestallcrit(x_type=x_var)
+            xcrit_stall = wherecleanstall(x_type=x_var)
         else:
             xcrit_stall = None
 
+        # Determine the upper y-limit of the plots
+        if y_lim is None:  # If the user did not specify a y_limit using the y_lim argument
+            ylim_hi = []
+            for sensitivityplot in sensitivityplots_list:
+                ylim_hi.append(max(propulsionreqmed[sensitivityplot]))
+            ylim_hi = max(ylim_hi) * 1.05
+        else:
+            ylim_hi = y_lim
+
+        # Find the indices on the x-axis, where the propulsion constraint is feasible (sustained turn does not stall)
+        propfeasindex = np.where(np.isfinite(propulsionreqmed['combined']))[0]
+        # (Set of x-axis indices) - (set of feasible x-axis indices) = (set of infeasible x-axis indices)
+        infeas_x_axis = list(set(x_axis) - set(x_axis[propfeasindex[0: -1]]))
+        # x-values that bound the feasible propulsion region
+        x2_infeascl = max(infeas_x_axis)
+        x1_infeascl = min(infeas_x_axis)
+
         # GRAPH PLOTTING
 
-        # Plotting setup, arrangement of 6 windows
-        fig, axs = pyplot.subplots(3, 2, figsize=(14.1, 10), gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
-        fig.canvas.set_window_title('ADRpy constraintanalysis.py')
-        fig.subplots_adjust(left=0.1, bottom=None, right=0.82, top=None, wspace=None, hspace=None)
-        fig.suptitle('One-Factor-at-a-Time Sensitivity of Propulsion System Constraints (Monothetic Analysis)')
-        plots_list = ['climb', 'cruise', 'servceil', 'take-off', 'turn', 'combined']
-        axs_dict = dict(zip(plots_list, [axs[0, 0], axs[1, 0], axs[2, 0], axs[0, 1], axs[1, 1], axs[2, 1]]))
-        # Colour/alpha dictionary
-        style = {
-            'focusmask': {'colour': 'white',
-                          'alpha': 0.70},
-            'inv_soln': {'colour': 'crimson',
-                         'alpha': 0.06}
-        }
-        clr_list = ['red', 'darkorange', 'gold', 'yellowgreen', 'mediumseagreen', 'deepskyblue',
-                    'blue', 'mediumpurple', 'darkmagenta', 'fuchsia', 'orchid', 'pink']
+        predefinedlabels = {'climb': "Climb", 'cruise': "Cruise", 'servceil': "Service Ceiling",
+                            'take-off': "Take-off Ground Roll", 'turn': "Sustained Turn"}
 
-        # Plot INDIVIDUAL constraint diagrams
-        for constraint in con_sensitivity_list:
+        fontsize_title = 1.20 * textsize
+        fontsize_label = 1.05 * textsize
+        fontsize_legnd = 1.00 * textsize
+        fontsize_tick = 0.90 * textsize
+
+        def sensitivityplots(whichconstraint, ax_sens=None):
+            if ax_sens is None:
+                ax_sens = plt.gca()
+
             # Find the sum of all derivatives for a constraint, at every given wing-loading
-            derivativesum = np.zeros(len(wingloading_pa))
-            for param_i, (param_k, param_v) in enumerate(propulsionreqprime[constraint].items()):
-                derivativesum += param_v
+            primesum = np.zeros(len(wingloading_pa))
+            for param_i, (param_k, param_v) in enumerate(propulsionreqprime[whichconstraint].items()):
+                primesum += param_v
 
             # Find the proportions of unity each parameter contributes to a constraint, and arrange as a list of arrays
             stackplot = []
             parameters_list = []
-            for param_i, (param_k, param_v) in enumerate(propulsionreqprime[constraint].items()):
-                stackplot.append(param_v / derivativesum)
-                if param_k in customlabels:  # Use custom labels if they exist
+            keyclrs_list = []
+            for param_i, (param_k, param_v) in enumerate(propulsionreqprime[whichconstraint].items()):
+                stackplot.append(param_v / primesum)
+                # Use custom labels if they exist
+                if param_k in customlabels:
                     parameters_list.append(customlabels[param_k])
                 else:
                     parameters_list.append(param_k)
+                # Assign a key in the stackplot, its unique colour
+                keyclrs_list.append(clr_dict[param_k])
 
             if len(stackplot) == 0:  # If no parameters could be added, populate stackplot with an empty filler
                 stackplot.append([0.] * len(wingloading_pa))
                 parameters_list.append("N/A")
                 # Also draw a nice red 'x' to clearly identify the graph
-                axs_dict[constraint].plot([min(x_axis), max(x_axis)], [0, 1], ls='-', color='r')
-                axs_dict[constraint].plot([min(x_axis), max(x_axis)], [1, 0], ls='-', color='r')
+                ax_sens.plot([min(x_axis), max(x_axis)], [0, 1], ls='-', color='r')
+                ax_sens.plot([min(x_axis), max(x_axis)], [1, 0], ls='-', color='r')
+                # The colour list should also be populated with a dummy colour
+                keyclrs_list.append('red')
+            else:
+                pass
 
             # For the constraint being processed, generate stacked plot from the list of arrays
-            axs_dict[constraint].stackplot(x_function(x_type=x_var), stackplot, labels=parameters_list, colors=clr_list)
-            axs_dict[constraint].set_title("Sensitivity of " + constraint.capitalize() + " constraint")
-            axs_dict[constraint].set_xlim(min(x_axis), max(x_axis))
-            axs_dict[constraint].set_ylim(0, 1)
-            axs_dict[constraint].set(xlabel=x_labelling(x_type=x_var), ylabel='Sensitivity [-]')
+            ax_sens.stackplot(x_function(x_type=x_var), stackplot, labels=parameters_list, colors=keyclrs_list)
+            ax_sens.set_title(predefinedlabels[whichconstraint], size=fontsize_title)
+            ax_sens.set_xlim(min(x_axis), max(x_axis))
+            ax_sens.set_ylim(0, 1)
+            ax_sens.set_xlabel(xlabel=x_labelling(x_type=x_var), fontsize=fontsize_label)
+            ax_sens.set_ylabel(ylabel=('Rel. Sensitivity of ' + y_var.split('_')[0].upper()), fontsize=fontsize_label)
+            ax_sens.tick_params(axis='x', labelsize=fontsize_tick)
+            ax_sens.tick_params(axis='y', labelsize=fontsize_tick)
             # The legend list must be reversed to make sure the legend displays in the same order the plot is stacked
-            handles, labels = axs_dict[constraint].get_legend_handles_labels()
-            axs_dict[constraint].legend(reversed(handles), reversed(labels), title='Design Variables',
-                                        loc='center left', bbox_to_anchor=(1, 0.5))
+            handles, labels = ax_sens.get_legend_handles_labels()
+            ax_sens.legend(reversed(handles), reversed(labels), title='Design Variables', loc='center left',
+                           bbox_to_anchor=(1, 0.5), prop={'size': fontsize_legnd}, title_fontsize=fontsize_legnd)
 
-        # Plot COMBINED constraint diagram
-        feasindex = np.where(np.isfinite(propulsionreqmed['combined']))[0]  # Where on the x-axis is a solution valid?
-        infeas_x_axis = list(set(x_axis) - set(x_axis[feasindex[0: -1]]))  # Where on the x-axis is a solution invalid?
-        x_maxinvcl = max(infeas_x_axis)
-        x_mininvcl = min(infeas_x_axis)
+            if maskbool:
+                # For sensitivity plots, focus user attention with transparent masks
+                propreqcomb = np.nan_to_num(propulsionreqmed['combined'], copy=True)
+                maskindex = np.where(propulsionreqmed[whichconstraint] < propreqcomb)[0]  # Mask where constraint < comb
 
-        axs_dict['combined'].plot(x_axis, propulsionreqmed['combined'], lw=3.5, color='k', label="Feasible T/W")
-        # Aggregate the propulsion constraints onto the combined diagram
-        ylim_hi = []
-        for constraint in con_sensitivity_list:
-            axs_dict['combined'].plot(x_axis, propulsionreqmed[constraint], label=constraint, lw=2.0, ls='--',
-                                      color=clr_list[len(ylim_hi)])
-            ylim_hi.append(max(propulsionreqmed[constraint]))
-        # Set the upper bound for the y-axis plotting
-        if y_lim is None:
-            ylim_hi = max(ylim_hi) * 1.05
-        else:
-            ylim_hi = y_lim
+                # Find discontinuities in maskindex, since we want to mask wherever maskindex is counting consecutively
+                masksindex_list = np.split(maskindex, np.where(np.diff(maskindex) != 1)[0] + 1)
 
-        # If the code could figure out where the clean stall takes place, plot it
-        if xcrit_stall:
-            if min(x_axis) < xcrit_stall < max(x_axis):
-                axs_dict['combined'].plot([xcrit_stall, xcrit_stall], [0, ylim_hi], label="clean stall h=0 m")
+                for consecregion_index in range(len(masksindex_list)):
+                    x2_clmask = x_axis[max(masksindex_list[consecregion_index])]
+                    x1_clmask = x_axis[min(masksindex_list[consecregion_index])]
 
-        # If the code could figure out where the turn stall takes place, plot it
-        if len(feasindex) > 0:
-            xturn_stall = x_axis[feasindex[-1]]
-            if min(x_axis) < xturn_stall < max(x_axis):
-                axs_dict['combined'].plot([xturn_stall, xturn_stall], [0, ylim_hi], label="turn stall")
+                    # If the cl mask is at the max feasible index, then draw from the min index to the max of the x-axis
+                    if x2_clmask == x_axis[max(propfeasindex)]:
+                        x2_clmask = x_axis[-1]
 
-        axs_dict['combined'].set_title('Aggregated Propulsion constraints')
-        axs_dict['combined'].set_ylim(0, ylim_hi)
-        axs_dict['combined'].set(xlabel=x_labelling(x_type=x_var), ylabel=y_labelling(y_type=y_var))
-        axs_dict['combined'].legend(title='Constraints', loc='center left', bbox_to_anchor=(1, 0.5))
-        axs_dict['combined'].grid(True)
+                    ax_sens.fill([x1_clmask, x2_clmask, x2_clmask, x1_clmask], [0, 0, 1, 1],
+                                 color=style['focusmask']['colour'], alpha=style['focusmask']['alpha'])
 
-        # Apply post-processing masks
+            return None
 
-        # For sensitivity plots, focus user attention with transparent masks
-        for constraint in con_sensitivity_list:
-            propreqcomb = np.nan_to_num(propulsionreqmed['combined'], copy=True)
-            maskindex = np.where(propulsionreqmed[constraint] < propreqcomb)[0]  # Mask wherever constraint < combined
+        def combinedplot(ax_comb=None):
+            if ax_comb is None:
+                ax_comb = plt.gca()
 
-            # If the constraint being plotted is less than combined constraint, mask it
-            if (len(maskindex) > 0) and maskbool:
-                x_maxclmask = max(max(x_axis[maskindex]), x_maxinvcl)
-                x_minclmask = min(min(x_axis[maskindex]), x_mininvcl)
-                axs_dict[constraint].fill([x_minclmask, x_maxclmask, x_maxclmask, x_minclmask],
-                                          [0, 0, 1, 1],
-                                          color=style['focusmask']['colour'], alpha=style['focusmask']['alpha'])
+            ax_comb.plot(x_axis, propulsionreqmed['combined'], lw=3.5, color='k', label="Feasible Turn $C_L$")
+            # Aggregate the propulsion constraints onto the combined diagram
+            for item in sensitivityplots_list:
+                ax_comb.plot(x_axis, propulsionreqmed[item], label=predefinedlabels[item], lw=2.0, ls='--',
+                             color=clr_list[sensitivityplots_list.index(item) * 2 + 6])
 
-        # For the combined plot, obscure region of unattainable performance due to infeasible CL requirements
-        if xcrit_stall:  # If the stall constraint is given, the CL mask should account for turn/stall constraints
-            x_maxclmask = max(xcrit_stall, x_maxinvcl)
-            x_minclmask = min(xcrit_stall, x_mininvcl)
-        else:  # Else the CL mask should only evaluate the turn constraint CL
-            x_maxclmask = x_maxinvcl
-            x_minclmask = x_mininvcl
-        # If a non-zero-thickness area was found in the "combined" plot region for which cl is invalid, mask it
-        if x_maxinvcl != x_mininvcl:
-            axs_dict['combined'].fill([x_minclmask, x_maxclmask, x_maxclmask, x_minclmask], [0, 0, ylim_hi, ylim_hi],
-                                      color=style['inv_soln']['colour'], alpha=style['inv_soln']['alpha'])
+            # If the code could figure out where the clean stall takes place, plot it
+            if xcrit_stall:
+                if min(x_axis) < xcrit_stall < max(x_axis):
+                    ax_comb.plot([xcrit_stall, xcrit_stall], [0, ylim_hi], label="$V_{stall}$ SL")
 
-        # For the combined plot, obscure the remaining region in which the minimum combined constraint is not satisfied
-        def twmask(index_arr):
-            """Produce a set of coordinates that produces a lower bound for the feasible region"""
-            if len(index_arr) < 1:
-                index_arr = [0]
-            x_invalidregion = np.append(x_axis[index_arr], [x_axis[index_arr][-1], x_axis[index_arr][0]])
-            y_invalidregion = np.append(propulsionreqmed['combined'][index_arr], [0, 0])
-            return x_invalidregion, y_invalidregion
+            # If the code could figure out where the turn stall takes place, plot it
+            if len(propfeasindex) > 0:
+                xturn_stall = x_axis[propfeasindex[-1]]
+                if min(x_axis) < xturn_stall < max(x_axis):
+                    ax_comb.plot([xturn_stall, xturn_stall], [0, ylim_hi], label="Sus. Turn stall")
 
-        # Mask invalid T/W solutions using an argument that finds where the clmask does not obscure the solution
-        x_inv, y_inv = twmask(index_arr=np.append(np.where(x_maxclmask < x_axis)[0], np.where(x_minclmask > x_axis)[0]))
-        axs_dict['combined'].fill(x_inv, y_inv, color=style['inv_soln']['colour'], alpha=style['inv_soln']['alpha'])
-        xfeas, yfeas = x_inv[0:-2], y_inv[0:-2]  # Map the list of coords from the region, to a lower bound for feas T/W
+            ax_comb.set_title('Aggregated Propulsion Constraints', size=fontsize_title)
+            ax_comb.set_xlim(min(x_axis), max(x_axis))
+            ax_comb.set_ylim(0, ylim_hi)
+            ax_comb.set_xlabel(xlabel=x_labelling(x_type=x_var), fontsize=fontsize_label)
+            ax_comb.set_ylabel(ylabel=y_labelling(y_type=y_var), fontsize=fontsize_label)
+            ax_comb.tick_params(axis='x', labelsize=fontsize_tick)
+            ax_comb.tick_params(axis='y', labelsize=fontsize_tick)
+            ax_comb.legend(title='Constraints', loc='center left', bbox_to_anchor=(1, 0.5),
+                           prop={'size': fontsize_legnd}, title_fontsize=fontsize_legnd)
+            ax_comb.grid(True)
+
+            # For the combined plot, obscure region of unattainable performance due to infeasible CL requirements
+            if xcrit_stall:  # If the stall constraint is given, the CL mask should account for turn/stall constraints
+                x2_clmask = max(xcrit_stall, x2_infeascl)
+                x1_clmask = min(xcrit_stall, x1_infeascl)
+            else:  # Else the CL mask should only evaluate the turn constraint CL
+                x2_clmask = x2_infeascl
+                x1_clmask = x1_infeascl
+            # If a non-zero-thickness area was found in the "combined" plot region for which cl is invalid, mask it
+            if x2_infeascl != x1_infeascl:
+                ax_comb.fill([x1_clmask, x2_clmask, x2_clmask, x1_clmask], [0, 0, ylim_hi, ylim_hi],
+                             color=style['inv_soln']['colour'], alpha=style['inv_soln']['alpha'])
+
+            # Produce coordinates that describe the lower bound of the feasible region
+            solnfeasindex = np.append(np.where(x2_clmask < x_axis)[0], np.where(x1_clmask > x_axis)[0])
+            # Obscure the remaining region in which the minimum combined constraint is not satisfied
+            if len(solnfeasindex) < 1:
+                solnfeasindex = [0]
+            x_inv = np.append(x_axis[solnfeasindex], [x_axis[solnfeasindex][-1], x_axis[solnfeasindex][0]])
+            y_inv = np.append(propulsionreqmed['combined'][solnfeasindex], [0, 0])
+            ax_comb.fill(x_inv, y_inv, color=style['inv_soln']['colour'], alpha=style['inv_soln']['alpha'])
+            xfeas, yfeas = x_inv[0:-2], y_inv[0:-2]  # Map infeasible region coords, to a lower bound for feas T/W
+            return xfeas, yfeas
 
         # Show the plot if specified to do so by method argument, then clear the plot and figure
+        fig = False
+        plots_list = ['climb', 'cruise', 'servceil', 'take-off', 'turn', 'combined']
+        suptitle = {'t': "OFAT Sensitivity of Propulsion System Constraints (" + y_labelling(y_type=y_var) + ")",
+                    'size': textsize * 1.4}
+        figsizex_in, figsizey_in = figsize_in[0], figsize_in[1]
+
+        if show is True:
+            # Plotting setup, arrangement of 6 windows
+            fig, axs = plt.subplots(3, 2, figsize=(figsizex_in, figsizey_in),
+                                    gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
+            fig.canvas.set_window_title('ADRpy constraintanalysis.py')
+            fig.subplots_adjust(left=0.1, bottom=None, right=0.82, top=None, wspace=None, hspace=None)
+            fig.suptitle(suptitle['t'], size=suptitle['size'])
+
+            axs_dict = dict(zip(plots_list, [axs[0, 0], axs[1, 0], axs[2, 0], axs[0, 1], axs[1, 1], axs[2, 1]]))
+
+            # Plot INDIVIDUAL constraint sensitivity diagrams
+            for sensitivityplottype in sensitivityplots_list:
+                sensitivityplots(whichconstraint=sensitivityplottype, ax_sens=axs_dict[sensitivityplottype])
+            # Plot COMBINED constraint diagram
+            combinedplot(ax_comb=axs_dict['combined'])
+
+        elif show in plots_list:
+            # Plotting setup, single window
+            fig, ax = plt.subplots(1, 1, figsize=(figsizex_in, figsizey_in),
+                                   gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
+            fig.canvas.set_window_title('ADRpy constraintanalysis.py')
+            fig.subplots_adjust(left=0.1, bottom=None, right=0.78, top=None, wspace=None, hspace=None)
+
+            if show in sensitivityplots_list:
+                # Plot INDIVIDUAL constraint sensitivity diagram
+                fig.suptitle(suptitle['t'], size=suptitle['size'])
+                sensitivityplots(whichconstraint=show, ax_sens=ax)
+            else:
+                # Plot COMBINED constraint diagram
+                fig.suptitle("Combined View of Propulsion System Requirements", size=suptitle['size'])
+                combinedplot(ax_comb=ax)
+
         if show:
-            pyplot.show()
-        fig.clear()
-        pyplot.close(fig=fig)
+            plt.show()
+            plt.close(fig=fig)
 
-        validpropulsionreq = {'valid_x': [xfeas, x_var], 'valid_y': [yfeas, y_var]}
-
-        if returnbool:
-            return validpropulsionreq
-        else:
-            return None
+        return None
 
     def vstall_kias(self, wingloading_pa, clmax):
         """Calculates the stall speed (indicated) for a given wing loading
