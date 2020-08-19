@@ -50,10 +50,10 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         # AIRCRAFT 3: Business Jet (Aircraft Concept)
         conceptjet_brief = {'rwyelevation_m': [-100, 1000], 'groundrun_m': [1000, 1400],
                             'climbalt_m': [-100, 1000], 'climbspeed_kias': [240, 250], 'climbrate_fpm': [1000, 1200],
-                            'cruisealt_m': [14000, 15000], 'cruisespeed_ktas': [440, 480],
-                            'servceil_m': [16000, 17000], 'secclimbspd_kias': [240, 260],
+                            'cruisealt_m': [13000, 14000], 'cruisespeed_ktas': [440, 480],
+                            'servceil_m': [14000, 14500], 'secclimbspd_kias': [240, 260],
                             'stloadfactor': [2, 2.5], 'turnalt_m': [4000, 5000], 'turnspeed_ktas': [280, 330]}
-        conceptjet_def = {'aspectratio': [6, 8], 'sweep_le_deg': [9, 12], 'sweep_25_deg': [6, 8], 'bpr': [3.7, 4.2],
+        conceptjet_def = {'aspectratio': [6, 8], 'sweep_le_deg': [9, 12], 'sweep_25_deg': [6, 8], 'bpr': [3.8, 4.0],
                           'tr': [1.05, 1.5], 'weight_n': 95000,
                           'weightfractions': {'turn': 1.0, 'climb': 1.0, 'cruise': 0.85, 'servceil': 0.85}}
         conceptjet_perf = {'CDTO': [0.04, 0.045], 'CLTO': [0.85, 0.9], 'CLmaxTO': [1.6, 1.8],
@@ -61,11 +61,11 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         self.ac_lib.append([conceptjet_brief, conceptjet_def, conceptjet_perf])
 
         # AIRCRAFT 4: SEPPA (Aircraft Concept)
-        conceptsep_brief = {'rwyelevation_m': 0, 'groundrun_m': 313,
+        conceptsep_brief = {'rwyelevation_m': [0, 100], 'groundrun_m': [310, 330],
                             'stloadfactor': [1.5, 1.65], 'turnalt_m': [1000, 1075], 'turnspeed_ktas': [100, 110],
                             'climbalt_m': 0, 'climbspeed_kias': 101, 'climbrate_fpm': 1398,
                             'cruisealt_m': [2900, 3200], 'cruisespeed_ktas': [170, 175], 'cruisethrustfact': 1.0,
-                            'servceil_m': [6500, 6650], 'secclimbspd_kias': 92,
+                            'servceil_m': [6500, 7650], 'secclimbspd_kias': 92,
                             'vstallclean_kcas': 69}
         conceptsep_def = {'aspectratio': [10, 11], 'sweep_le_deg': 2, 'sweep_25_deg': 0, 'bpr': -1,
                           'wingarea_m2': 13.46, 'weight_n': 15000,
@@ -242,56 +242,49 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         return
 
-    def test_twreqsensitivity(self):
+    def test_propulsionsensitivity(self):
         """Tests the statistical analysis method for the one-at-a-time inquiry of T/W sensitivity to input parameters"""
 
-        print("T/W Sensitivity (One-at-a-time) test.")
+        print("Propulsion Sensitivity (One-at-a-time) test.")
 
         # Use Aircraft 0: Business jet
         acindex = 0
         concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
         wingloadinglist_pa = np.arange(2000, 5000, 10)
 
-        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='tw', x_var='ws',
+        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='tw', x_var='ws_pa',
                                                  show=False)
 
         # Use Aircraft 3: Custom Business Jet
         acindex = 3
         concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
-        wingloadinglist_pa = np.arange(2000, 8000, 500)
+        wingloadinglist_pa = np.arange(2000, 8000, 50)
 
         customlabelling = {'aspectratio': 'AR',
+                           'bpr': 'BPR',
                            'sweep_le_deg': '$\\Lambda_{LE}$',
+                           'sweep_25_deg': '$\\Lambda_{25}$',
                            'sweep_mt_deg': '$\\Lambda_{MT}$'}
 
-        returned = concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='tw', x_var='ws',
-                                                            customlabels=customlabelling, show=False, maskbool=False,
-                                                            returnbool=True)
-        testdict = {'valid_x': [np.array([2000., 2500., 3000., 3500., 4000., 4500., 5000., 5500.]), 'ws'],
-                    'valid_y': [np.array([1.33442955, 1.18735618, 1.11034814, 1.07337745, 1.0614301,
-                                          1.06616497, 1.0825774, 1.1074826]), 'tw']}
-        self.assertEqual(returned['valid_x'][0].all(), testdict['valid_x'][0].all())
-        self.assertEqual(returned['valid_y'][0].all(), testdict['valid_y'][0].all())
+        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='tw', x_var='s_m2',
+                                                 customlabels=customlabelling, show=False, maskbool=False,
+                                                 figsize_in=[16, 9])
 
         # Use Aircraft 4: Custom SEPPA
         acindex = 4
         concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
-        wingloadinglist_pa = np.arange(700, 2500, 150)
+        wingloadinglist_pa = np.arange(700, 2500, 15)
 
-        returned = concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='hp', x_var='s',
-                                                            show=False, returnbool=True)
-        testdict = {'valid_x': [np.array([21.42857143, 17.64705882, 15.]), 's'],
-                    'valid_y': [np.array([0.21290116, 0.2069362, 0.23549822]), 'hp']}
-        self.assertEqual(returned['valid_x'][0].all(), testdict['valid_x'][0].all())
-        self.assertEqual(returned['valid_y'][0].all(), testdict['valid_y'][0].all())
+        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_var='p_hp', x_var='s_m2',
+                                                 show=False, maskbool=True)
 
         # Use Aircraft 5: Keane's Small UAV
         acindex = 5
         concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
-        wingloadinglist_pa = np.arange(50, 2500, 100)
+        wingloadinglist_pa = np.arange(50, 2500, 10)
 
-        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_lim=5, y_var='hp', x_var='s',
-                                                 show=False)
+        concept.propulsionsensitivity_monothetic(wingloading_pa=wingloadinglist_pa, y_lim=5, y_var='p_hp', x_var='s_m2',
+                                                 show=False, maskbool=True)
 
         return
 
