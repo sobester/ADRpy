@@ -1,7 +1,6 @@
 import unittest
 
-import airworthiness as aw
-
+from ADRpy import airworthiness as aw
 from ADRpy import unitconversions as co
 
 
