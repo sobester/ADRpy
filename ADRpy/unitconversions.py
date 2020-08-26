@@ -164,3 +164,19 @@ def kgm32sft3(density_kgm3):
 def sft32kgm3(density_slft3):
     """Convert density from slugs/ft^3 to kg/m^3"""
     return density_slft3 / 0.00194032
+
+def tas2eas(tas, localairdensity_kgm3):
+    """Convert True Air Speed to Equivalent Air Speed"""
+    return tas * ((localairdensity_kgm3 / 1.225) ** 0.5)
+
+def eas2tas(eas, localairdensity_kgm3):
+    """Convert True Air Speed to Equivalent Air Speed"""
+    return eas / ((localairdensity_kgm3 / 1.225) ** 0.5)
+
+def pa2lbfft2(pressure_pa):
+    """Convert pressure from Pascal to lbf(pound-force)/ft^2"""
+    return pressure_pa * 0.020885434273039
+
+def lbfft22pa(pressure_lbft2):
+    """Convert pressure from lbf(pound-force)/ft^2 to Pascal"""
+    return pressure_lbft2 / 0.020885434273039

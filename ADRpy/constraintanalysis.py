@@ -42,7 +42,7 @@ class AircraftConcept:
     its *performance*, as well as the *atmosphere* it operates in. These are
     the four arguments that define an object of the AircraftConcept class.
     The first three are dictionaries, as described below, the last is an object
-    of `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`
+    of `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`_
     class.
 
     **Parameters:**
@@ -176,8 +176,11 @@ class AircraftConcept:
             conditions, so higher ambient temperatures will result in power loss. Higher *tr*
             values mean thrust decay starting at higher altitudes.
 
+        weight_n
+            Float. Specifies the maximum take-off weight of the aircraft.
+
         weightfractions
-            Dictionary, specifying at what fraction of the maximum take-off weight do various
+            Dictionary. Specifies at what fraction of the maximum take-off weight do various
             constraints have to be met. It should contain the following keys: *take-off*,
             *climb*, *cruise*, *turn*, *servceil*. Optional, each defaults to 1.0 if not
             specified.
@@ -215,6 +218,9 @@ class AircraftConcept:
 
         CLmaxclean
             Float. Maximum lift coefficient in flight, in clean configuration.
+
+        CLminclean
+            Float. Minimum lift coefficient in flight, in clean configuration. Typically negative.
 
         CLslope
             Float. Lift-curve slope gradient, or Cl/alpha of a design aerofoil (or wing that may
@@ -323,6 +329,7 @@ class AircraftConcept:
             'CLTO': 0.95,
             'CLmaxTO': 1.5,
             'CLmaxclean': False,  # Flag as not specified
+            'CLminclean': False,  # Flag as not specified
             'CLslope': 2 * math.pi,
 
             # Propeller Efficiency
@@ -467,6 +474,7 @@ class AircraftConcept:
         self.CL0TO = performance['CL0TO']
         self.clto = performance['CLTO']
         self.clmaxclean = performance['CLmaxclean']
+        self.clminclean = performance['CLminclean']
         self.clmaxto = performance['CLmaxTO']
         self.a_0i = performance['CLslope']
 
@@ -501,16 +509,19 @@ class AircraftConcept:
 
         The method returns an estimate for the Oswald efficiency factor of a planar wing. The mach
         correction factor was fitted around subsonic transport aircraft, and therefore this method
-        is recommended only for use in subsonic analysis with free-stream Mach < 0.69.
+        is recommended only for use in subsonic analysis with free-stream Mach < 0.69
 
         **Parameters:**
+
         mach_inf
             float, Mach number at which the Oswald efficiency factor is to be estimated, required
             to evaluate compressibility effects. Optional, defaults to 0.3 (incompressible flow).
 
         **Returns:**
+
         e
-            float, predicted Oswald efficiency factor for subsonic transport aircraft
+            float, predicted Oswald efficiency factor for subsonic transport aircraft.
+
         """
 
         if mach_inf is None:
@@ -555,9 +566,9 @@ class AircraftConcept:
 
     def induceddragfact(self, whichoswald=None, mach_inf=None):
         """Lift induced drag factor k estimate (Cd = Cd0 + K.Cl^2) based on the relationship
-            k = 1 / pi * AR * e_0
+            (k = 1 / pi * AR * e_0).
 
-        **Parameters**
+        **Parameters:**
 
         whichoswald
             integer, used to specify the method(s) to estimate e_0 from. Specifying a single digit
@@ -569,11 +580,14 @@ class AircraftConcept:
             float, the free-stream flight mach number. Optional, defaults to 0.3 (incompressible
             flow prediction).
 
-        **Returns**
+        **Returns:**
 
         induceddragfactor
             float, an estimate for the coefficient of Cl^2 in the drag polar (Cd = Cd0 + K.Cl^2)
             based on various estimates of the oswald efficiency factor.
+
+        **Note:**
+        This method does not contain provisions for 'wing-in-ground-effect' factors.
 
         """
 
@@ -608,13 +622,15 @@ class AircraftConcept:
     def findchordsweep_rad(self, xc_findsweep):
         """Calculates the sweep angle at a given chord fraction, for a constant taper wing
 
-        **Parameters**
+        **Parameters:**
+
         xc_findsweep
             float, the fraction of chord along which the function is being asked to determine the
             sweep angle of. Inputs are bounded as 0 <= xc_findsweep <= 1 (0% to 100% chord),
             where x/c = 0 is defined as the leading edge.
 
-        **Returns**
+        **Returns:**
+
         sweep_rad
             float, this is the sweep angle of the given chord fraction, for a constant taper wing.
         """
@@ -644,20 +660,22 @@ class AircraftConcept:
         Several methods for calculating supersonic and subsonic lift-slopes are aggregated to
         produce a model for the lift curve with changing free-stream Mach number.
 
-        **Parameters**
+        **Parameters:**
+
         mach_inf
             float, the free-stream flight mach number. Optional, defaults to 0.3 (incompressible
             flow prediction).
 
-        **Returns**
+        **Returns:**
+
         liftslope
             float, the predicted lift slope as an average of several methods of computing it, for
             a 'thin' aerofoil (t/c < 5%) - assuming the aircraft is designed with supersonic flight
             in mind. Units of rad^-1.
 
-        **Notes:**
+        **Note:**
 
-        1. Care must be used when interpreting this function in the transonic flight regime. This
+        Care must be used when interpreting this function in the transonic flight regime. This
         function departs from theoretical models for 0.6 <= Mach_free-stream <= 1.4, and instead
         uses a weighted average of estimated curve-fits and theory to predict transonic behaviour.
 
@@ -827,11 +845,11 @@ class AircraftConcept:
 
             # The slope is weighted either as pure subsonic, subsonic, pure transonic, supersonic, or pure supersonic
             if mach_inf < 1:
-                weight_sub = max(min(np.interp(mach_inf, [puresubsonic_mach, lowertranson_mach], [1, 0]), 1), 0)
+                weight_sub = np.interp(mach_inf, [puresubsonic_mach, lowertranson_mach], [1, 0])
                 weight_sup = 0
             else:
                 weight_sub = 0
-                weight_sup = max(min(np.interp(mach_inf, [uppertranson_mach, puresupsonic_mach], [0, 1]), 1), 0)
+                weight_sup = np.interp(mach_inf, [uppertranson_mach, puresupsonic_mach], [0, 1])
 
             liftslope = 0
             if puresubsonic_mach < mach_inf < puresupsonic_mach:
@@ -849,11 +867,12 @@ class AircraftConcept:
 
     def induceddragfact_lesm(self, wingloading_pa=None, cl_real=None, mach_inf=None):
         """Lift induced drag factor k estimate (Cd = Cd0 + k.Cl^2), from LE suction theory, for aircraft
-        capable of supersonic flight
+        capable of supersonic flight.
 
-        **Parameters**
+        **Parameters:**
+
         wingloading_pa
-            float or numpy array, list of wing-loading values in Pa. Optional, provided that an
+            float or array, list of wing-loading values in Pa. Optional, provided that an
             aircraft weight and wing area are specified in the design definitions dictionary.
 
         cl_real
@@ -864,9 +883,14 @@ class AircraftConcept:
             float, Mach number at which the Oswald efficiency factor is to be estimated, required
             to evaluate compressibility effects. Optional, defaults to 0.3 (incompressible flow).
 
-        **Returns**
+        **Returns:**
+
         k
             float, predicted lift-induced drag factor K, as used in (Cd = Cd0 + k.Cl^2)
+
+        **Note:**
+
+        This method does not contain provisions for 'wing-in-ground-effect' factors.
 
         """
 
@@ -881,7 +905,7 @@ class AircraftConcept:
 
         if wingloading_pa is None:
             if self.weight_n is False:
-                designmsg = "Take-off weight not specified in the design definitions dictionary."
+                designmsg = "Maximmum take-off weight not specified in the design definitions dictionary."
                 raise ValueError(designmsg)
             if self.wingarea_m2 is False:
                 designmsg = "Wing area not specified in the design definitions dictionary."
@@ -966,7 +990,7 @@ class AircraftConcept:
         k_suction = suctionfactor * k_100 + (1 - suctionfactor) * k_0
 
         # Take k to be the weighted average between a subsonic oswald, and supersonic suction prediction
-        weight = max(min(np.interp(mach_inf, [0, machstar_le], [1, 0]), 1), 0) ** 0.2
+        weight = np.interp(mach_inf, [0, machstar_le], [1, 0]) ** 0.2
 
         k_predicted = (k_oswald * weight + k_suction * (1 - weight))
 
@@ -1640,7 +1664,7 @@ class AircraftConcept:
         **Parameters**
 
         wingloading_pa
-            array, a list of wing-loadings to investigate, in Pa.
+            array, list of wing-loading values in Pa.
 
         y_var
             string, used to indicate what should be plotted along the y-axis of the combined
@@ -1661,8 +1685,10 @@ class AircraftConcept:
             plot legends with custom keying. Optional, defaults to None.
 
         show
-            boolean, used to indicate whether or not the method should produce a figure as a
-            means of interpreting the sensitivity plots (see notes). Optional, defaults to True.
+            boolean/string, used to indicate whether or not the method should produce a figure
+            as a means of interpreting the sensitivity plots (see notes). Available arguments
+            include :code:`True`, :code:`False`, 'combined', 'climb', 'cruise', 'servceil',
+            'take-off', and 'turn'. Optional, defaults to True.
 
         maskbool
             boolean, used to indicate whether or not constraints that do not contribute to the
@@ -1670,7 +1696,7 @@ class AircraftConcept:
             Optional, defaults to False.
 
         textsize
-            integer, sets an arbitraty reference fontsize that text in the output plot scale
+            integer, sets a representative reference fontsize that text in the output plot scale
             themselves in accordance to. Optional, defaults to 10 for six-way subplots, and
             defaults to 14 for singular plots as selected with the 'show' argument.
 
@@ -1678,10 +1704,6 @@ class AircraftConcept:
             list, used to specify custom dimensions of the output plot in inches. Image width
             must be specified as a float in the first entry of a two-item list, with height as
             the remaining item. Optional, defaults to 14.1 inches wide by 10 inches tall.
-
-        **Returns**
-
-        None
 
         **See also** ``twrequired``
 
@@ -1767,11 +1789,18 @@ class AircraftConcept:
             else:
                 textsize = 14
 
+        default_figsize_in = [14.1, 10]
         if figsize_in is None:
-            figsize_in = [14.1, 10]
+            figsize_in = default_figsize_in
+        elif type(figsize_in) == list:
+            if len(figsize_in) != 2:
+                argmsg = "Unsupported figure size, should be length 2, found {0} instead - using default parameters." \
+                    .format(len(figsize_in))
+                warnings.warn(argmsg, RuntimeWarning)
+                figsize_in = default_figsize_in
 
         if self.weight_n is False:
-            defmsg = "Aircraft weight was not specified in the aircraft design definitions dictionary"
+            defmsg = "Maximum take-off weight was not specified in the aircraft design definitions dictionary"
             raise ValueError(defmsg)
 
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
@@ -1779,7 +1808,7 @@ class AircraftConcept:
         # Colour/alpha dictionary
         style = {
             'focusmask': {'colour': 'white', 'alpha': 0.70},
-            'inv_soln': {'colour': 'crimson', 'alpha': 0.06}
+            'inv_soln': {'colour': 'crimson', 'alpha': 0.10}
         }
         # Pick a colour (red)
         # Step clockwise on the colour wheel and go darker (darkviolet)
@@ -2044,11 +2073,10 @@ class AircraftConcept:
         plots_list = ['climb', 'cruise', 'servceil', 'take-off', 'turn', 'combined']
         suptitle = {'t': "OFAT Sensitivity of Propulsion System Constraints (" + y_labelling(y_type=y_var) + ")",
                     'size': textsize * 1.4}
-        figsizex_in, figsizey_in = figsize_in[0], figsize_in[1]
 
         if show is True:
             # Plotting setup, arrangement of 6 windows
-            fig, axs = plt.subplots(3, 2, figsize=(figsizex_in, figsizey_in),
+            fig, axs = plt.subplots(3, 2, figsize=figsize_in,
                                     gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
             fig.canvas.set_window_title('ADRpy constraintanalysis.py')
             fig.subplots_adjust(left=0.1, bottom=None, right=0.82, top=None, wspace=None, hspace=None)
@@ -2064,7 +2092,7 @@ class AircraftConcept:
 
         elif show in plots_list:
             # Plotting setup, single window
-            fig, ax = plt.subplots(1, 1, figsize=(figsizex_in, figsizey_in),
+            fig, ax = plt.subplots(1, 1, figsize=figsize_in,
                                    gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
             fig.canvas.set_window_title('ADRpy constraintanalysis.py')
             fig.subplots_adjust(left=0.1, bottom=None, right=0.78, top=None, wspace=None, hspace=None)
@@ -2100,7 +2128,8 @@ class AircraftConcept:
 
         **Returns:**
 
-        stall speed in knots (float or numpy array)
+        vs_keas
+            float or array, stall speed in knots.
 
         **Note:**
 
