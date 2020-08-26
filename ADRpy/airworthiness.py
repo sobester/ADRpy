@@ -627,6 +627,8 @@ class CertificationSpecifications:
                            'F': (vc_keas, ef_y[-1]),
                            'G': (viamin_keas, fg_y[-1])
                            })
+        if category == 'comm':
+            coords_poi.update({'B': (vb_keas, b_ygust)})
         if vbmin_keas > vc_keas:
             del coords_poi['B']
 
@@ -704,8 +706,8 @@ class CertificationSpecifications:
         class AnyObjectHandler(object):
             def legend_artist(self, legend, orig_handle, fontsize, handlebox):
                 patch = mpl_text.Text(x=0, y=0, text=orig_handle.my_text, color=orig_handle.my_color,
-                                      verticalalignment=u'baseline',
-                                      horizontalalignment=u'left')
+                                      verticalalignment=u'baseline', horizontalalignment=u'left',
+                                      fontsize=fontsize_legnd)
                 handlebox.add_artist(patch)
                 return patch
 
