@@ -263,24 +263,35 @@ class CertificationSpecifications:
         # (d) Design speed for maximum gust intensity, V_B
 
         # (d)(1)
-        ngust_dict, k_g, liftslope = self._paragraph341(wingloading_pa=wingloading_pa, speedatgust_keas={'Uc': vc_keas})
         _, gustspeedsmps = self._paragraph333()
+        _, k_g, liftslope = self._paragraph341(wingloading_pa, speedatgust_keas={'Uc': vc_keas})
 
-        vbmin_keas = 0
+        cruisewfraction = self.acobj.cruise_weight_fraction
+        vs1_keas = self.vs_keas(loadfactor=cruisewfraction)
+
         for category in cs23categories_list:
-            if category == 'comm':
-                gustspeed = gustspeedsmps[category]['Ub_mps']
-            else:
-                gustspeed = gustspeedsmps[category]['Uc_mps']
 
-            p = liftslope * gustspeed * k_g / clmaxclean
+            if category == 'comm':
+                gust_de_mps = gustspeedsmps[category]['Ub_mps']
+            else:
+                gust_de_mps = gustspeedsmps[category]['Uc_mps']
+
             cruiseloading_pa = wingloading_pa * self.acobj.cruise_weight_fraction
             rho0_kgm3 = self.acobj.designatm.airdens_kgpm3(altitudes_m=0)
-            vbmin_keas = co.mps2kts(0.5 * (p + np.sqrt(p ** 2 + (8 * cruiseloading_pa / (rho0_kgm3 * clmaxclean)))))
+
+            a = 1
+            b = -(liftslope / clmaxclean) * k_g * gust_de_mps
+            c = -2 * cruiseloading_pa / (rho0_kgm3 * clmaxclean)
+            vbmin1_keas = co.mps2kts((-b + (b ** 2 - 4 * a * c) ** 0.5) / (2 * a))
+            eas_dict[category].update({'vbmin1_keas': vbmin1_keas})
+
+            vbmin2_keas = vs1_keas * math.sqrt(manoeuvrelimits[category]['npos_min'])
+            eas_dict[category].update({'vbmin2_keas': vbmin2_keas})
+
+            vbmin_keas = np.fmin(vbmin1_keas, vbmin2_keas)
             eas_dict[category].update({'vbmin_keas': vbmin_keas})
 
-        # (d)(2)
-        for category in cs23categories_list:
+            # (d)(2)
             eas_dict[category].update({'vbmax_keas': np.fmax(vbmin_keas, vc_keas)})
 
         return eas_dict
@@ -404,18 +415,17 @@ class CertificationSpecifications:
                 suffix = gusttype.split('_')[0]
 
                 if suffix in speedatgust_keas:
-                    airspeed_keas = [value for key, value in speedatgust_keas.items() if suffix in key]
-                    airspeed_mps = co.kts2mps(co.eas2tas(eas=airspeed_keas, localairdensity_kgm3=rho_kgm3))
-                    q = k_g * rho0_kgm3 * gustspeed_mps * airspeed_mps * liftslope / (2 * wingloading_pa)
+                    airspeed_keas = [value for key, value in speedatgust_keas.items() if suffix in key][0]
+                    airspeed_mps = co.kts2mps(airspeed_keas)
+                    q = k_g * rho0_kgm3 * gustspeed_mps * airspeed_mps * liftslope / (2 * cruiseloading_pa)
                     poskey = 'npos_' + suffix
                     negkey = 'nneg_' + suffix
                     gustload_dict[category].update({poskey: 1 + q})
-                    if suffix != "Ub":
-                        gustload_dict[category].update({negkey: 1 - q})
+                    gustload_dict[category].update({negkey: 1 - q})
 
         return gustload_dict, k_g, liftslope
 
-    def flightenvelope(self, wingloading_pa, category='norm', designspeeds=None, textsize=None, figsize_in=None):
+    def flightenvelope(self, wingloading_pa, category='norm', vd_keas=None, textsize=None, figsize_in=None, show=True):
         """EASA specification for CS-23.333(d) Flight Envelope (in cruising conditions).
 
         Calling this method will plot the flight envelope at a single wing-loading.
@@ -430,11 +440,10 @@ class CertificationSpecifications:
             :code:`'comm'` (commuter), or :code:`'aero'` (aerobatic) categories of aircraft.
             Optional, defaults to :code:`'norm'`.
 
-        designspeeds
-            dictionary, allows for the custom specification of design airspeeds :code:`'va_keas'`,
-            :code:`'vb_keas'`, and :code:`'vd_keas'`. Simply provide one of the aforementioned
-            keys with the desired speed in KEAS. If the desired speed does not fit in the range
-            produced by CS-23.335, the closest allowable airspeed is used instead.
+        vd_keas
+            float, allows for specification of the design divespeed :code:`'vd_keas'` with units
+            KEAS. If the desired speed does not fit in the bounds produced by CS-23.335, the minimum
+            allowable airspeed is used instead.
 
         textsize
             integer, sets a representative reference fontsize that text in the output plot scale
@@ -444,6 +453,9 @@ class CertificationSpecifications:
             list, used to specify custom dimensions of the output plot in inches. Image width
             must be specified as a float in the first entry of a two-item list, with height as
             the remaining item. Optional, defaults to 12 inches wide by 7.5 inches tall.
+
+        show
+            boolean, used to specify if the plot should be displayed. Optional, defaults to True.
 
         **Returns:**
 
@@ -460,9 +472,6 @@ class CertificationSpecifications:
                 .format(cs23categories_list[0], cs23categories_list[1], cs23categories_list[2], cs23categories_list[3])
             raise ValueError(designmsg)
         catg_names = {'norm': "Normal", 'util': "Utility", 'comm': "Commuter", 'aero': "Aerobatic"}
-
-        if designspeeds is None:
-            designspeeds = {}
 
         if textsize is None:
             textsize = 10
@@ -505,19 +514,14 @@ class CertificationSpecifications:
         # V_A, Manoeuvring Speed
         vamin_keas = speedlimits_dict['vamin_keas']
         vamax_keas = speedlimits_dict['vamax_keas']
-        if 'va_keas' not in designspeeds:
-            va_keas = 0.5 * (vamin_keas + vamax_keas)
-        else:
-            va_keas = np.interp(designspeeds['va_keas'], [vamin_keas, vamax_keas], [vamin_keas, vamax_keas])
-        k_va = vamin_keas / va_keas
+
+        va_keas = np.interp(vamin_keas, [vamin_keas, vamax_keas], [vamin_keas, vamax_keas])
 
         # V_B, Gust Penetration Speed
-        vbmin_keas = float(speedlimits_dict['vbmin_keas']) / (k_va ** 1.5)
+        vbmin_keas = float(speedlimits_dict['vbmin_keas'])
+        vbpen_keas = float(speedlimits_dict['vbmin1_keas'])
         vbmax_keas = float(speedlimits_dict['vbmax_keas'])
-        if 'vb_keas' not in designspeeds:
-            vb_keas = 0.5 * (vbmin_keas + vbmax_keas)
-        else:
-            vb_keas = np.interp(designspeeds['vb_keas'], [vbmin_keas, vbmax_keas], [vbmin_keas, vbmax_keas])
+        vb_keas = np.interp(vbpen_keas, [vbmin_keas, vbmax_keas], [vbmin_keas, vbmax_keas])
 
         # V_C, Cruise Speed
         vcmin_keas = float(speedlimits_dict['vcmin_keas'])
@@ -525,16 +529,19 @@ class CertificationSpecifications:
 
         # V_D, Dive Speed
         vdmin_keas = float(speedlimits_dict['vdmin_keas'])
-        if 'vd_keas' not in designspeeds:
+        if vd_keas is None:
             vd_keas = vdmin_keas
         else:
-            vd_keas = max(designspeeds['vd_keas'], vdmin_keas)
+            vd_keas = max(vd_keas, vdmin_keas)
 
         # V_S, Stall Speed
-        vs_keas = self.vs_keas(loadfactor=1) / k_va
+        vs_keas = self.vs_keas(loadfactor=1)
 
         # V_invS, Inverted Stalling Speed
         vis_keas = self.vs_keas(loadfactor=-1)
+        if vis_keas < vs_keas:
+            argmsg = "Inverted-flight stall speed < Level-flight stall speed, consider reducing design Manoeuvre Speed."
+            warnings.warn(argmsg, RuntimeWarning)
 
         # V_invA, Inverted Manoeuvring Speed
         viamin_keas = vis_keas * math.sqrt(abs(manoeuvreload_dict[category]['nneg_C']))
@@ -548,7 +555,7 @@ class CertificationSpecifications:
         coordinate_list = ['x', 'y']
         # Curve OA
         oa_x = np.linspace(0, va_keas, 100, endpoint=True)
-        oa_y = rho0_kgm3 * (co.kts2mps(oa_x)) ** 2 * clmax / wingloading_pa / 2 * (k_va ** 2)
+        oa_y = rho0_kgm3 * (co.kts2mps(oa_x)) ** 2 * clmax / wingloading_pa / 2
         coords_manoeuvre.update({'OA': dict(zip(coordinate_list, [list(oa_x), list(oa_y)]))})
         # Points D, E, F
         coords_manoeuvre.update({'D': dict(zip(coordinate_list, [vd_keas, manoeuvreload_dict[category]['npos_D']]))})
@@ -566,30 +573,24 @@ class CertificationSpecifications:
         # Curve+Line SC
         sc_x = np.linspace(vs_keas, vc_keas, 100, endpoint=True)
         sc_y = []
-        bmin_ygust = float(rho0_kgm3 * (co.kts2mps(vbmin_keas)) ** 2 * clmax / wingloading_pa / 2 * (k_va ** 2))
-        b_ygust = float(gustloads[category][list(gustloads[category].keys())[0]])
+        max_ygust = float(gustloads[category][list(gustloads[category].keys())[0]])
+        b_ygustpen = float(rho0_kgm3 * (co.kts2mps(vbpen_keas)) ** 2 * clmax / wingloading_pa / 2)
         c_ygust = float(gustloads[category]['npos_Uc'])
         d_ymano = manoeuvreload_dict[category]['npos_D']
         for speed in sc_x:
             # If below minimum manoeuvring speed or gust intersection speed, keep on the stall curve
-            if (speed <= va_keas) or (speed <= vbmin_keas):
-                sc_y.append(rho0_kgm3 * (co.kts2mps(speed)) ** 2 * clmax / wingloading_pa / 2 * (k_va ** 2))
-            # Now if Maximum gust load == cruise gust load, stick to manoeuvre limit and cruise gust
-            elif b_ygust == c_ygust:
-                sc_y.append(max(np.interp(speed, [vbmin_keas, vc_keas], [bmin_ygust, c_ygust]), d_ymano))
-            # Maximum gust load > cruise gust load (Rough gust encountered), stick to rough gust and cruise gust points
-            else:
-                if speed <= vb_keas:  # Now check if we are below max gust speed - If we are, stick to the max gust line
-                    sc_y.append(max(np.interp(speed, [vbmin_keas, vb_keas], [bmin_ygust, b_ygust]), d_ymano))
-                else:  # We are beyond max gust penetration speed, now go to max cruise loading
-                    sc_y.append(max(np.interp(speed, [vb_keas, vc_keas], [b_ygust, c_ygust]), d_ymano))
+            if (speed <= va_keas) or (speed <= vbpen_keas):
+                sc_y.append(rho0_kgm3 * (co.kts2mps(speed)) ** 2 * clmax / wingloading_pa / 2)
+            # Else the flight envelope is the max of the gust/manoeuvre envelope sizes
+            elif vbpen_keas > va_keas:
+                sc_y.append(max(np.interp(speed, [vb_keas, vc_keas], [b_ygustpen, c_ygust]), d_ymano))
         coords_envelope.update({'SC': dict(zip(coordinate_list, [list(sc_x), sc_y]))})
         # Line CD
         cd_x = np.linspace(vc_keas, vd_keas, 100, endpoint=True)
         cd_y = []
         d_ygust = float(gustloads[category]['npos_Ud'])
         for speed in cd_x:
-            cd_y.append(max(np.interp(speed, [vc_keas, vd_keas], [c_ygust, d_ygust]), d_ymano))
+            cd_y.append(max(np.interp(speed, [vc_keas, vd_keas], [float(sc_y[-1]), d_ygust]), d_ymano))
         coords_envelope.update({'CD': dict(zip(coordinate_list, [list(cd_x), cd_y]))})
         # Point E
         e_ygust = float(gustloads[category]['nneg_Ud'])
@@ -620,7 +621,7 @@ class CertificationSpecifications:
         # Points of Interest coordinates - These are points that appear in the CS-23.333(d) example
         coords_poi = {}
         coords_poi.update({'A': (va_keas, d_ymano),
-                           'B': (vbmin_keas, bmin_ygust),
+                           'B': (vb_keas, b_ygustpen),
                            'C': (vc_keas, sc_y[-1]),
                            'D': (vd_keas, cd_y[-1]),
                            'E': (vd_keas, e_y),
@@ -628,128 +629,137 @@ class CertificationSpecifications:
                            'G': (viamin_keas, fg_y[-1])
                            })
         if category == 'comm':
-            coords_poi.update({'B': (vb_keas, b_ygust)})
-        if vbmin_keas > vc_keas:
+            coords_poi.update({'B': (vb_keas, b_ygustpen)})
+        if vbpen_keas > vc_keas:
             del coords_poi['B']
 
-        # Plotting parameters
-        fontsize_title = 1.20 * textsize
-        fontsize_label = 1.05 * textsize
-        fontsize_legnd = 1.00 * textsize
-        fontsize_tick = 0.90 * textsize
+        yposlim = max(max_ygust, coords_poi['C'][1], coords_poi['D'][1])
+        yneglim = min(coords_poi['E'][1], coords_poi['F'][1])
 
-        fig = plt.figure(figsize=figsize_in)
-        fig.canvas.set_window_title('ADRpy airworthiness.py')
+        if show:
+            # Plotting parameters
+            fontsize_title = 1.20 * textsize
+            fontsize_label = 1.05 * textsize
+            fontsize_legnd = 1.00 * textsize
+            fontsize_tick = 0.90 * textsize
 
-        ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
-        ax.set_title("EASA CS-23 Amendment 4 - Flight Envelope ({0} Category)".format(catg_names[category]),
-                     fontsize=fontsize_title)
-        ax.set_xlabel("Airspeed [KEAS]", fontsize=fontsize_label)
-        ax.set_ylabel("Load Factor [-]", fontsize=fontsize_label)
-        ax.tick_params(axis='x', labelsize=fontsize_tick)
-        ax.tick_params(axis='y', labelsize=fontsize_tick)
+            fig = plt.figure(figsize=figsize_in)
+            fig.canvas.set_window_title('ADRpy airworthiness.py')
 
-        # Gust Lines plotting
-        xlist = []
-        ylist = []
-        for _, (gustloadkey, gustload) in enumerate(gustloads[category].items()):
-            gusttype = gustloadkey.split('_')[1]
-            gustspeed_mps = round(gustspeeds_dict[category][str(gusttype + '_mps')], 2)
-            xlist += [0, airspeed_atgust_keas[gusttype]]
-            ylist += [1, gustload]
-            # Calculate where gust speed annotations should point to
-            xannotation = gustspeed_mps / 35 * (xlist[-1] - xlist[-2]) + xlist[-2]
-            yannotation = gustspeed_mps / 35 * (ylist[-1] - ylist[-2]) + ylist[-2]
-            xyannotate = xannotation, yannotation
-            # Calculate where the actual annotation text with the gust speed should be positioned
-            offsetx = abs(gustload) * (gustspeed_mps - 30)
-            offsety = 10 * (-10 if gustload < 0 else 10)
-            label = "$U_{de} = $" + str(gustspeed_mps) + " $ms^{-1}$"
-            # Produce the annotation
-            ax.annotate(label, xy=xyannotate, textcoords='offset points', xytext=(offsetx, offsety),
-                        fontsize=fontsize_legnd, arrowprops={'arrowstyle': '->', 'color': 'black', 'alpha': 0.8})
-        # Plot the gust lines
-        coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
-        for gustline_idx in range(len(gustloads[category])):
-            # Individual gust line coordinates
-            xcoord = coords[0][gustline_idx * 2:(gustline_idx * 2) + 2]
-            ycoord = coords[1][gustline_idx * 2:(gustline_idx * 2) + 2]
-            # Gust lines should be extended beyond the flight envelope, improving their visibility
-            xcoord_ext = np.array([xcoord[0], xcoord[1] * 5], dtype=object)
-            ycoord_ext = np.array([ycoord[0], ((ycoord[1] - 1) * 5) + 1], dtype=object)
-            # Plot the gust lines, but make sure only one label appears in the legend
-            if gustline_idx == 0:
-                ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.5, label='Gust Lines')
-            else:
-                ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.5)
+            ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
+            ax.set_title("EASA CS-23 Amendment 4 - Flight Envelope ({0} Category)".format(catg_names[category]),
+                         fontsize=fontsize_title)
+            ax.set_xlabel("Airspeed [KEAS]", fontsize=fontsize_label)
+            ax.set_ylabel("Load Factor [-]", fontsize=fontsize_label)
+            ax.tick_params(axis='x', labelsize=fontsize_tick)
+            ax.tick_params(axis='y', labelsize=fontsize_tick)
 
-        # Flight Envelope plotting
-        xlist = []
-        ylist = []
-        for _, (k, v) in enumerate(coords_envelope.items()):
-            if type(v['x']) != list:
-                xlist.append(v['x'])
-                ylist.append(v['y'])
-            else:
-                xlist += v['x']
-                ylist += v['y']
-        coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
-        ax.plot(*coords, c='black', ls='-', lw=1.4, label='Flight Envelope')
-        ax.fill(*coords, c='grey', alpha=0.10)
+            # Gust Lines plotting
+            xlist = []
+            ylist = []
+            for gustindex, (gustloadkey, gustload) in enumerate(gustloads[category].items()):
+                gusttype = gustloadkey.split('_')[1]
+                gustspeed_mps = round(gustspeeds_dict[category][str(gusttype + '_mps')], 2)
+                xlist += [0, airspeed_atgust_keas[gusttype]]
+                ylist += [1, gustload]
+                if gustload >= 0:
+                    # Calculate where gust speed annotations should point to
+                    xannotate = 0.15 * xlist[-1]
+                    yannotate = 0.15 * (ylist[-1] - 1) + 1
+                    xyannotate = xannotate, yannotate
+                    # Calculate where the actual annotation text with the gust speed should be positioned
+                    offsetx = (abs(gustload) ** 2 * (15.24 - gustspeed_mps)) / 4
+                    offsety = float((4 - gustindex + 1) * 3 * (12 if gustload < 0 else 10)) ** 0.93
+                    label = "$U_{de} = $" + str(gustspeed_mps) + " $ms^{-1}$"
+                    # Produce the annotation
+                    ax.annotate(label, xy=xyannotate, textcoords='offset points', xytext=(offsetx, offsety),
+                                fontsize=fontsize_legnd,
+                                arrowprops={'arrowstyle': '->', 'color': 'black', 'alpha': 0.8})
+            # Plot the gust lines
+            coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
+            for gustline_idx in range(len(gustloads[category])):
+                # Individual gust line coordinates
+                xcoord = coords[0][gustline_idx * 2:(gustline_idx * 2) + 2]
+                ycoord = coords[1][gustline_idx * 2:(gustline_idx * 2) + 2]
+                # Gust lines should be extended beyond the flight envelope, improving their visibility
+                xcoord_ext = np.array([xcoord[0], xcoord[1] * 5], dtype=object)
+                ycoord_ext = np.array([ycoord[0], ((ycoord[1] - 1) * 5) + 1], dtype=object)
+                # Plot the gust lines, but make sure only one label appears in the legend
+                if gustline_idx == 0:
+                    ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.5, label='Gust Lines')
+                else:
+                    ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.5)
 
-        # Points of Interest plotting - These are points that appear in the CS-23.333(d) example
-        class AnyObject(object):
-            def __init__(self, text, color):
-                self.my_text = text
-                self.my_color = color
+            # Flight Envelope plotting
+            xlist = []
+            ylist = []
+            for _, (k, v) in enumerate(coords_envelope.items()):
+                if type(v['x']) != list:
+                    xlist.append(v['x'])
+                    ylist.append(v['y'])
+                else:
+                    xlist += v['x']
+                    ylist += v['y']
+            coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
+            ax.plot(*coords, c='black', ls='-', lw=1.4, label='Flight Envelope')
+            ax.fill(*coords, c='grey', alpha=0.10)
 
-        class AnyObjectHandler(object):
-            def legend_artist(self, legend, orig_handle, fontsize, handlebox):
-                patch = mpl_text.Text(x=0, y=0, text=orig_handle.my_text, color=orig_handle.my_color,
-                                      verticalalignment=u'baseline', horizontalalignment=u'left',
-                                      fontsize=fontsize_legnd)
-                handlebox.add_artist(patch)
-                return patch
+            # Points of Interest plotting - These are points that appear in the CS-23.333(d) example
+            class AnyObject(object):
+                def __init__(self, text, color):
+                    self.my_text = text
+                    self.my_color = color
 
-        handles_objects_list = []
-        labels_list = []
-        handler_map = {}
-        # First, annotate the V-n diagram with the points of interest clearly labelled
-        for i, (k, v) in enumerate(coords_poi.items()):
-            # If the speed to be annotated has a positive limit load, annotate with a green symbol, not red
-            clr = 'green' if k in ['A', 'B', 'C', 'D'] else 'red'
-            handles_objects_list.append(AnyObject(k, clr))
-            labels_list.append(("V: " + str(round(float(v[0]), 1))).ljust(10) + ("| n: " + str(round(float(v[1]), 2))))
-            handler_map.update({handles_objects_list[-1]: AnyObjectHandler()})
-            offset = (5 if v[0] > vc_keas else -10, 1 if v[1] > 0 else -10)
-            ax.annotate(k, xy=v, textcoords='offset points', xytext=offset, fontsize=fontsize_label, color=clr)
-        # Second, create a legend which contains the V-n parameters of each point of interest
-        vnlegend = ax.legend(handles_objects_list, labels_list, handler_map=handler_map, loc='center left',
-                             title="V-n Speed [KEAS]; Load [-]", bbox_to_anchor=(1, 0.4), title_fontsize=fontsize_label,
-                             prop={'size': fontsize_legnd, 'family': 'monospace'})
+            class AnyObjectHandler(object):
+                def legend_artist(self, legend, orig_handle, fontsize, handlebox):
+                    patch = mpl_text.Text(x=0, y=0, text=orig_handle.my_text, color=orig_handle.my_color,
+                                          verticalalignment=u'baseline', horizontalalignment=u'left',
+                                          fontsize=fontsize_legnd)
+                    handlebox.add_artist(patch)
+                    return patch
 
-        # Manoeuvre Envelope plotting
-        xlist = []
-        ylist = []
-        for _, (k, v) in enumerate(coords_manoeuvre.items()):
-            if type(v['x']) != list:
-                xlist.append(v['x'])
-                ylist.append(v['y'])
-            else:
-                xlist += v['x']
-                ylist += v['y']
-        coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
-        ax.plot(*coords, c='orange', ls='--', lw=1.4, alpha=0.9, label='Manoeuvre Envelope')
+            handles_objects_list = []
+            labels_list = []
+            handler_map = {}
+            # First, annotate the V-n diagram with the points of interest clearly labelled
+            for i, (k, v) in enumerate(coords_poi.items()):
+                # If the speed to be annotated has a positive limit load, annotate with a green symbol, not red
+                clr = 'green' if k in ['A', 'B', 'C', 'D'] else 'red'
+                handles_objects_list.append(AnyObject(k, clr))
+                labels_list.append(
+                    ("V: " + str(round(float(v[0]), 1))).ljust(10) + ("| n: " + str(round(float(v[1]), 2))))
+                handler_map.update({handles_objects_list[-1]: AnyObjectHandler()})
+                offs_spd = vc_keas if c_ygust > max_ygust else vb_keas
+                offset = (textsize / 2 if v[0] > offs_spd else -textsize, textsize / 10 if v[1] > 0 else -textsize)
+                ax.annotate(k, xy=v, textcoords='offset points', xytext=offset, fontsize=fontsize_label, color=clr)
+                plt.plot(*v, 'x', color=clr)
+            # Second, create a legend which contains the V-n parameters of each point of interest
+            vnlegend = ax.legend(handles_objects_list, labels_list, handler_map=handler_map, loc='center left',
+                                 title="V-n Speed [KEAS]; Load [-]", bbox_to_anchor=(1, 0.4),
+                                 title_fontsize=fontsize_label,
+                                 prop={'size': fontsize_legnd, 'family': 'monospace'})
 
-        # Create the primary legend
-        ax.legend(loc='center left', bbox_to_anchor=(1, 0.75), prop={'size': fontsize_legnd})
-        # Add the secondary legend, without destroying the original
-        ax.add_artist(vnlegend)
-        ax.set_xlim(0, 1.1 * vd_keas)
-        yposlim = max(bmin_ygust, coords_poi['C'][1], coords_poi['D'][1])
-        ax.set_ylim(-.74 * yposlim, 1.30 * yposlim)
-        plt.grid()
-        plt.show()
-        plt.close(fig=fig)
+            # Manoeuvre Envelope plotting
+            xlist = []
+            ylist = []
+            for _, (k, v) in enumerate(coords_manoeuvre.items()):
+                if type(v['x']) != list:
+                    xlist.append(v['x'])
+                    ylist.append(v['y'])
+                else:
+                    xlist += v['x']
+                    ylist += v['y']
+            coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
+            ax.plot(*coords, c='orange', ls='--', lw=1.4, alpha=0.9, label='Manoeuvre Envelope')
+
+            # Create the primary legend
+            ax.legend(loc='center left', bbox_to_anchor=(1, 0.75), prop={'size': fontsize_legnd})
+            # Add the secondary legend, without destroying the original
+            ax.add_artist(vnlegend)
+            ax.set_xlim(0, 1.1 * vd_keas)
+            ax.set_ylim(1.3 * yneglim, 1.3 * yposlim)
+            plt.grid()
+            plt.show()
+            plt.close(fig=fig)
 
         return coords_poi
