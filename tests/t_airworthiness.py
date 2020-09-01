@@ -1,6 +1,7 @@
 import unittest
 
 from ADRpy import airworthiness as aw
+
 from ADRpy import unitconversions as co
 
 
@@ -24,19 +25,19 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         self.ac_lib.append([l45xr_brief, l45xr_def, l45xr_perf])
 
         # AIRCRAFT 1: Single Engine Piston Propeller Aircraft (Cirrus SR22)
-        cr22_brief = {'rwyelevation_m': 0, 'groundrun_m': 313,  # Take-off Constraint
+        sr22_brief = {'rwyelevation_m': 0, 'groundrun_m': 313,  # Take-off Constraint
                       'stloadfactor': 1.5, 'turnalt_m': 1000, 'turnspeed_ktas': 100,  # Turn Constraint
                       'climbalt_m': 0, 'climbspeed_kias': 101, 'climbrate_fpm': 1398,  # Climb Constraint
                       'cruisealt_m': 3048, 'cruisespeed_ktas': 182, 'cruisethrustfact': 1.0,  # Cruise Constraint
                       'servceil_m': 6580, 'secclimbspd_kias': 92,  # Service Ceiling Constraint
                       'vstallclean_kcas': 69}  # Minimum Stall speed
-        cr22_def = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1, 'wingarea_m2': 13.46,
+        sr22_def = {'aspectratio': 10.12, 'sweep_le_deg': 2, 'sweep_mt_deg': 0, 'bpr': -1, 'wingarea_m2': 13.46,
                     'weight_n': co.lbf2n(3400),
                     'weightfractions': {'turn': 1.0, 'climb': 1.0, 'cruise': 0.853, 'servceil': 1.0}}
-        cr22_perf = {'CDTO': 0.0414, 'CLTO': 0.59, 'CLmaxTO': 1.69, 'CLmaxclean': 1.45, 'CLminclean': -0.8,
+        sr22_perf = {'CDTO': 0.0414, 'CLTO': 0.59, 'CLmaxTO': 1.69, 'CLmaxclean': 1.45, 'CLminclean': -0.8,
                      'mu_R': 0.02, 'CDminclean': 0.0254, 'etaprop': {'take-off': 0.65, 'climb': 0.8, 'cruise': 0.85,
                                                                      'turn': 0.85, 'servceil': 0.8}}
-        self.ac_lib.append([cr22_brief, cr22_def, cr22_perf])
+        self.ac_lib.append([sr22_brief, sr22_def, sr22_perf])
 
         # AIRCRAFT 2: Fighter (F/A-18C Hornet)
         fa18c_brief = {'groundrun_m': 427, 'servceil_m': 15240,
@@ -115,9 +116,9 @@ class TestConstraintAnalysisModule(unittest.TestCase):
                                                  self.ac_lib[acindex][2])
 
         wingloading_pa = concept.acobj.weight_n / concept.acobj.wingarea_m2
-        speeds = {'va_keas': 90.3, 'vd_keas': 150}
+        divespeed_keas = 150
 
-        concept.flightenvelope(wingloading_pa=wingloading_pa, category='norm', designspeeds=speeds, textsize=10)
+        concept.flightenvelope(wingloading_pa=wingloading_pa, category='norm', vd_keas=divespeed_keas, textsize=10)
 
         return
 
@@ -126,13 +127,13 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         print("CS 23.335 Design Airspeeds Test.")
 
-        # Use Aircraft 1: SEPPA CR-22
+        # Use Aircraft 1: SEPPA SR-22
         acindex = 1
         concept = aw.CertificationSpecifications(self.ac_lib[acindex][0], self.ac_lib[acindex][1],
                                                  self.ac_lib[acindex][2])
 
         wingloadinglist_pa = [2000, 3000]
-        speeds = concept._paragraph335(wingloading_pa=wingloadinglist_pa)
+        _ = concept._paragraph335(wingloading_pa=wingloadinglist_pa)
 
         return
 
