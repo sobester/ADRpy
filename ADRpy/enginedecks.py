@@ -217,10 +217,10 @@ class turboprop_deck:
                                        bsfc_bsfc_gpknps])
 
     def thrust(self, mach, altitude_m):
-        """ Uses a cubic interpolation from the data points to find the thrust
-        data at given ISA altitudes and Mach numbers, can accept arrays of
-        Free-stream Mach (mach) and altitude (m) data as input and will
-        return a thrust (N) array.
+        """ Uses a cubic interpolation from the data points to find the hot
+        thrust data at given ISA altitudes and Mach numbers, can accept
+        arrays of Free-stream Mach (mach) and altitude (m) data as input
+        and will return a hot thrust (N) array.
 
         **Parameters:**
         mach
@@ -228,7 +228,7 @@ class turboprop_deck:
         altitude_m
             ISA Altitude (m). Can be a float, list or numpy array.
         **Outputs:**
-        Returns engine Thrust (N)
+        Returns engine hot thrust (N)
 
         **Example**
             t56 = turboprop_deck("T56-A")
