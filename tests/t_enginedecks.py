@@ -1,17 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 20 09:44:25 2020
-
-@author: Samuel
-"""
-
-# import ADRpy...Engine deck? as decks
 from ADRpy import enginedecks as decks
 import unittest
 import os
 import pandas as pd
 import math
-import numpy as np
 
 # A list of possible engine types. This list is included here to avoid the need
 # for an init function in the class.
@@ -60,7 +51,9 @@ class TestEngineDeck(unittest.TestCase):
                     # Breaks out of for look
                     break
             # -1 is because of the data available csv.
-            file_count = len(os.listdir(specific_type + " CSVs")) - 1
+            file_count = len(os.listdir(".." + os.sep + "ADRpy" + os.sep +
+                                        "data" + os.sep + "engine data" +
+                                        os.sep + specific_type + " CSVs")) - 1
             # Checks to see if the files counted in the CSV folder matches the
             # total from the data list.
             if file_count != len(known_data):
@@ -286,8 +279,10 @@ def _std_csv_name_read(engine_type, engine, file_name):
     """
     # Tries to see if file exists
     try:
-        data_frame = (pd.read_csv(engine_type + " CSVs" + os.sep + engine +
-                                  " " + file_name + " data.csv"))
+        data_frame = (pd.read_csv(".." + os.sep + "ADRpy" + os.sep + "data" +
+                                  os.sep + "engine data" + engine_type +
+                                  " CSVs" + os.sep + engine + " " + file_name +
+                                  " data.csv"))
     except FileNotFoundError:
         # If not then noting is returned
         return
