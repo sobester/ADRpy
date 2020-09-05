@@ -217,10 +217,10 @@ class turboprop_deck:
                                        bsfc_bsfc_gpknps])
 
     def thrust(self, mach, altitude_m):
-        """ Uses a cubic interpolation from the data points to find the thrust
-        data at given ISA altitudes and Mach numbers, can accept arrays of
-        Free-stream Mach (mach) and altitude (m) data as input and will
-        return a thrust (N) array.
+        """ Uses a cubic interpolation from the data points to find the hot
+        thrust data at given ISA altitudes and Mach numbers, can accept
+        arrays of Free-stream Mach (mach) and altitude (m) data as input
+        and will return a hot thrust (N) array.
 
         **Parameters:**
         mach
@@ -228,7 +228,7 @@ class turboprop_deck:
         altitude_m
             ISA Altitude (m). Can be a float, list or numpy array.
         **Outputs:**
-        Returns engine Thrust (N)
+        Returns engine hot thrust (N)
 
         **Example**
             t56 = turboprop_deck("T56-A")
@@ -334,10 +334,10 @@ class turboprop_deck:
         """
         # Checks to see if the data is available for this plot.
         if self.data_available[0] is False:
-            # Checks to see if printing is allowed
+            # Checks to see if printing is allowed.
             if self.silent is False:
-                print("This engine has no Thrust data available and so it is" +
-                      " not possible to plot this data.")
+                print("This engine has no hot thrust data available and so " +
+                      "it is not possible to plot this data.")
             return
         # Finds minimum and maximum values for Mach and altitude (m) data
         min_x = min(self.thr_data[0])
@@ -347,9 +347,9 @@ class turboprop_deck:
         # Labels the x and y axis; colour-bar and adds title
         x_label = "Mach Number"
         y_label = "Altitude (m)"
-        z_label = "Thrust (N)"
+        z_label = "Hot Thrust (N)"
         plt_title = self.engine + \
-            " thrust (N) for Mach number and altitude (m)"
+            " hot thrust (N) for Mach number and altitude (m)"
         # Applies demo plot function to produce plot.
         _demo_plot(min_x, max_x, min_y, max_y, self.thrust, x_label, y_label,
                    z_label, plt_title)
@@ -366,7 +366,7 @@ class turboprop_deck:
         if self.data_available[0] is False:
             # Checks to see if printing is allowed
             if self.silent is False:
-                print("This engine has no Power data available and so it is " +
+                print("This engine has no power data available and so it is " +
                       "not possible to plot this data.")
             return
         # Finds minimum and maximum values for Mach and altitude (m) data
@@ -409,7 +409,7 @@ class turboprop_deck:
         y_label = "Altitude (m)"
         z_label = "BSFC (g/(kWh))"
         plt_title = self.engine + \
-            " power (W) for Mach Number and altitude (m)"
+            " BSFC (g/(kWh)) for Mach Number and altitude (m)"
         # Applies demo plot function to produce plot.
         _demo_plot(min_x, max_x, min_y, max_y, self.bsfc, x_label, y_label,
                    z_label, plt_title)
@@ -585,7 +585,7 @@ class piston_deck:
         if self.data_available[0] is False:
             # Checks to see if printing is allowed
             if self.silent is False:
-                print("This engine has no Power data available and so it is " +
+                print("This engine has no power data available and so it is " +
                       "not possible to plot this data.")
             return
         # Finds minimum and maximum values for engine speed (RPM) and
@@ -755,8 +755,8 @@ class electric_deck:
         if self.data_available[0][0] is False:
             # Checks to see if printing is allowed
             if self.silent is False:
-                print("This engine has no Efficiency available and so it is " +
-                      "not possible to plot this data.")
+                print("This engine has no efficiency data available and so " +
+                      "it is not possible to plot this data.")
             return
         # Finds minimum and maximum values for motor speed (RPM) and
         # torque (Nm)
@@ -769,7 +769,7 @@ class electric_deck:
         y_label = "Torque (Nm)"
         z_label = "Efficiency"
         plt_title = self.engine + \
-            " efficiency for Motor Speed (RPM) and Torque (Nm)"
+            " efficiency for motor speed (RPM) and torque (Nm)"
         # Applies demo plot function to produce plot.
         _demo_plot(min_x, max_x, min_y, max_y, self.efficiency, x_label,
                    y_label, z_label, plt_title)
@@ -989,7 +989,7 @@ class jet_deck:
         if self.data_available[0][0] is False:
             # Checks to see if printing is allowed
             if self.silent is False:
-                print("This engine has no Thrust data available and so it is" +
+                print("This engine has no thrust data available and so it is" +
                       " not possible to plot this data.")
             return
         # Finds minimum and maximum values for mach and altitude (m) data
@@ -1036,7 +1036,7 @@ class jet_deck:
             if self.data_available[0][0] is False:
                 # Checks to see if printing is allowed
                 if self.silent is False:
-                    print("This engine has no Thrust data available and"
+                    print("This engine has no thrust data available and"
                           + " so it is not possible to plot this data." +
                           " Set alt to False to plot a graph of TSFC for" +
                           " Mach number and altitude.")
