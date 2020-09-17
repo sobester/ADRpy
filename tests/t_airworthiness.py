@@ -110,15 +110,16 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         print("CS 23.333 Flight Envelope Plot Test.")
 
+        vndefinitions={'divespeed_keas': 150, 'certcat': 'norm'}
+
         # Use Aircraft 6: Snorri Gudmundsson's example
         acindex = 6
         concept = aw.CertificationSpecifications(self.ac_lib[acindex][0], self.ac_lib[acindex][1],
-                                                 self.ac_lib[acindex][2])
+                                                 self.ac_lib[acindex][2], None, None, csbrief=vndefinitions)
 
         wingloading_pa = concept.acobj.weight_n / concept.acobj.wingarea_m2
-        divespeed_keas = 150
 
-        concept.flightenvelope(wingloading_pa=wingloading_pa, category='norm', vd_keas=divespeed_keas, textsize=10)
+        concept.flightenvelope(wingloading_pa=wingloading_pa, textsize=10)
 
         return
 
