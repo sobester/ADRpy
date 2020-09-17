@@ -147,7 +147,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         macharray = np.arange(0.1, 4, 0.1)
         liftslopelist = []
         for mach_inf in macharray:
-            liftslopelist.append(concept.liftslope(mach_inf=mach_inf))
+            liftslopelist.append(concept.liftslope_prad(mach_inf=mach_inf))
 
         # Assert that the lift curve slope is never below or equal to zero
         self.assertGreater(min(liftslopelist), 0)
@@ -196,7 +196,8 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         # Use Aircraft 0: Business Jet
         acindex = 0
-        concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2])
+        concept = ca.AircraftConcept(self.ac_lib[acindex][0], self.ac_lib[acindex][1], self.ac_lib[acindex][2], None,
+                                     "jet")
         wingloadinglist_pa = [2000, 3000, 4000, 5000, 6000, 7000]
 
         # Investigate the climb constraint
@@ -223,7 +224,6 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         # Investigate the take-off constraint
         print("T/W Take-off constraint test.")
         tw_sl, liftoffspeed_mpstas, _ = concept.twrequired_to(wingloadinglist_pa)
-
         self.assertEqual(round(10000 * tw_sl[0]), round(10000 * 0.19397876))
         self.assertEqual(round(10000 * liftoffspeed_mpstas[0]), round(10000 * 52.16511207))
         self.assertEqual(round(10000 * tw_sl[3]), round(10000 * 0.41110154))
