@@ -1,26 +1,26 @@
-from ADRpy import enginedecks as decks
 import unittest
 import os
 import pandas as pd
 import math
+
+from ADRpy import propulsion as decks
 
 # A list of possible engine types. This list is included here to avoid the need
 # for an init function in the class.
 ENGINE_TYPE = ["jet", "piston", "turboprop", "electric"]
 # A list of dictionaries for all types.This list is included here to avoid the
 # need for an init function in the class.
-ENGINE_DICTS = [decks.local_data(specific_type, return_data=True,
-                                 references=False) for specific_type in
-                ENGINE_TYPE]
+ENGINE_DICTS = [decks.local_data(specific_type, printdata=False) for specific_type in ENGINE_TYPE]
 
 
-class TestEngineDeck(unittest.TestCase):
+class TestPropulsionDeck(unittest.TestCase):
     """
     Tests that all engines are listed and the engines that are listed have data
     associated with them. It uses that data that was used as input data to
     produce the functions. The tests ensure that the output data is within 1%
     of the original input data.
     """
+
     def test_names(self):
         """
         This test ensures that each engine described in the local data csv
@@ -31,7 +31,7 @@ class TestEngineDeck(unittest.TestCase):
         # defaults data to true
         data = True
         # Goes through each engine type
-        for index, specific_type in enumerate(ENGINE_TYPE):
+        for index, engine_type in enumerate(ENGINE_TYPE):
             # Finds engine dictionary from list
             engine_dict = ENGINE_DICTS[index]
             # Creates a list of engines stored for verification.
@@ -41,7 +41,7 @@ class TestEngineDeck(unittest.TestCase):
             known_data = []
             # for each engine in each category.
             for engine in engine_list:
-                csvs = engine_dict[engine][0]
+                csvs = engine_dict[engine]['available_data']
                 # Creates a list of all data.
                 known_data += csvs
                 if len(csvs) == 0:
@@ -51,12 +51,12 @@ class TestEngineDeck(unittest.TestCase):
                     # Breaks out of for look
                     break
             # -1 is because of the data available csv.
-            file_count = len(os.listdir(".." + os.sep + "ADRpy" + os.sep +
-                                        "data" + os.sep + "engine data" +
-                                        os.sep + specific_type + " CSVs")) - 1
+            file_count = len(os.listdir(
+                os.path.join(os.path.dirname(decks.__file__), "data", "engine data", engine_type + " CSVs"))) - 1
             # Checks to see if the files counted in the CSV folder matches the
             # total from the data list.
             if file_count != len(known_data):
+                print(engine_type, file_count, len(known_data))
                 data = False
             # Breaks if data is set to False.
             if data is False:
@@ -78,9 +78,9 @@ class TestEngineDeck(unittest.TestCase):
         output_list = ["Thrust (N)", "TSFC (g/(kNs))"]
         fun_list = ["thrust", "tsfc"]
         # For each engine in the list of engines do the following.
-        self.assertTrue(_deck_tester(engine_list, engine_type, input1_list,
-                                     input2_list, output_list, fun_list,
-                                     fun_list, decks.jet_deck))
+        self.assertTrue(_deck_csvtester(engine_list, engine_type, input1_list,
+                                        input2_list, output_list, fun_list,
+                                        fun_list, decks.JetDeck))
 
     def test_turboprop_values(self):
         """
@@ -98,11 +98,10 @@ class TestEngineDeck(unittest.TestCase):
         input2_list = ["Altitude (m)", "Altitude (m)", "Altitude (m)"]
         # Returned values for each of the inputs.
         output_list = ["Thrust (N)", "BSFC (g/(kWh))", "Power (W)"]
-        fun_list = ["thrust", "tsfc", "power"]
+        fun_list = ["hotthrust", "tsfc", "shaftpower"]
         # For each engine in the list of engines do the following.
-        self.assertTrue(_deck_tester(engine_list, engine_type, input1_list,
-                                     input2_list, output_list, fun_list,
-                                     fun_list, decks.turboprop_deck))
+        self.assertTrue(_deck_csvtester(engine_list, engine_type, input1_list, input2_list, output_list, fun_list,
+                                        fun_list, decks.TurbopropDeck))
 
     def test_piston_values(self):
         """
@@ -120,14 +119,12 @@ class TestEngineDeck(unittest.TestCase):
         input2_list = ["Altitude (m)", "Power (W)", "Power (W)"]
         # Returned values for each of the two inputs.
         output_list = ["Power (W)", "BSFC (g/(kWh))", "BSFC (g/(kWh))"]
-        fun_list = ["power", "bsfc", "bsfc"]
+        fun_list = ["shaftpower", "bsfc", "bsfc"]
         file_name_list = ["power", "bsfc best power", "bsfc"]
         attr = [None, None, "economy"]
         # For each engine in the list of engines do the following.
-        self.assertTrue(_deck_tester(engine_list, engine_type, input1_list,
-                                     input2_list, output_list, fun_list,
-                                     file_name_list, decks.piston_deck,
-                                     attr=attr))
+        self.assertTrue(_deck_csvtester(engine_list, engine_type, input1_list, input2_list, output_list, fun_list,
+                                        file_name_list, decks.PistonDeck, attr=attr))
 
     def test_electric_values(self):
         """
@@ -145,9 +142,8 @@ class TestEngineDeck(unittest.TestCase):
         output_list = ["Efficiency"]
         fun_list = ["efficiency"]
         # For each engine in the list of engines do the following.
-        self.assertTrue(_deck_tester(engine_list, engine_type, input1_list,
-                                     input2_list, output_list, fun_list,
-                                     fun_list, decks.electric_deck))
+        self.assertTrue(_deck_csvtester(engine_list, engine_type, input1_list, input2_list, output_list, fun_list,
+                                        fun_list, decks.ElectricDeck))
 
     def test_jet_poly(self):
         """
@@ -166,61 +162,70 @@ class TestEngineDeck(unittest.TestCase):
         fun_list = ["sl_thrust", "sl_take_off_thrust"]
         file_name_list = ["thrust", "sl to thrust"]
         # For each engine in the list of engines do the following.
-        self.assertTrue(_deck_tester(engine_list, engine_type, input1_list,
-                                     input2_list, output_list, fun_list,
-                                     file_name_list, decks.jet_deck, alt=0,
-                                     x_only=True))
+        self.assertTrue(_deck_csvtester(engine_list, engine_type, input1_list, input2_list, output_list, fun_list,
+                                        file_name_list, decks.JetDeck, alt=0, x_only=True))
+
+    def test_propeller_etasolver(self):
+        """
+        Tests the implemented method for estimating propeller efficiency from geometrical parameters.
+        """
+        print("Tests Propeller efficiency solver")
+
+        propellerconcept = {'diameter_m': 2.67, 'bladecount': 4, 'bladeactivityfact': 100, 'idesign_cl': 0.5}
+
+        testprop = decks.PropellerDeck(propeller=propellerconcept)
+        eta = testprop.efficiency(mach=0.5026, altitude_m=8382, shaftpower_w=522000, prop_rpm=2000)
+        self.assertEqual(round(float(eta), 5), round(0.8976928369352944, 5))
 
 
-def _deck_tester(engine_list, engine_type, input1_list, input2_list,
-                 output_list, fun_list, file_name_list, class_required,
-                 alt=None, attr=None, x_only=False):
+def _deck_csvtester(engine_list, engine_type, input1_list, input2_list, output_list, fun_list, file_name_list,
+                    class_required, alt=None, attr=None, x_only=False):
     """
-    **Parameters**
-        engine_list:
-            List of engines.
+    **Parameters:**
+    engine_list:
+        List of engines.
 
-        engine_type:
-            String containing the type of engine under test.
+    deck_type:
+        String containing the type of engine under test.
 
-        input1_list
-            List of "x" value columns, each column corresponds to a function
-            in fun_list.
+    input1_list
+        List of "x" value columns, each column corresponds to a function
+        in fun_list.
 
-        input2_list
-            List of "y" value columns, each column corresponds to a function
-            in fun_list.
+    input2_list
+        List of "y" value columns, each column corresponds to a function
+        in fun_list.
 
-        output_list
-            List of "f(x,y)" values. This column contains data that is a
-            function of both x and y.
+    output_list
+        List of "f(x,y)" values. This column contains data that is a
+        function of both x and y.
 
-        fun_list.
-            list of functions. This contains the functions to apply to each
-            of the items in the lists: input1_list, input2_list to produce the
-            output which is then compared to: output_list.
+    fun_list.
+        list of functions. This contains the functions to apply to each
+        of the items in the lists: input1_list, input2_list to produce the
+        output which is then compared to: output_list.
 
-        file_name_list
-            list of files to search to find the x, y and z data. Again each
-            column has a corresponding function in fun_list.
+    file_name_list
+        list of files to search to find the x, y and z data. Again each
+        column has a corresponding function in fun_list.
 
-        class_reqired
-            class to use.
+    class_required
+        class to use.
 
-        alt=None
-            If alt is not None, then this means that the function will only
-            take data from a given altitude (m) and uses all data at that
-            altitude (m).
+    alt=None
+        If alt is not None, then this means that the function will only
+        take data from a given altitude (m) and uses all data at that
+        altitude (m).
 
-        attr=None.
-            Attribute applied to function being investigated.
+    attr=None.
+        Attribute applied to function being investigated.
 
-        x_only
-            A boolean statement that indicates whether a function has only x or
-            x and y input. If False then there is both x and y inputs accepted.
-            If True then only the data from the list input1_list will be used.
+    x_only
+        A boolean statement that indicates whether a function has only x or
+        x and y input. If False then there is both x and y inputs accepted.
+        If True then only the data from the list input1_list will be used.
 
-    **Returns**
+    **Outputs:**
         True or False. If True then the functions applied to the x and y data
         match the actual data (output_list) within 1% then True will be
         returned. Otherwise False will be returned.
@@ -235,35 +240,30 @@ def _deck_tester(engine_list, engine_type, input1_list, input2_list,
             attrb = attr[name_index]
         # For each engine in the list of engines do the following
         for engine in engine_list:
-            propulsor = class_required(engine, silent=True)
+            propulsor = class_required(engine)
             # Find and load the thrust data using Pandas.
-            test_data = _std_csv_name_read(engine_type, engine,
-                                           file_name_list[name_index])
+            test_data = _std_csv_name_read(engine_type, engine, file_name_list[name_index])
             # If there is data available, then use the deck search function to
             # find the actual output at the values and the predicted output.
             if test_data is not None:
-                thrust_n, predicted_thrust_n = \
-                    _deck_search(test_data,
-                                 getattr(propulsor, fun_list[name_index]),
-                                 input1_list[name_index],
-                                 input2_list[name_index], output_name, alt,
-                                 attrb, x_only)
+                thrust_n, predicted_thrust_n = _deck_search(test_data, getattr(propulsor, fun_list[name_index]),
+                                                            input1_list[name_index], input2_list[name_index],
+                                                            output_name, alt, attrb, x_only)
                 for index, thrust_value_n in enumerate(thrust_n):
                     # Checks to see if the predicted data matches with the
                     # actual data.
-                    percent = 100 * float(predicted_thrust_n[index]) / \
-                        float(thrust_value_n)
+                    percent = 100 * float(predicted_thrust_n[index]) / float(thrust_value_n)
                     if percent > 101 or percent < 99:
                         # If the results do not match then False is returned.
-                        return(False)
+                        return False
     # If all data matches, then return True
-    return(True)
+    return True
 
 
 def _std_csv_name_read(engine_type, engine, file_name):
     """
-    **Parameters**
-        engine_type
+    **Parameters:**
+        deck_type
             A string which contains one of the four listed families of
             aero-engine, which are: jet, piston, turboprop, electric.
 
@@ -273,66 +273,70 @@ def _std_csv_name_read(engine_type, engine, file_name):
         file_name
             A string containing data that is part of the csv file name.
 
-    **Returns**
+    **Outputs:**
         A pandas dataframe containing the information from the requested csv or
         nothing if it could not be found.
     """
     # Tries to see if file exists
     try:
-        data_frame = (pd.read_csv(".." + os.sep + "ADRpy" + os.sep + "data" +
-                                  os.sep + "engine data" + engine_type +
-                                  " CSVs" + os.sep + engine + " " + file_name +
-                                  " data.csv"))
+        data_frame = (pd.read_csv(os.path.join(os.path.dirname(decks.__file__), "data", "engine data",
+                                               engine_type + " CSVs", engine + " " + file_name + " data.csv")))
     except FileNotFoundError:
         # If not then noting is returned
         return
     # Returns data if it is available.
-    return(data_frame)
+    return data_frame
 
 
 def _deck_search(data, function, x, y, z, alt, attr=None, x_only=False):
     """
-    **Parameters**
-        data
-            pandas dataframe containing the data
+    **Parameters:**
 
-        x
-            string which matches a column heading in data.
+    data
+        pandas dataframe containing the data
 
-        y
-            string which matches a column heading in data.
+    x
+        string which matches a column heading in data.
 
-        z
-            string which matches a column heading in data.
+    y
+        string which matches a column heading in data.
 
-        alt
-            a number which defines an altitude (m) to investigate. If set as
-            None then a sample of altitudes will be taken at every fifth value
-            in the csv. If set to an altitude to investigate then it will take
-            all values at the given altitude.
+    z
+        string which matches a column heading in data.
 
-        attr
-            Attribute applied to function being investigated. If set to None
-            then no attribute will be applied to function being used.
+    alt
+        a number which defines an altitude (m) to investigate. If set as
+        None then a sample of altitudes will be taken at every fifth value
+        in the csv. If set to an altitude to investigate then it will take
+        all values at the given altitude.
 
-        x_only
-            A boolean statement that indicates whether a function has only x or
-            x and y input. If False then there is both x and y inputs accepted.
-            If True then only the data from the list input1_list will be used.
-    **Returns**
-        This returns two lists, the first list contains the actual output and
-        the second returns the predicted output.
+    attr
+        Attribute applied to function being investigated. If set to None
+        then no attribute will be applied to function being used.
+
+    x_only
+        A boolean statement that indicates whether a function has only x or
+        x and y input. If False then there is both x and y inputs accepted.
+        If True then only the data from the list input1_list will be used.
+
+    **Outputs:**
+
+    output
+        list, containing the actual output data.
+
+    output_predict
+        list, containing the predicted output data.
     """
     if alt is None:
         length = len(data)  # Finds length of the data.
-        step = math.floor(length/5)  # Finds the step size
+        step = math.floor(length / 5)  # Finds the step size
     else:
         # If Alt has a value, filter the dataframe by that value.
         data = data[data["Altitude (m)"] == alt]
         step = 1
     output = []
     output_predict = []
-    for index in range(0, len(data)-1, step):  # Creates an index
+    for index in range(0, len(data) - 1, step):  # Creates an index
         input_x = data.loc[index][x]  # Finds input x data.
         input_y = data.loc[index][y]  # Finds input y data.
         output_z = data.loc[index][z]  # Finds output z data.
@@ -347,9 +351,13 @@ def _deck_search(data, function, x, y, z, alt, attr=None, x_only=False):
             output_predict_z = function(input_x, input_y, attr)
         # Checks to see if output is nan type
         if pd.isnull(output_z) or pd.isnull(output_predict_z):
-            None
+            pass
         else:
             output.append(output_z)  # Finds output data.
             # Creates a thrust prediction.
             output_predict.append(output_predict_z)
-    return(output, output_predict)
+    return output, output_predict
+
+
+if __name__ == '__main__':
+    unittest.main()
