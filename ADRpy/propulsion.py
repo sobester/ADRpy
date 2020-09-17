@@ -70,7 +70,7 @@ def local_data(deck_type, printdata=False):
                           + " and " + enginetypes_list[-1])
 
     # Produce a nested list of available engines, notes on the data obtained, and relevant references
-    enginecsvs_path = os.path.join(os.path.dirname(__file__), "data", "engine data", deck_type + " CSVs")
+    enginecsvs_path = os.path.join(os.path.dirname(__file__), "data", "engine data", deck_type.capitalize() + " CSVs")
     availablecsvs_list = os.listdir(enginecsvs_path)
     with open(os.path.join(enginecsvs_path, '_' + deck_type + '_metadata.csv'), 'r', encoding="utf-8-sig") as file:
         reader = csv.reader(file)
