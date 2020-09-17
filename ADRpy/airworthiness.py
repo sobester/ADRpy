@@ -53,6 +53,11 @@ class CertificationSpecifications:
         Dictionary. Definition of key parameters relating to the certification specification
         of an aircraft. Contains the following key names:
 
+        certcat
+            String. Used to specify the intended certification category of the aircraft. Choose from
+            either :code:`'norm'` (normal), :code:`'util'` (utility), :code:`'comm'` (commuter), or
+            :code:`'aero'` (aerobatic) categories of aircraft. Optional, defaults to :code:`'norm'`.
+
         altitude_m
             Float. The altitude (in metres) at which the aircraft should have its certification tested.
             Optional, defaults to 0.
@@ -85,6 +90,8 @@ class CertificationSpecifications:
         # Specify default flags or parameters for the Vn definitions dictionary, if parameter is left unspecified
 
         default_csbrief = {
+            # Certification category
+            'certcat': 'norm',  # Default category is normal
             # Vn altitude query
             'altitude_m': 0,  # Assign sea level (h = 0 metres)
             # Design Airspeeds
@@ -115,6 +122,7 @@ class CertificationSpecifications:
             self.cruisespeed_keas = csbrief['cruisespeed_keas']
 
         # Populate object attributes
+        self.category = csbrief['certcat']
         self.divespeed_keas = csbrief['divespeed_keas']
         self.maxlevelspeed_keas = csbrief['maxlevelspeed_keas']
         self.altitude_m = csbrief['altitude_m']
@@ -480,7 +488,7 @@ class CertificationSpecifications:
 
         return gustload_dict, k_g, liftslope_prad
 
-    def flightenvelope(self, wingloading_pa, category='norm', textsize=None, figsize_in=None, show=True):
+    def flightenvelope(self, wingloading_pa, textsize=None, figsize_in=None, show=True):
         """EASA specification for CS-23.333(d) Flight Envelope (in cruising conditions).
 
         Calling this method will plot the flight envelope at a single wing-loading.
@@ -489,11 +497,6 @@ class CertificationSpecifications:
 
         wingloading_pa
             float, single wingloading at which the flight envelope should be plotted for, in Pa.
-
-        category
-            string, choose from either :code:`'norm'` (normal), :code:`'util'` (utility),
-            :code:`'comm'` (commuter), or :code:`'aero'` (aerobatic) categories of aircraft.
-            Optional, defaults to :code:`'norm'`.
 
         textsize
             integer, sets a representative reference fontsize that text in the output plot scale
@@ -516,6 +519,7 @@ class CertificationSpecifications:
 
         """
 
+        category = self.category
         cs23categories_list = ['norm', 'util', 'comm', 'aero']
         if category not in cs23categories_list:
             designmsg = 'Valid aircraft category not specified, please select from "{0}", "{1}", "{2}", or "{3}".' \
