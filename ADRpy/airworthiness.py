@@ -49,22 +49,88 @@ class CertificationSpecifications:
         `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`_
         class object. See :code:`AircraftConcept` in :code:`constraintanalysis.py`.
 
+    csbrief
+        Dictionary. Definition of key parameters relating to the certification specification
+        of an aircraft. Contains the following key names:
+
+        altitude_m
+            Float. The altitude (in metres) at which the aircraft should have its certification tested.
+            Optional, defaults to 0.
+
+        cruisespeed_keas
+            Float. The design cruise speed (in knots, equivalent airspeed). Commonly denoted V_C.
+
+        divespeed_keas
+            Float. The design dive speed (in knots, equivalent airspeed). Commonly denoted V_D.
+
+        maxlevelspeed_keas
+            Float. The design maximum level-flight speed at sea level (in knots, equivalent
+            airspeed). Commonly denoted V_H.
+
+        weightfraction
+            Float. The fraction (nondimensional) of the maximum take-off weight at which
+            the aircraft should be certified. Optional, defaults to 1.
+
     """
 
-    def __init__(self, brief=None, design=None, performance=None, designatm=None):
+    def __init__(self, brief=None, design=None, performance=None, designatm=None, propulsion=None, csbrief=None):
+
+        # Assign a default, if needed, to the csbrief dictionary
+        if csbrief is None:
+            csbrief = {}
+
         # Build an aircraft object based on the design dictionaries and atmosphere object
         self.acobj = ca.AircraftConcept(brief=brief, design=design, performance=performance, designatm=designatm)
+
+        # Specify default flags or parameters for the Vn definitions dictionary, if parameter is left unspecified
+
+        default_csbrief = {
+            # Vn altitude query
+            'altitude_m': 0,  # Assign sea level (h = 0 metres)
+            # Design Airspeeds
+            'cruisespeed_keas': False,  # Flag as not specified
+            'divespeed_keas': False,  # Flag as not specified
+            'maxlevelspeed_keas': False,  # Flag as not specified
+            # Vn loading query, fraction of MTOW
+            'weightfraction': 1  # Assume V-n diagram applies to MTOW loading
+        }
+
+        # Use the templates (default dictionaries) to populate missing values in the provided design dictionaries
+
+        # Iterate through the defaults dictionary
+        for defaults_i, (defaults_k, defaults_v) in enumerate(default_csbrief.items()):
+            # If a parameter of csbrief is left unspecified by the user, copy in the default value
+            if defaults_k not in csbrief:
+                csbrief.update({defaults_k: defaults_v})
+
+        # FURTHER COMPREHENSION: If design cruise speed was not specified in the csbrief dictionary argument
+        if csbrief['cruisespeed_keas'] is False:
+            # Check to see if a cruise speed can instead be swiped from the design brief
+            if self.acobj.cruisespeed_ktas is False:
+                self.cruisespeed_keas = False
+            else:
+                rho_kgpm3 = self.acobj.designatm.airdens_kgpm3(csbrief['altitude_m'])
+                self.cruisespeed_keas = co.tas2eas(self.acobj.cruisespeed_ktas, rho_kgpm3)
+        else:
+            self.cruisespeed_keas = csbrief['cruisespeed_keas']
+
+        # Populate object attributes
+        self.divespeed_keas = csbrief['divespeed_keas']
+        self.maxlevelspeed_keas = csbrief['maxlevelspeed_keas']
+        self.altitude_m = csbrief['altitude_m']
+        self.weightfraction = csbrief['weightfraction']
+
         return
 
     def vs_keas(self, loadfactor):
         """Equivalent air speed in knots for stall at design weight, for some loadfactor"""
 
         if self.acobj.weight_n is False:
-            defmsg = "Maximum take-off weight was not specified in the design definitions dictionary"
+            defmsg = 'Maximum take-off weight was not specified in the design definitions dictionary'
             raise ValueError(defmsg)
 
         if self.acobj.wingarea_m2 is False:
-            defmsg = "Wing area was not specified in the design definitions dictionary"
+            defmsg = 'Wing area was not specified in the design definitions dictionary'
             raise ValueError(defmsg)
 
         weight_n = self.acobj.weight_n
@@ -73,14 +139,14 @@ class CertificationSpecifications:
         if loadfactor >= 0:
 
             if self.acobj.clmaxclean is False:
-                perfmsg = "Maximum lift coefficient in clean configuration was not specified in performance dictionary"
+                perfmsg = 'Maximum lift coefficient in clean configuration was not specified in performance dictionary'
                 raise ValueError(perfmsg)
             cl = self.acobj.clmaxclean
 
         else:
 
             if self.acobj.clminclean is False:
-                perfmsg = "Minimum lift coefficient in clean configuration was not specified in performance dictionary"
+                perfmsg = 'Minimum lift coefficient in clean configuration was not specified in performance dictionary'
                 raise ValueError(perfmsg)
             cl = self.acobj.clminclean
 
@@ -112,7 +178,7 @@ class CertificationSpecifications:
         and minimum limit loads from symmetrical manoeuvres, as well as gust types each category
         must be designed to withstand.
 
-        **Returns:**
+        **Outputs:**
 
         manoeuvre_dict
             dictionary, with aircraft categories :code:`'norm'`,:code:`'util'`, :code:`'comm'`,
@@ -129,11 +195,7 @@ class CertificationSpecifications:
             aircraft (rough gusts), whereas :code:`'Uc_mps'` and :code:`'Ud_mps'` apply to all.
         """
 
-        if self.acobj.cruisealt_m is False:
-            cruisemsg = "Cruising altitude was not specified in the designbrief dictionary"
-            raise ValueError(cruisemsg)
-
-        altitude_m = self.acobj.cruisealt_m
+        altitude_m = self.altitude_m
 
         # Create a dictionary of empty dictionaries for each aircraft category
         cs23categories_list = ['norm', 'util', 'comm', 'aero']
@@ -187,31 +249,20 @@ class CertificationSpecifications:
         wingloading_pa
             float or array, list of wing-loading values in Pa.
 
-        **Returns:**
+        **Outputs:**
 
         eas_dict
             dictionary, containing minimum and maximum allowable design airspeeds in KEAS.
 
-        **Note:**
-
-        This method is not fully implemented, a future revision would allow the cruise and
-        design speeds to be selected as functions of Mach number based on compressibility
-        limits. Furthermore, the cruise speed should be limited by maximum level flight speed
-        but is not currently implemented.
-
         """
-        if self.acobj.cruisealt_m is False:
-            cruisemsg = "Cruise altitude not specified in the designbrief dictionary."
-            raise ValueError(cruisemsg)
-        rho_kgpm3 = self.acobj.designatm.airdens_kgpm3(self.acobj.cruisealt_m)
 
-        if self.acobj.cruisespeed_ktas is False:
-            cruisemsg = "Cruise speed not specified in the designbrief dictionary."
+        if self.cruisespeed_keas is False:
+            cruisemsg = 'Cruise speed not specified in the csbrief or designbrief dictionary.'
             raise ValueError(cruisemsg)
-        vc_keas = co.tas2eas(self.acobj.cruisespeed_ktas, rho_kgpm3)
+        vc_keas = self.cruisespeed_keas
 
         if self.acobj.clmaxclean is False:
-            perfmsg = "CLmaxclean must be specified in the performance dictionary."
+            perfmsg = 'CLmaxclean must be specified in the performance dictionary.'
             raise ValueError(perfmsg)
         clmaxclean = self.acobj.clmaxclean
 
@@ -233,7 +284,14 @@ class CertificationSpecifications:
         eas_dict['comm'].update({'vcmin_keas': vcfactor_1i * np.sqrt(wingloading_lbft2)})
         eas_dict['aero'].update({'vcmin_keas': vcfactor_1ii * np.sqrt(wingloading_lbft2)})
 
-        # (a)(3) Requires vh_keas
+        # (a)(3)
+        if self.maxlevelspeed_keas is False:
+            for category in cs23categories_list:
+                eas_dict[category].update({'vcsoftmax_keas': False})
+        else:
+            for category in cs23categories_list:
+                eas_dict[category].update({'vcsoftmax_keas': 0.9 * self.maxlevelspeed_keas}) # This is not strict
+
         # (a)(4) Requires Mach
 
         # (b) Design dive speed, V_D
@@ -258,16 +316,16 @@ class CertificationSpecifications:
 
         for category in cs23categories_list:
             eas_dict[category].update({'vamin_keas': vs_keas * math.sqrt(manoeuvrelimits[category]['npos_min'])})
-            eas_dict[category].update({'vamax_keas': vc_keas})
+            eas_dict[category].update({'vasoftmax_keas': vc_keas}) # This is not strict
 
         # (d) Design speed for maximum gust intensity, V_B
 
         # (d)(1)
         _, gustspeedsmps = self._paragraph333()
-        _, k_g, liftslope = self._paragraph341(wingloading_pa, speedatgust_keas={'Uc': vc_keas})
+        _, k_g, liftslope_prad = self._paragraph341(wingloading_pa, speedatgust_keas={'Uc': vc_keas})
 
-        cruisewfraction = self.acobj.cruise_weight_fraction
-        vs1_keas = self.vs_keas(loadfactor=cruisewfraction)
+        wfract = self.weightfraction
+        vs1_keas = self.vs_keas(loadfactor=wfract)
 
         for category in cs23categories_list:
 
@@ -276,12 +334,12 @@ class CertificationSpecifications:
             else:
                 gust_de_mps = gustspeedsmps[category]['Uc_mps']
 
-            cruiseloading_pa = wingloading_pa * self.acobj.cruise_weight_fraction
+            trueloading_pa = wingloading_pa * wfract
             rho0_kgm3 = self.acobj.designatm.airdens_kgpm3(altitudes_m=0)
 
             a = 1
-            b = -(liftslope / clmaxclean) * k_g * gust_de_mps
-            c = -2 * cruiseloading_pa / (rho0_kgm3 * clmaxclean)
+            b = -(liftslope_prad / clmaxclean) * k_g * gust_de_mps
+            c = -2 * trueloading_pa / (rho0_kgm3 * clmaxclean)
             vbmin1_keas = co.mps2kts((-b + (b ** 2 - 4 * a * c) ** 0.5) / (2 * a))
             eas_dict[category].update({'vbmin1_keas': vbmin1_keas})
 
@@ -304,7 +362,7 @@ class CertificationSpecifications:
         wingloading_pa
             float or array, list of wing-loading values in Pa.
 
-        **Returns:**
+        **Outputs:**
 
         limitload_dict
             dictionary, with aircraft categories :code:`'norm'`,:code:`'util'`, :code:`'comm'`,
@@ -314,7 +372,7 @@ class CertificationSpecifications:
 
         """
         if self.acobj.wingarea_m2 is False:
-            defmsg = "Reference wing area not specified in the design definitions dictionary."
+            defmsg = 'Reference wing area not specified in the design definitions dictionary.'
             raise ValueError(defmsg)
 
         mtow_n = self.acobj.weight_n
@@ -361,7 +419,7 @@ class CertificationSpecifications:
             should be evaluated. The airspeed at each condition in KEAS should be passed as
             the value to one or more of the following keys: :code:`'Ub'`, :code:`'Uc'`, and :code:`'Ud'`.
 
-        **Returns:**
+        **Outputs:**
 
         gustload_dict
             dictionary, with aircraft categories :code:`'norm'`,:code:`'util'`, :code:`'comm'`,
@@ -372,34 +430,31 @@ class CertificationSpecifications:
         k_g
             float, the gust alleviation factor
 
-        liftslope
-            float, the liftslope as calculated by the :code:`constraintanalysis` module, under
+        liftslope_prad
+            float, the liftslope_prad as calculated by the :code:`constraintanalysis` module, under
             cruise conditions.
 
         """
 
-        if self.acobj.cruisespeed_ktas is False:
-            cruisemsg = "Cruise speed not specified in the designbrief dictionary."
-            raise ValueError(cruisemsg)
-        cruisespeed_mpstas = co.kts2mps(self.acobj.cruisespeed_ktas)
-
-        if self.acobj.cruisealt_m is False:
-            cruisemsg = "Cruise altitude not specified in the designbrief dictionary."
-            raise ValueError(cruisemsg)
-
-        altitude_m = self.acobj.cruisealt_m
-        mach = self.acobj.designatm.mach(airspeed_mps=cruisespeed_mpstas, altitude_m=altitude_m)
-        liftslope = self.acobj.liftslope(mach_inf=mach)
+        altitude_m = self.altitude_m
         rho_kgm3 = self.acobj.designatm.airdens_kgpm3(altitude_m)
-        rho0_kgm3 = self.acobj.designatm.airdens_kgpm3()
 
+        if self.cruisespeed_keas is False:
+            cruisemsg = 'Cruise speed not specified in the csbrief or designbrief dictionary.'
+            raise ValueError(cruisemsg)
+        cruisespeed_mpstas = co.kts2mps(co.eas2tas(self.cruisespeed_keas, localairdensity_kgm3=rho_kgm3))
+        mach = self.acobj.designatm.mach(airspeed_mps=cruisespeed_mpstas, altitude_m=altitude_m)
+
+        liftslope_prad = self.acobj.liftslope_prad(mach_inf=mach)
+        rho0_kgm3 = self.acobj.designatm.airdens_kgpm3()
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
-        cruiseloading_pa = wingloading_pa * self.acobj.cruise_weight_fraction
+        wfract = self.weightfraction
+        trueloading_pa = wingloading_pa * wfract
 
         _, gusts_mps = self._paragraph333()
 
         # Aeroplane mass ratio
-        mu_g = (2 * cruiseloading_pa) / (rho_kgm3 * self._meanchord_m()['SMC'] * liftslope * constants.g)
+        mu_g = (2 * trueloading_pa) / (rho_kgm3 * self._meanchord_m()['SMC'] * liftslope_prad * constants.g)
 
         # Gust alleviation factor
         k_g = 0.88 * mu_g / (5.3 + mu_g)
@@ -417,15 +472,15 @@ class CertificationSpecifications:
                 if suffix in speedatgust_keas:
                     airspeed_keas = [value for key, value in speedatgust_keas.items() if suffix in key][0]
                     airspeed_mps = co.kts2mps(airspeed_keas)
-                    q = k_g * rho0_kgm3 * gustspeed_mps * airspeed_mps * liftslope / (2 * cruiseloading_pa)
+                    q = k_g * rho0_kgm3 * gustspeed_mps * airspeed_mps * liftslope_prad / (2 * trueloading_pa)
                     poskey = 'npos_' + suffix
                     negkey = 'nneg_' + suffix
                     gustload_dict[category].update({poskey: 1 + q})
                     gustload_dict[category].update({negkey: 1 - q})
 
-        return gustload_dict, k_g, liftslope
+        return gustload_dict, k_g, liftslope_prad
 
-    def flightenvelope(self, wingloading_pa, category='norm', vd_keas=None, textsize=None, figsize_in=None, show=True):
+    def flightenvelope(self, wingloading_pa, category='norm', textsize=None, figsize_in=None, show=True):
         """EASA specification for CS-23.333(d) Flight Envelope (in cruising conditions).
 
         Calling this method will plot the flight envelope at a single wing-loading.
@@ -440,11 +495,6 @@ class CertificationSpecifications:
             :code:`'comm'` (commuter), or :code:`'aero'` (aerobatic) categories of aircraft.
             Optional, defaults to :code:`'norm'`.
 
-        vd_keas
-            float, allows for specification of the design divespeed :code:`'vd_keas'` with units
-            KEAS. If the desired speed does not fit in the bounds produced by CS-23.335, the minimum
-            allowable airspeed is used instead.
-
         textsize
             integer, sets a representative reference fontsize that text in the output plot scale
             themselves in accordance to. Optional, defaults to 10.
@@ -457,7 +507,7 @@ class CertificationSpecifications:
         show
             boolean, used to specify if the plot should be displayed. Optional, defaults to True.
 
-        **Returns:**
+        **Outputs:**
 
         coords_poi
             dictionary, containing keys :code:`A` through :code:`G`, with values of coordinate tuples.
@@ -468,7 +518,7 @@ class CertificationSpecifications:
 
         cs23categories_list = ['norm', 'util', 'comm', 'aero']
         if category not in cs23categories_list:
-            designmsg = "Valid aircraft category not specified, please select from '{0}', '{1}', '{2}', or '{3}'." \
+            designmsg = 'Valid aircraft category not specified, please select from "{0}", "{1}", "{2}", or "{3}".' \
                 .format(cs23categories_list[0], cs23categories_list[1], cs23categories_list[2], cs23categories_list[3])
             raise ValueError(designmsg)
         catg_names = {'norm': "Normal", 'util': "Utility", 'comm': "Commuter", 'aero': "Aerobatic"}
@@ -481,58 +531,68 @@ class CertificationSpecifications:
             figsize_in = default_figsize_in
         elif type(figsize_in) == list:
             if len(figsize_in) != 2:
-                argmsg = "Unsupported figure size, should be length 2, found {0} instead - using default parameters." \
+                argmsg = 'Unsupported figure size, should be length 2, found {0} instead - using default parameters.' \
                     .format(len(figsize_in))
                 warnings.warn(argmsg, RuntimeWarning)
                 figsize_in = default_figsize_in
 
-        if self.acobj.cruisealt_m is False:
-            cruisemsg = "Cruise altitude not specified in the designbrief dictionary."
-            raise ValueError(cruisemsg)
-        rho_kgm3 = self.acobj.designatm.airdens_kgpm3(self.acobj.cruisealt_m)
+        rho_kgm3 = self.acobj.designatm.airdens_kgpm3(self.altitude_m)
         rho0_kgm3 = self.acobj.designatm.airdens_kgpm3()
 
-        if self.acobj.cruisespeed_ktas is False:
-            cruisemsg = "Cruise speed not specified in the designbrief dictionary."
+        if self.cruisespeed_keas is False:
+            cruisemsg = 'Cruise speed not specified in the csbrief or designbrief dictionary.'
             raise ValueError(cruisemsg)
-        vc_ktas = self.acobj.cruisespeed_ktas
+        vc_keas = self.cruisespeed_keas
+
+        if self.divespeed_keas is False:
+            divemsg = 'Dive speed not specified in the csbrief or designbrief dictionary, using minimum allowable ' \
+                      'speed as specified in CS 23.335(b)(2).'
+            warnings.warn(divemsg, RuntimeWarning)
 
         if self.acobj.clmaxclean is False:
-            perfmsg = "Clmaxclean not specified in the performance dictionary"
+            perfmsg = 'Clmaxclean not specified in the performance dictionary'
             raise ValueError(perfmsg)
         clmax = self.acobj.clmaxclean
 
         if self.acobj.clminclean is False:
-            perfmsg = "Clminclean not specified in the performance dictionary"
+            perfmsg = 'Clminclean not specified in the performance dictionary'
             raise ValueError(perfmsg)
         clmin = self.acobj.clminclean
 
         wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+        wfract = self.weightfraction
+        trueloading_pa = wingloading_pa * wfract
         speedlimits_dict = self._paragraph335(wingloading_pa=wingloading_pa)[category]
         manoeuvreload_dict, gustspeeds_dict = self._paragraph333()
 
+        # V_C, Cruise Speed
+        vcmin_keas = float(speedlimits_dict['vcmin_keas'])
+        vcmax_keas = speedlimits_dict['vcsoftmax_keas']
+        vc_keas = max(vc_keas, vcmin_keas)
+        if (vc_keas > vcmax_keas) and vcmax_keas is not False:
+            info = "CS 23.335(a)(3): V_C need not exceed 0.9 * V_H Sea Level."
+            warnings.warn(info, UserWarning)
+
+        # V_D, Dive Speed
+        vdmin_keas = float(speedlimits_dict['vdmin_keas'])
+        if self.divespeed_keas is False:
+            vd_keas = vdmin_keas
+        else:
+            vd_keas = max(self.divespeed_keas, vdmin_keas)
+
         # V_A, Manoeuvring Speed
         vamin_keas = speedlimits_dict['vamin_keas']
-        vamax_keas = speedlimits_dict['vamax_keas']
-
-        va_keas = np.interp(vamin_keas, [vamin_keas, vamax_keas], [vamin_keas, vamax_keas])
+        vamax_keas = speedlimits_dict['vasoftmax_keas']
+        va_keas = vamin_keas
+        if va_keas > vc_keas:
+            info = "CS 23.335(c)(2): V_A need not exceed V_C used in design."
+            warnings.warn(info, UserWarning)
 
         # V_B, Gust Penetration Speed
         vbmin_keas = float(speedlimits_dict['vbmin_keas'])
         vbpen_keas = float(speedlimits_dict['vbmin1_keas'])
         vbmax_keas = float(speedlimits_dict['vbmax_keas'])
-        vb_keas = np.interp(vbpen_keas, [vbmin_keas, vbmax_keas], [vbmin_keas, vbmax_keas])
-
-        # V_C, Cruise Speed
-        vcmin_keas = float(speedlimits_dict['vcmin_keas'])
-        vc_keas = max(co.tas2eas(vc_ktas, rho_kgm3), vcmin_keas)
-
-        # V_D, Dive Speed
-        vdmin_keas = float(speedlimits_dict['vdmin_keas'])
-        if vd_keas is None:
-            vd_keas = vdmin_keas
-        else:
-            vd_keas = max(vd_keas, vdmin_keas)
+        vb_keas = vbpen_keas
 
         # V_S, Stall Speed
         vs_keas = self.vs_keas(loadfactor=1)
@@ -540,7 +600,7 @@ class CertificationSpecifications:
         # V_invS, Inverted Stalling Speed
         vis_keas = self.vs_keas(loadfactor=-1)
         if vis_keas < vs_keas:
-            argmsg = "Inverted-flight stall speed < Level-flight stall speed, consider reducing design Manoeuvre Speed."
+            argmsg = 'Inverted-flight stall speed < Level-flight stall speed, consider reducing design Manoeuvre Speed.'
             warnings.warn(argmsg, RuntimeWarning)
 
         # V_invA, Inverted Manoeuvring Speed
@@ -555,15 +615,18 @@ class CertificationSpecifications:
         coordinate_list = ['x', 'y']
         # Curve OA
         oa_x = np.linspace(0, va_keas, 100, endpoint=True)
-        oa_y = rho0_kgm3 * (co.kts2mps(oa_x)) ** 2 * clmax / wingloading_pa / 2
+        oa_y = rho0_kgm3 * (co.kts2mps(oa_x)) ** 2 * clmax / trueloading_pa / 2
         coords_manoeuvre.update({'OA': dict(zip(coordinate_list, [list(oa_x), list(oa_y)]))})
         # Points D, E, F
-        coords_manoeuvre.update({'D': dict(zip(coordinate_list, [vd_keas, manoeuvreload_dict[category]['npos_D']]))})
-        coords_manoeuvre.update({'E': dict(zip(coordinate_list, [vd_keas, manoeuvreload_dict[category]['nneg_D']]))})
-        coords_manoeuvre.update({'F': dict(zip(coordinate_list, [vc_keas, manoeuvreload_dict[category]['nneg_C']]))})
+        coords_manoeuvre.update({'D': dict(zip(coordinate_list, [vd_keas, manoeuvreload_dict[category]['npos_D'] * (
+                    wingloading_pa / trueloading_pa)]))})
+        coords_manoeuvre.update({'E': dict(zip(coordinate_list, [vd_keas, manoeuvreload_dict[category]['nneg_D'] * (
+                    wingloading_pa / trueloading_pa)]))})
+        coords_manoeuvre.update({'F': dict(zip(coordinate_list, [vc_keas, manoeuvreload_dict[category]['nneg_C'] * (
+                    wingloading_pa / trueloading_pa)]))})
         # Curve GO
         go_x = np.linspace(viamin_keas, 0, 100, endpoint=True)
-        go_y = 0.5 * rho0_kgm3 * co.kts2mps(go_x) ** 2 * clmin / wingloading_pa
+        go_y = 0.5 * rho0_kgm3 * co.kts2mps(go_x) ** 2 * clmin / trueloading_pa
         coords_manoeuvre.update({'GO': dict(zip(coordinate_list, [list(go_x), list(go_y)]))})
 
         # Flight Envelope coordinates
@@ -574,15 +637,15 @@ class CertificationSpecifications:
         sc_x = np.linspace(vs_keas, vc_keas, 100, endpoint=True)
         sc_y = []
         max_ygust = float(gustloads[category][list(gustloads[category].keys())[0]])
-        b_ygustpen = float(rho0_kgm3 * (co.kts2mps(vbpen_keas)) ** 2 * clmax / wingloading_pa / 2)
+        b_ygustpen = float(rho0_kgm3 * (co.kts2mps(vbpen_keas)) ** 2 * clmax / trueloading_pa / 2)
         c_ygust = float(gustloads[category]['npos_Uc'])
-        d_ymano = manoeuvreload_dict[category]['npos_D']
+        d_ymano = float(manoeuvreload_dict[category]['npos_D'] / wfract)
         for speed in sc_x:
             # If below minimum manoeuvring speed or gust intersection speed, keep on the stall curve
             if (speed <= va_keas) or (speed <= vbpen_keas):
-                sc_y.append(rho0_kgm3 * (co.kts2mps(speed)) ** 2 * clmax / wingloading_pa / 2)
+                sc_y.append(rho0_kgm3 * (co.kts2mps(speed)) ** 2 * clmax / trueloading_pa / 2)
             # Else the flight envelope is the max of the gust/manoeuvre envelope sizes
-            elif vbpen_keas > va_keas:
+            else:  # vbpen_keas > va_keas
                 sc_y.append(max(np.interp(speed, [vb_keas, vc_keas], [b_ygustpen, c_ygust]), d_ymano))
         coords_envelope.update({'SC': dict(zip(coordinate_list, [list(sc_x), sc_y]))})
         # Line CD
@@ -590,30 +653,30 @@ class CertificationSpecifications:
         cd_y = []
         d_ygust = float(gustloads[category]['npos_Ud'])
         for speed in cd_x:
-            cd_y.append(max(np.interp(speed, [vc_keas, vd_keas], [float(sc_y[-1]), d_ygust]), d_ymano))
+            cd_y.append(float(max(np.interp(speed, [vc_keas, vd_keas], [float(sc_y[-1]), d_ygust]), d_ymano)))
         coords_envelope.update({'CD': dict(zip(coordinate_list, [list(cd_x), cd_y]))})
         # Point E
         e_ygust = float(gustloads[category]['nneg_Ud'])
-        e_ymano = manoeuvreload_dict[category]['nneg_D']
+        e_ymano = manoeuvreload_dict[category]['nneg_D'] * wfract
         e_y = min(e_ygust, e_ymano)
         coords_envelope.update({'E': dict(zip(coordinate_list, [vd_keas, e_y]))})
         # Line EF
         ef_x = np.linspace(vd_keas, vc_keas, 100, endpoint=True)
         ef_y = []
         f_ygust = float(gustloads[category]['nneg_Uc'])
-        f_ymano = manoeuvreload_dict[category]['nneg_C']
+        f_ymano = manoeuvreload_dict[category]['nneg_C'] / wfract
         for speed in ef_x:
-            ef_y.append(min(np.interp(speed, [vc_keas, vd_keas], [f_ygust, e_ygust]), f_ymano))
+            ef_y.append(min(np.interp(speed, [vc_keas, vd_keas], [f_ygust, e_ygust]), e_ymano))
         coords_envelope.update({'EF': dict(zip(coordinate_list, [list(ef_x), ef_y]))})
         # Line FG
         fg_x = np.linspace(vc_keas, viamin_keas, 100, endpoint=True)
         fg_y = []
         for speed in fg_x:
-            fg_y.append(min(np.interp(speed, [0, vc_keas], [1, f_ygust]), f_ymano))
+            fg_y.append(float(min(np.interp(speed, [0, vc_keas], [1, f_ygust]), f_ymano)))
         coords_envelope.update({'FG': dict(zip(coordinate_list, [list(fg_x), fg_y]))})
         # Curve GS
         gs_x = np.linspace(viamin_keas, vis_keas, 100, endpoint=True)
-        gs_y = rho0_kgm3 * (co.kts2mps(gs_x)) ** 2 * clmin / wingloading_pa / 2
+        gs_y = rho0_kgm3 * (co.kts2mps(gs_x)) ** 2 * clmin / trueloading_pa / 2
         coords_envelope.update({'GS': dict(zip(coordinate_list, [list(gs_x), list(gs_y)]))})
         # Stall Line iSO
         coords_envelope.update({'iSO': dict(zip(coordinate_list, [[vis_keas, vis_keas, vs_keas], [-1, 0, 0]]))})
@@ -686,9 +749,9 @@ class CertificationSpecifications:
                 ycoord_ext = np.array([ycoord[0], ((ycoord[1] - 1) * 5) + 1], dtype=object)
                 # Plot the gust lines, but make sure only one label appears in the legend
                 if gustline_idx == 0:
-                    ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.5, label='Gust Lines')
+                    ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.8, label='Gust Lines')
                 else:
-                    ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.5)
+                    ax.plot(xcoord_ext, ycoord_ext, c='blue', ls='-.', lw=0.9, alpha=0.8)
 
             # Flight Envelope plotting
             xlist = []
@@ -702,7 +765,7 @@ class CertificationSpecifications:
                     ylist += v['y']
             coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
             ax.plot(*coords, c='black', ls='-', lw=1.4, label='Flight Envelope')
-            ax.fill(*coords, c='grey', alpha=0.10)
+            ax.fill(*coords, c='grey', alpha=0.20)
 
             # Points of Interest plotting - These are points that appear in the CS-23.333(d) example
             class AnyObject(object):
