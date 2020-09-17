@@ -70,7 +70,7 @@ def local_data(deck_type, printdata=False):
                           + " and " + enginetypes_list[-1])
 
     # Produce a nested list of available engines, notes on the data obtained, and relevant references
-    enginecsvs_path = os.path.join(os.path.dirname(__file__), "data", "engine data", deck_type.capitalize() + " CSVs")
+    enginecsvs_path = os.path.join(os.path.dirname(__file__), "data", "engine_data", deck_type.capitalize() + "_CSVs")
     availablecsvs_list = os.listdir(enginecsvs_path)
     with open(os.path.join(enginecsvs_path, '_' + deck_type + '_metadata.csv'), 'r', encoding="utf-8-sig") as file:
         reader = csv.reader(file)
@@ -84,21 +84,21 @@ def local_data(deck_type, printdata=False):
         # Replaces Data names for turboprop.
         file_name_replace = {}
         if deck_type == "turboprop":
-            file_name_replace = {"Thrust data": "Core/hot thrust (N) versus Mach Number and altitude (m)",
-                                 "Power data": "Shaft power (W) versus Mach Number and altitude (m)",
-                                 "BSFC data": "BSFC (g/(kWh)) versus Mach Number and altitude (m)"}
+            file_name_replace = {"Thrust_data": "Core/hot thrust (N) versus Mach Number and altitude (m)",
+                                 "Power_data": "Shaft power (W) versus Mach Number and altitude (m)",
+                                 "BSFC_data": "BSFC (g/(kWh)) versus Mach Number and altitude (m)"}
         # Replaces Data names for jet.
         elif deck_type == "jet":
-            file_name_replace = {"Thrust SL_TO data": "Take-off thrust (N) versus Mach number at SL",
-                                 "Thrust data": "Thrust (N) versus Mach number and altitude (m)",
-                                 "TSFC data": "TSFC (g/(kNs)) versus Mach number and engine thrust (N)"}
+            file_name_replace = {"Thrust_SL_TO_data": "Take-off thrust (N) versus Mach number at SL",
+                                 "Thrust_data": "Thrust (N) versus Mach number and altitude (m)",
+                                 "TSFC_data": "TSFC (g/(kNs)) versus Mach number and engine thrust (N)"}
         # Replaces Data names for electric motors.
         elif deck_type == "electric":
-            file_name_replace = {"Efficiency data": "Efficiency versus Engine speed (RPM) and torque (Nm)"}
+            file_name_replace = {"Efficiency_data": "Efficiency versus Engine speed (RPM) and torque (Nm)"}
         # Replaces Data names for piston engines.
         elif deck_type == "piston":
-            file_name_replace = {"Power data": "Shaft power (W) versus Engine Speed (RPM) and altitude (m)",
-                                 "BSFC data": "BSFC (g/(kWh)) Engine Speed (RPM) and shaft power (W)"}
+            file_name_replace = {"Power_data": "Shaft power (W) versus Engine Speed (RPM) and altitude (m)",
+                                 "BSFC_data": "BSFC (g/(kWh)) Engine Speed (RPM) and shaft power (W)"}
 
         # Data relevant to the engine being examined, is given in a list
         available_enginecsvs_list = [item for item in availablecsvs_list if engine_name in item]
@@ -145,7 +145,7 @@ class TurbopropDeck:
 
         # Uses the _setup function to find the relevant data for the engine
         # and then returns pandas dataframes and polynomial types as required.
-        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine data", "Turboprop CSVs")
+        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine_data", "Turboprop_CSVs")
         data, self.data_available = _setup(engine_name, folderpath, ["thrust", "power"], ["bsfc"])
         # Creates thrust dataframe variable if data is available.
         if self.data_available[0][0] is True:
@@ -564,7 +564,7 @@ class PistonDeck:
 
         # Uses the _setup function to find the relevant data for the engine
         # and then returns pandas dataframes and polynomial types as required.
-        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine data", "Piston CSVs")
+        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine_data", "Piston_CSVs")
         data, self.data_available = _setup(engine_name, folderpath, ["power"], ["bsfc", "bsfc best power"])
         # Creates thrust dataframe variable if data is available.
         if self.data_available[0][0] is True:
@@ -968,7 +968,7 @@ class ElectricDeck:
 
         # Uses the _setup function to find the relevant data for the engine
         # and then returns pandas dataframes and polynomial types as required.
-        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine data", "Electric CSVs")
+        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine_data", "Electric_CSVs")
         data, self.data_available = _setup(engine_name, folderpath, ["efficiency"], [""])
         # Creates Torque and power dataframe variable if data is available.
         if self.data_available[0][0] is True:
@@ -1214,7 +1214,7 @@ class JetDeck:
 
         # Uses the _setup function to find the relevant data for the engine
         # and then returns pandas dataframes and polynomial types as required.
-        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine data", "jet CSVs")
+        folderpath = os.path.join(os.path.dirname(__file__), "data", "engine_data", "Jet_CSVs")
         data, self.data_available = _setup(engine_name, folderpath, ["thrust"], ["tsfc"])
         # Creates thrust dataframe variable if data is available.
         if self.data_available[0][0] is True:
