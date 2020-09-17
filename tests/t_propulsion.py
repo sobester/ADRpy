@@ -53,7 +53,7 @@ class TestPropulsionDeck(unittest.TestCase):
                     break
             # -1 is because of the data available csv.
             file_count = len(os.listdir(
-                os.path.join(os.path.dirname(decks.__file__), "data", "engine_data", engine_type + "_CSVs"))) - 1
+                os.path.join(os.path.dirname(decks.__file__), "data", "engine_data", engine_type.capitalize() + "_CSVs"))) - 1
             # Checks to see if the files counted in the CSV folder matches the
             # total from the data list.
             if file_count != len(known_data):
