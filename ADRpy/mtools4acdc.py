@@ -276,3 +276,14 @@ def _coordtrans(x, z, theta_rad):
         xt.append(x[i] * math.cos(theta_rad)  + z[i] * math.sin(theta_rad))
         zt.append(-x[i] * math.sin(theta_rad) + z[i] * math.cos(theta_rad))
     return xt, zt
+
+
+def iterable(obj):
+    """Use to determine if object "obj" is iterable. Returns a boolean."""
+    try:
+        iter(obj)
+    except Exception:
+        return False
+    else:
+        return True
+
