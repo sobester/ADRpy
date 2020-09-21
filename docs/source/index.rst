@@ -80,7 +80,7 @@ ADRpy Modules
 
 .. automodule:: constraintanalysis
     :members:
-    
+
 .. automodule:: airworthiness
     :members:
 
