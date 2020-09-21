@@ -16,7 +16,7 @@ earliest phases of the design process, even before a geometry model is built. In
 can serve as the basis of sensitivity analyses and uncertainty quantification (UQ) exercises
 as part of the analysis of the feasibility of the design requirements.
 
-The classes, methods and functions of the library fall into three broad categories:
+The classes, methods and functions of the library fall into these broad categories:
 
 1. **Models of the operating environment.** These live in the :ref:`atmospheres_module`
 module and include virtual atmospheres (ISA, MIL-HDBK-310, etc.), runway models (suitable 
@@ -27,7 +27,10 @@ and models of propulsion performance response to variations in ambient condition
 requirements), given a set of constraints, such as take-off distance, climb rate, etc.
 These can be found in the :ref:`constraints_module`.
 
-3. **Utilities**, including a module for :ref:`unitconversions_module` and a set of 
+3. **Airworthiness**. Tools to assist in analysing the airworthiness of a design from
+a certification standpoint. See the :ref:`airworthiness_module`.
+
+4. **Utilities**, including a module for :ref:`unitconversions_module` and a set of 
 :ref:`mtools4acdc_module`.
 
 This document contains numerous usage examples and details on the inputs and outputs
@@ -40,8 +43,8 @@ into a `Jupyter notebook <https://jupyter.org>`_. Any problems, issues, question
 Installing and running ADRpy
 ----------------------------
 
-ADRpy is written in Python 3 and tested in Python 3.4, 3.5, 3.5, 3.6, 3.7, 3.8 and 
-and 3.8-dev. It is not available for Python 2.
+ADRpy is written in Python 3 and tested in Python 3.5, 3.6, 3.7 and 3.8. It is not 
+available for Python 2.
 
 First and foremost, you will need to have Python installed - you can get the latest version
 `here <https://www.python.org/downloads/>`_ or as part of a number of alternative
@@ -77,6 +80,9 @@ ADRpy Modules
     :members:
 
 .. automodule:: constraintanalysis
+    :members:
+    
+.. automodule:: airworthiness
     :members:
 
 .. automodule:: unitconversions
