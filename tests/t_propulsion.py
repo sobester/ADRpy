@@ -47,12 +47,13 @@ class TestPropulsionDeck(unittest.TestCase):
                 if len(csvs) == 0:
                     # Sets data to false if no CSVs are found for a particular
                     # function
+                    print("csvs were zero for,", engine)
                     data = False
-                    # Breaks out of for look
+                    # Breaks out of for loop
                     break
             # -1 is because of the data available csv.
             file_count = len(os.listdir(
-                os.path.join(os.path.dirname(decks.__file__), "data", "engine data", engine_type + " CSVs"))) - 1
+                os.path.join(os.path.dirname(decks.__file__), "data", "engine_data", engine_type.capitalize() + "_CSVs"))) - 1
             # Checks to see if the files counted in the CSV folder matches the
             # total from the data list.
             if file_count != len(known_data):
@@ -279,8 +280,8 @@ def _std_csv_name_read(engine_type, engine, file_name):
     """
     # Tries to see if file exists
     try:
-        data_frame = (pd.read_csv(os.path.join(os.path.dirname(decks.__file__), "data", "engine data",
-                                               engine_type + " CSVs", engine + " " + file_name + " data.csv")))
+        data_frame = (pd.read_csv(os.path.join(os.path.dirname(decks.__file__), "data", "engine_data",
+                                               engine_type + " CSVs", engine + " " + file_name + "_data.csv")))
     except FileNotFoundError:
         # If not then noting is returned
         return
