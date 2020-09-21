@@ -23,9 +23,8 @@ module and include virtual atmospheres (ISA, MIL-HDBK-310, etc.), runway models 
 for take-off and landing performance modelling using a 'real world' runway database)
 and models of propulsion performance response to variations in ambient conditions.
 
-2. **Conceptual sizing methods** for fixed wing aircraft sizing (wing area and thrust/power
-requirements), given a set of constraints, such as take-off distance, climb rate, etc.
-These can be found in the :ref:`constraints_module`.
+2. **Sizing and performance analysis methods** for fixed wing aircraft. They can be
+found in the :ref:`constraints_module`.
 
 3. **Airworthiness**. Tools to assist in analysing the airworthiness of a design from
 a certification standpoint. See the :ref:`airworthiness_module`.
