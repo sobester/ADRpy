@@ -105,7 +105,7 @@ class CertificationSpecifications:
         # Use the templates (default dictionaries) to populate missing values in the provided design dictionaries
 
         # Iterate through the defaults dictionary
-        for defaults_i, (defaults_k, defaults_v) in enumerate(default_csbrief.items()):
+        for _, (defaults_k, defaults_v) in enumerate(default_csbrief.items()):
             # If a parameter of csbrief is left unspecified by the user, copy in the default value
             if defaults_k not in csbrief:
                 csbrief.update({defaults_k: defaults_v})
@@ -540,7 +540,6 @@ class CertificationSpecifications:
                 warnings.warn(argmsg, RuntimeWarning)
                 figsize_in = default_figsize_in
 
-        rho_kgm3 = self.acobj.designatm.airdens_kgpm3(self.altitude_m)
         rho0_kgm3 = self.acobj.designatm.airdens_kgpm3()
 
         if self.cruisespeed_keas is False:
@@ -586,16 +585,16 @@ class CertificationSpecifications:
 
         # V_A, Manoeuvring Speed
         vamin_keas = speedlimits_dict['vamin_keas']
-        vamax_keas = speedlimits_dict['vasoftmax_keas']
+        # vamax_keas = speedlimits_dict['vasoftmax_keas']
         va_keas = vamin_keas
         if va_keas > vc_keas:
             info = "CS 23.335(c)(2): V_A need not exceed V_C used in design."
             warnings.warn(info, UserWarning)
 
         # V_B, Gust Penetration Speed
-        vbmin_keas = float(speedlimits_dict['vbmin_keas'])
+        # vbmin_keas = float(speedlimits_dict['vbmin_keas'])
         vbpen_keas = float(speedlimits_dict['vbmin1_keas'])
-        vbmax_keas = float(speedlimits_dict['vbmax_keas'])
+        # vbmax_keas = float(speedlimits_dict['vbmax_keas'])
         vb_keas = vbpen_keas
 
         # V_S, Stall Speed
@@ -789,7 +788,7 @@ class CertificationSpecifications:
             labels_list = []
             handler_map = {}
             # First, annotate the V-n diagram with the points of interest clearly labelled
-            for i, (k, v) in enumerate(coords_poi.items()):
+            for _, (k, v) in enumerate(coords_poi.items()):
                 # If the speed to be annotated has a positive limit load, annotate with a green symbol, not red
                 clr = 'green' if k in ['A', 'B', 'C', 'D'] else 'red'
                 handles_objects_list.append(AnyObject(k, clr))
