@@ -48,6 +48,9 @@ class CertificationSpecifications:
     designatm
         `Atmosphere <https://adrpy.readthedocs.io/en/latest/#atmospheres.Atmosphere>`_
         class object. See :code:`AircraftConcept` in :code:`constraintanalysis.py`.
+        
+    propulsion
+        Tuple or String. See :code:`AircraftConcept` in :code:`constraintanalysis.py`.
 
     csbrief
         Dictionary. Definition of key parameters relating to the certification specification
@@ -796,7 +799,7 @@ class CertificationSpecifications:
                     ("V: " + str(round(float(v[0]), 1))).ljust(10) + ("| n: " + str(round(float(v[1]), 2))))
                 handler_map.update({handles_objects_list[-1]: AnyObjectHandler()})
                 offs_spd = vc_keas if c_ygust > max_ygust else vb_keas
-                offset = (textsize / 2 if v[0] > offs_spd else -textsize, textsize / 10 if v[1] > 0 else -textsize)
+                offset = (textsize / 2 if v[0] > offs_spd else (0 - textsize), textsize / 10 if v[1] > 0 else (0 - textsize))
                 ax.annotate(k, xy=v, textcoords='offset points', xytext=offset, fontsize=fontsize_label, color=clr)
                 plt.plot(*v, 'x', color=clr)
             # Second, create a legend which contains the V-n parameters of each point of interest
