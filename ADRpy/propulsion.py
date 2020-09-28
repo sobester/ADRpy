@@ -1133,36 +1133,6 @@ class ElectricDeck:
 
         return thrust_n
 
-    def sl_powercorr(self, shaft_rpm, torque_nm):
-        """Multiply by maximum available shaft power to find power at the specified conditions.
-
-        This method returns the ratio of power available in the performance regime specified, to
-        the maximum available power produced by the motor. By non-dimensionalising the power with the
-        max available, the engine can effectively be scaled in performance for any power requirement,
-        given a feasible engine speed and torque. Shape of arrays 'shaft_rpm' and 'torque_nm'
-        should be the same, or unity.
-
-        **Parameters**
-
-        shaft_rpm
-            float or array, the number of revolutions the engine shaft makes in a minute, units of RPM.
-
-        torque_nm
-            float or array, the torque of the motor shaft in Newton-metres.
-
-        **Returns**
-
-        powercorr
-            array, interpolated estimate of the total engine power normalised to sea-level maximum power.
-        """
-        shaft_rpm = actools.recastasnpfloatarray(shaft_rpm)
-        torque_nm = actools.recastasnpfloatarray(torque_nm)
-        shaftpower_w = self.shaftpower(shaft_rpm=shaft_rpm, torque_nm=torque_nm)
-
-        power_sl = max(self.pwr_data[2])  # The maximum possible engine power is assumed to occur at SL
-        powercorr = shaftpower_w / power_sl
-
-        return powercorr
 
     def demoplot_efficiency(self):
         """This function produces a colour-map of motor efficiency against engine RPM and torque.

@@ -366,7 +366,7 @@ class AircraftConcept:
         # Take a single design dictionary out of the library
         for chapter_i in range(len(default_designlib)):
             # Iterate through the items in the default design dictionary pulled from the defaults library
-            for dict_i, (dict_k, dict_v) in enumerate(default_designlib[chapter_i].items()):
+            for _, (dict_k, dict_v) in enumerate(default_designlib[chapter_i].items()):
 
                 # If a parameter was not specified, copy in a flag/value/sub-dictionary from the default dictionary
                 if dict_k not in designlib[chapter_i]:
@@ -376,7 +376,7 @@ class AircraftConcept:
                         designlib[chapter_i][dict_k] = dict_v
                 # Else if a parameter was specified as a dictionary, check sub-params were given (or else populate them)
                 elif type(designlib[chapter_i][dict_k]) == dict:
-                    for subdict_i, (subdict_k, subdict_v) in enumerate(default_designlib[chapter_i][dict_k].items()):
+                    for _, (subdict_k, subdict_v) in enumerate(default_designlib[chapter_i][dict_k].items()):
                         if subdict_k not in designlib[chapter_i][dict_k]:
                             designlib[chapter_i][dict_k][subdict_k] = subdict_v
 
@@ -674,8 +674,8 @@ class AircraftConcept:
 
     def liftslope_prad(self, mach_inf=None):
         """Method for estimating the lift-curve slope from aircraft geometry; Methods from
-        https://www.fzt.haw-hamburg.de/pers/Scholz/HOOU/AircraftDesign_7_WingDesign.pdf,
         http://naca.central.cranfield.ac.uk/reports/arc/rm/2935.pdf (Eqn. 80), by D. Kuchemann;
+        DATCOM 1978;
 
         Several methods for calculating supersonic and subsonic lift-slopes are aggregated to
         produce a model for the lift curve with changing free-stream Mach number.
@@ -1110,7 +1110,7 @@ class AircraftConcept:
                 minrpm, maxrpm = min(engine_obj.pwr_data[0]), max(engine_obj.pwr_data[0])
                 speed_rpm_array = np.arange(minrpm, maxrpm)
                 power_w_array = engine_obj.shaftpower(speed_rpm_array, altitude_m)
-                maxpwrrpm_idx = numpy.where(speed_rpm_array == numpy.nanmax(speed_rpm_array))
+                maxpwrrpm_idx = np.where(speed_rpm_array == np.nanmax(speed_rpm_array))
                 bestpwrspeed_rpm = speed_rpm_array[maxpwrrpm_idx]
 
                 pcorr = engine_obj.sl_powercorr(bestpwrspeed_rpm, altitude_m)
@@ -1131,7 +1131,7 @@ class AircraftConcept:
         if 'pcorr' not in locals():
             pcorr = 1
             pcorrmsg = 'Could not find sea-level power mapping for specified propulsion type.'
-            warnings.warn(tcorrmsg, RuntimeWarning)
+            warnings.warn(pcorrmsg, RuntimeWarning)
 
         return tcorr, pcorr
 
@@ -2052,7 +2052,7 @@ class AircraftConcept:
         # Perform OFAT monothetic analysis
         for dictionary_i in range(len(designspace_list)):
 
-            for dp_i, (dp_k, dp_v) in enumerate(designspace_list[dictionary_i].items()):
+            for _, (dp_k, dp_v) in enumerate(designspace_list[dictionary_i].items()):
 
                 # If a list was found, create two temporary dictionaries with the maximum and minimum bounded values
                 if type(dp_v) == list:
@@ -2131,7 +2131,7 @@ class AircraftConcept:
 
             # Find the sum of all derivatives for a constraint, at every given wing-loading
             primesum = np.zeros(len(wingloading_pa))
-            for param_i, (param_k, param_v) in enumerate(propulsionreqprime[whichconstraint].items()):
+            for _, (param_k, param_v) in enumerate(propulsionreqprime[whichconstraint].items()):
                 primesum += param_v
 
             # Find the proportions of unity each parameter contributes to a constraint, and arrange as a list of arrays
