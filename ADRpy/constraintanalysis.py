@@ -674,8 +674,8 @@ class AircraftConcept:
 
     def liftslope_prad(self, mach_inf=None):
         """Method for estimating the lift-curve slope from aircraft geometry; Methods from
-        https://www.fzt.haw-hamburg.de/pers/Scholz/HOOU/AircraftDesign_7_WingDesign.pdf,
         http://naca.central.cranfield.ac.uk/reports/arc/rm/2935.pdf (Eqn. 80), by D. Kuchemann;
+        DATCOM 1978;
 
         Several methods for calculating supersonic and subsonic lift-slopes are aggregated to
         produce a model for the lift curve with changing free-stream Mach number.
