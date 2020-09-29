@@ -141,7 +141,7 @@ class CertificationSpecifications:
             raise ValueError(defmsg)
 
         if self.acobj.wingarea_m2 is False:
-            defmsg = 'Wing area was not specified in the design definitions dictionary'
+            defmsg = 'Reference wing area was not specified in the design definitions dictionary'
             raise ValueError(defmsg)
 
         weight_n = self.acobj.weight_n
@@ -249,16 +249,11 @@ class CertificationSpecifications:
 
         return manoeuvre_dict, gustmps_dict
 
-    def _paragraph335(self, wingloading_pa):
+    def _paragraph335(self):
         """EASA specification for CS-23 Design Airspeeds.
 
         For all categories of aircraft, this specification item produces limits for design
         airspeeds.
-
-        **Parameters:**
-
-        wingloading_pa
-            float or array, list of wing-loading values in Pa.
 
         **Outputs:**
 
@@ -277,7 +272,15 @@ class CertificationSpecifications:
             raise ValueError(perfmsg)
         clmaxclean = self.acobj.clmaxclean
 
-        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+        if self.acobj.weight_n is False:
+            designmsg = 'Maximum take-off weight must be specified in the design dictionary.'
+            raise ValueError(designmsg)
+
+        if self.acobj.wingarea_m2 is False:
+            designmsg = 'Reference wing area must be specified in the design dictionary.'
+            raise ValueError(designmsg)
+        wingloading_pa = self.acobj.weight_n / self.acobj.wingarea_m2
+
         wingloading_lbft2 = co.pa2lbfft2(wingloading_pa)
 
         # Create a dictionary of empty dictionaries for each aircraft category
@@ -333,7 +336,7 @@ class CertificationSpecifications:
 
         # (d)(1)
         _, gustspeedsmps = self._paragraph333()
-        _, k_g, liftslope_prad = self._paragraph341(wingloading_pa, speedatgust_keas={'Uc': vc_keas})
+        gustloads, k_g, liftslope_prad = self._paragraph341(speedatgust_keas={'Uc': vc_keas})
 
         wfract = self.weightfraction
         vs1_keas = self.vs_keas(loadfactor=wfract)
@@ -354,7 +357,7 @@ class CertificationSpecifications:
             vbmin1_keas = co.mps2kts((-b + (b ** 2 - 4 * a * c) ** 0.5) / (2 * a))
             eas_dict[category].update({'vbmin1_keas': vbmin1_keas})
 
-            vbmin2_keas = vs1_keas * math.sqrt(manoeuvrelimits[category]['npos_min'])
+            vbmin2_keas = vs1_keas * math.sqrt(gustloads[category]['npos_Uc'])
             eas_dict[category].update({'vbmin2_keas': vbmin2_keas})
 
             vbmin_keas = np.fmin(vbmin1_keas, vbmin2_keas)
@@ -368,11 +371,6 @@ class CertificationSpecifications:
     def _paragraph337(self):
         """EASA specification for CS-23 Limit manoeuvring load factors.
 
-        **Parameters:**
-
-        wingloading_pa
-            float or array, list of wing-loading values in Pa.
-
         **Outputs:**
 
         limitload_dict
@@ -382,9 +380,13 @@ class CertificationSpecifications:
             manoeuvre, under keys :code:`'npos_min'` and :code:`'nneg_max'`.
 
         """
+        if self.acobj.weight_n is False:
+            designmsg = 'Maximum take-off weight must be specified in the design dictionary.'
+            raise ValueError(designmsg)
+
         if self.acobj.wingarea_m2 is False:
-            defmsg = 'Reference wing area not specified in the design definitions dictionary.'
-            raise ValueError(defmsg)
+            designmsg = 'Reference wing area must be specified in the design dictionary.'
+            raise ValueError(designmsg)
 
         mtow_n = self.acobj.weight_n
 
@@ -417,13 +419,10 @@ class CertificationSpecifications:
 
         return limitload_dict
 
-    def _paragraph341(self, wingloading_pa, speedatgust_keas):
+    def _paragraph341(self, speedatgust_keas):
         """EASA specification for CS-23 Gust load factors (in cruising conditions).
 
         **Parameters:**
-
-        wingloading_pa
-            float or array, list of wing-loading values in Pa.
 
         speedatgust_keas
             dictionary, containing the airspeeds at which each gust condition from CS-23.333
@@ -436,8 +435,8 @@ class CertificationSpecifications:
             dictionary, with aircraft categories :code:`'norm'`,:code:`'util'`, :code:`'comm'`,
             and :code:`'aero'`. Contained within each category is another dictionary of the
             absolute maximum negative limit load, and minimum positive limit load due to gust,
-            under keys :code:`'nposUb'`, :code:`'nposUc'`, :code:`'nposUd'`, :code:`'nnegUc'`
-            and:code:`'nnegUd'`.
+            under keys :code:`'npos_Ub'`, :code:`'npos_Uc'`, :code:`'npos_Ud'`, :code:`'nneg_Uc'`
+            and:code:`'nneg_Ud'`.
         k_g
             float, the gust alleviation factor
 
@@ -456,9 +455,17 @@ class CertificationSpecifications:
         cruisespeed_mpstas = co.kts2mps(co.eas2tas(self.cruisespeed_keas, localairdensity_kgm3=rho_kgm3))
         mach = self.acobj.designatm.mach(airspeed_mps=cruisespeed_mpstas, altitude_m=altitude_m)
 
+        if self.acobj.weight_n is False:
+            designmsg = 'Maximum take-off weight must be specified in the design dictionary.'
+            raise ValueError(designmsg)
+
+        if self.acobj.wingarea_m2 is False:
+            designmsg = 'Reference wing area must be specified in the design dictionary.'
+            raise ValueError(designmsg)
+        wingloading_pa = self.acobj.weight_n / self.acobj.wingarea_m2
+
         liftslope_prad = self.acobj.liftslope_prad(mach_inf=mach)
         rho0_kgm3 = self.acobj.designatm.airdens_kgpm3()
-        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
         wfract = self.weightfraction
         trueloading_pa = wingloading_pa * wfract
 
@@ -491,15 +498,12 @@ class CertificationSpecifications:
 
         return gustload_dict, k_g, liftslope_prad
 
-    def flightenvelope(self, wingloading_pa, textsize=None, figsize_in=None, show=True):
+    def flightenvelope(self, textsize=None, figsize_in=None, show=True):
         """EASA specification for CS-23.333(d) Flight Envelope (in cruising conditions).
 
         Calling this method will plot the flight envelope at a single wing-loading.
 
         **Parameters:**
-
-        wingloading_pa
-            float, single wingloading at which the flight envelope should be plotted for, in Pa.
 
         textsize
             integer, sets a representative reference fontsize that text in the output plot scale
@@ -565,10 +569,18 @@ class CertificationSpecifications:
             raise ValueError(perfmsg)
         clmin = self.acobj.clminclean
 
-        wingloading_pa = actools.recastasnpfloatarray(wingloading_pa)
+        if self.acobj.weight_n is False:
+            designmsg = 'Maximum take-off weight must be specified in the design dictionary.'
+            raise ValueError(designmsg)
+
+        if self.acobj.wingarea_m2 is False:
+            designmsg = 'Reference wing area must be specified in the design dictionary.'
+            raise ValueError(designmsg)
+        wingloading_pa = self.acobj.weight_n / self.acobj.wingarea_m2
+
         wfract = self.weightfraction
         trueloading_pa = wingloading_pa * wfract
-        speedlimits_dict = self._paragraph335(wingloading_pa=wingloading_pa)[category]
+        speedlimits_dict = self._paragraph335()[category]
         manoeuvreload_dict, gustspeeds_dict = self._paragraph333()
 
         # V_C, Cruise Speed
@@ -614,7 +626,7 @@ class CertificationSpecifications:
 
         # Gust coordinates
         airspeed_atgust_keas = {'Ub': vb_keas, 'Uc': vc_keas, 'Ud': vd_keas}
-        gustloads, _, _ = self._paragraph341(wingloading_pa=wingloading_pa, speedatgust_keas=airspeed_atgust_keas)
+        gustloads, _, _ = self._paragraph341(speedatgust_keas=airspeed_atgust_keas)
 
         # Manoeuvre coordinates
         coords_manoeuvre = {}
