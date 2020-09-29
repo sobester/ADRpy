@@ -117,9 +117,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         concept = aw.CertificationSpecifications(self.ac_lib[acindex][0], self.ac_lib[acindex][1],
                                                  self.ac_lib[acindex][2], None, None, csbrief=vndefinitions)
 
-        wingloading_pa = concept.acobj.weight_n / concept.acobj.wingarea_m2
-
-        concept.flightenvelope(wingloading_pa=wingloading_pa, textsize=10)
+        concept.flightenvelope(textsize=10)
 
         return
 
@@ -133,8 +131,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         concept = aw.CertificationSpecifications(self.ac_lib[acindex][0], self.ac_lib[acindex][1],
                                                  self.ac_lib[acindex][2])
 
-        wingloadinglist_pa = [2000, 3000]
-        _ = concept._paragraph335(wingloading_pa=wingloadinglist_pa)
+        _ = concept._paragraph335()
 
         return
 
