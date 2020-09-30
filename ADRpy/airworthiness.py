@@ -161,7 +161,8 @@ class CertificationSpecifications:
                 raise ValueError(perfmsg)
             cl = self.acobj.clminclean
 
-        vs_keas = co.mps2kts(math.sqrt((loadfactor * weight_n) / (0.5 * 1.225 * wingarea_m2 * cl)))
+        rho0_kgm3 = self.acobj.designatm.airdens_kgpm3(altitudes_m=0)
+        vs_keas = co.mps2kts(math.sqrt((loadfactor * weight_n) / (0.5 * rho0_kgm3 * wingarea_m2 * cl)))
 
         return vs_keas
 

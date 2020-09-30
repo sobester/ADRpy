@@ -565,7 +565,7 @@ class PistonDeck:
         # Uses the _setup function to find the relevant data for the engine
         # and then returns pandas dataframes and polynomial types as required.
         folderpath = os.path.join(os.path.dirname(__file__), "data", "engine_data", "Piston_CSVs")
-        data, self.data_available = _setup(engine_name, folderpath, ["power"], ["bsfc", "bsfc best power"])
+        data, self.data_available = _setup(engine_name, folderpath, ["power"], ["bsfc", "bsfc_best_power"])
         # Creates thrust dataframe variable if data is available.
         if self.data_available[0][0] is True:
             # Assigns the dataframe to variable
@@ -1764,27 +1764,27 @@ def _setup(engine_name, csvpath, outputs, efficiencies):
         # Finds output data. This has a standard format of output + data.csv
         # i.e. Thrust data.csv or Power data.csv
         for index, output in enumerate(outputs):
-            if output + " data.csv" in data.lower():
+            if output + "_data.csv" in data.lower():
                 # Reads output data.
                 output_data[index] = pd.read_csv(csvpath + os.sep + data)
                 # Data is available and so the function can proceed.
                 data_available[0][index] = True
             # Checks to see if there is a sea level (SL) polynomial for the output.
-            if "sea level " + output + " polynomial.csv" in data.lower():
+            if "sea level_" + output + "_polynomial.csv" in data.lower():
                 # Processes polynomial and returns
                 sl_output_poly, sl_limits = _poly_process(csvpath + os.sep + data)
                 # Data is available and so the function can proceed
                 data_available[2] = True
             # Checks to see if there is a sea level (SL) take off (TO) output
             # polynomial.
-            if "sea level take off " + output + " polynomial.csv" in data.lower():
+            if "sea level take off_" + output + "_polynomial.csv" in data.lower():
                 # Processes polynomial and returns
                 sl_to_output_poly, sl_to_limits = _poly_process(csvpath + os.sep + data)
                 # Data is available and so the function can proceed
                 data_available[3] = True
         # Finds TSFC Data
         for index, efficiency in enumerate(efficiencies):
-            if efficiency + " data.csv" in data.lower():
+            if efficiency + "_data.csv" in data.lower():
                 eta_data[index] = pd.read_csv(csvpath + os.sep + data)
                 # Data is available and so the function can proceed.
                 data_available[1][index] = True
