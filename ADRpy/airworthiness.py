@@ -4,11 +4,11 @@
 """
 .. _airworthiness_module:
 
-Air Worthiness Module
---------------------------
+Airworthiness module
+--------------------
 
-This module contains tools for evaluation of the air worthiness
-of fixed wing aircraft.
+This module contains tools for the analysis of an aircraft design from the
+point of view of meeting initial airworthiness requirements.
 
 """
 
@@ -28,11 +28,11 @@ from ADRpy import mtools4acdc as actools
 
 
 class CertificationSpecifications:
-    """Class for determining air worthiness of a concept. An object of this class can be
-    quickly checked for compliance with `Certification Specification 23 Amendment 4
-    <https://www.easa.europa.eu/document-library/certification-specifications>` for fixed-wing
-    aircraft. This tool does not substitute a full compliance check with the specification, but
-    its purpose is to assist designers in quickly identifying potential design incompatibilities.
+    """Aircraft concept class designed for capturing those elements of the definition
+    of a design that are required for the preparation of some of the analyses needed
+    for determining the initial airworthiness of an aircraft concept. Currently ADRpy
+    facilitates one such type of analysis - the construction of the V-n diagram of an
+    aircraft concept, as prescribed by Part 23 (as detailed, e.g., by EASA's CS-23).
 
     **Parameters:**
 
@@ -53,16 +53,17 @@ class CertificationSpecifications:
         Tuple or String. See :code:`AircraftConcept` in :code:`constraintanalysis.py`.
 
     csbrief
-        Dictionary. Definition of key parameters relating to the certification specification
-        of an aircraft. Contains the following key names:
+        Dictionary. Definition of key parameters relating to establishing the initial
+        airworthiness of an aircraft. It contains the following key names:
 
         certcat
-            String. Used to specify the intended certification category of the aircraft. Choose from
-            either :code:`'norm'` (normal), :code:`'util'` (utility), :code:`'comm'` (commuter), or
-            :code:`'aero'` (aerobatic) categories of aircraft. Optional, defaults to :code:`'norm'`.
+            String. Used to specify the intended certification category of the aircraft,
+            as per Part 23. Acceptable values are: :code:`'norm'` (normal), 
+            :code:`'util'` (utility), :code:`'comm'` (commuter), or :code:`'aero'` (aerobatic).
+            Optional, defaults to :code:`'norm'`.
 
         altitude_m
-            Float. The altitude (in metres) at which the aircraft should have its certification tested.
+            Float. The altitude (in metres) at which the calculations are to be performed.
             Optional, defaults to 0.
 
         cruisespeed_keas
@@ -72,12 +73,12 @@ class CertificationSpecifications:
             Float. The design dive speed (in knots, equivalent airspeed). Commonly denoted V_D.
 
         maxlevelspeed_keas
-            Float. The design maximum level-flight speed at sea level (in knots, equivalent
+            Float. The design maximum level flight speed at sea level (in knots, equivalent
             airspeed). Commonly denoted V_H.
 
         weightfraction
             Float. The fraction (nondimensional) of the maximum take-off weight at which
-            the aircraft should be certified. Optional, defaults to 1.
+            the calculations are to be performed. Optional, defaults to 1.
 
     """
 
@@ -184,9 +185,9 @@ class CertificationSpecifications:
         return {'SMC': smc_m, 'MAC': mac_m}
 
     def _paragraph333(self):
-        """EASA specification for CS-23 Flight Envelope.
+        """Flight envelope, as defined by CS-23.
 
-        For normal, utility, commuter, and aerobatic categories of aircraft, return the maximum
+        For normal, utility, commuter, and aerobatic categories of aircraft, returns the maximum
         and minimum limit loads from symmetrical manoeuvres, as well as gust types each category
         must be designed to withstand.
 
@@ -251,7 +252,7 @@ class CertificationSpecifications:
         return manoeuvre_dict, gustmps_dict
 
     def _paragraph335(self):
-        """EASA specification for CS-23 Design Airspeeds.
+        """Design airspeeds, as per CS-23.335 (see also 14 CFR 23.335).
 
         For all categories of aircraft, this specification item produces limits for design
         airspeeds.
@@ -370,7 +371,7 @@ class CertificationSpecifications:
         return eas_dict
 
     def _paragraph337(self):
-        """EASA specification for CS-23 Limit manoeuvring load factors.
+        """Limit manoeuvring load factors, as per CS-23.337 (see also 14 CFR 23.337).
 
         **Outputs:**
 
@@ -421,7 +422,7 @@ class CertificationSpecifications:
         return limitload_dict
 
     def _paragraph341(self, speedatgust_keas):
-        """EASA specification for CS-23 Gust load factors (in cruising conditions).
+        """Gust load factors (in cruising conditions), as per CS-23.341 (see also 14 CFR 23.341).
 
         **Parameters:**
 
@@ -500,9 +501,15 @@ class CertificationSpecifications:
         return gustload_dict, k_g, liftslope_prad
 
     def flightenvelope(self, textsize=None, figsize_in=None, show=True):
-        """EASA specification for CS-23.333(d) Flight Envelope (in cruising conditions).
+        """Construction of the flight envelope, as per CS-23.333(d), see also 14 CFR 23.333. Calling
+        this method will plot the flight envelope at a single wing-loading. For examples, see below 
+        and in the Jupyter notebook :code:`Constructing V-n diagrams.ipynb` included in
+        :code:`docs/ADRpy/notebooks`.
 
-        Calling this method will plot the flight envelope at a single wing-loading.
+        Note that this V-n diagram should only be seen as indicative. When preparing the documentation
+        for establishing the airworthiness of an aircraft, the engineer responsible for the structural
+        aspects of the airworthiness must conduct his/her own calculations in establishing the flight
+        envelope. 
 
         **Parameters:**
 
@@ -524,6 +531,30 @@ class CertificationSpecifications:
             dictionary, containing keys :code:`A` through :code:`G`, with values of coordinate tuples.
             These are "points of interest", the speed [KEAS] at which they occur, and the load factor
             they are attributed to.
+
+
+        **Example** ::
+
+            from ADRpy import airworthiness as aw
+            from ADRpy import unitconversions as co
+            from ADRpy import atmospheres as at
+
+            designbrief = {}
+
+            designdef = {'aspectratio': 11.1, 'wingarea_m2': 12.1, 'weight_n': 5872}
+
+            designperf = {'CLmaxclean': 1.45, 'CLminclean': -1, 'CLslope': 6.28}
+
+            designpropulsion = "piston" # not specifically needed for the V-n diagram here, required simply for 
+                                        # consistency with other classes and to support features included in later releases 
+
+            designatm = at.Atmosphere() # set the design atmosphere to a zero-offset ISA
+    
+            csbrief={'cruisespeed_keas': 107, 'divespeed_keas': 150,
+            'altitude_m': 0,
+            'weightfraction': 1, 'certcat': 'norm'}
+
+            concept = aw.CertificationSpecifications(designbrief, designdef, designperf, designatm, designpropulsion, csbrief)
 
         """
 
