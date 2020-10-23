@@ -327,7 +327,8 @@ class CertificationSpecifications:
         # (c) Design manoeuvring speed, V_A
 
         # (c)(1, 2)
-        vs_keas = self.vs_keas(loadfactor=1)
+        wfract = self.weightfraction
+        vs_keas = self.vs_keas(loadfactor=wfract)
         manoeuvrelimits = self._paragraph337()
 
         for category in cs23categories_list:
@@ -340,7 +341,6 @@ class CertificationSpecifications:
         _, gustspeedsmps = self._paragraph333()
         gustloads, k_g, liftslope_prad = self._paragraph341(speedatgust_keas={'Uc': vc_keas})
 
-        wfract = self.weightfraction
         vs1_keas = self.vs_keas(loadfactor=wfract)
 
         for category in cs23categories_list:
@@ -355,7 +355,7 @@ class CertificationSpecifications:
 
             a = 1
             b = -(liftslope_prad / clmaxclean) * k_g * gust_de_mps
-            c = -2 * trueloading_pa / (rho0_kgm3 * clmaxclean)
+            c = -2 * trueloading_pa / (rho0_kgm3 * clmaxclean) * wfract
             vbmin1_keas = co.mps2kts((-b + (b ** 2 - 4 * a * c) ** 0.5) / (2 * a))
             eas_dict[category].update({'vbmin1_keas': vbmin1_keas})
 
@@ -492,7 +492,7 @@ class CertificationSpecifications:
                 if suffix in speedatgust_keas:
                     airspeed_keas = [value for key, value in speedatgust_keas.items() if suffix in key][0]
                     airspeed_mps = co.kts2mps(airspeed_keas)
-                    q = k_g * rho0_kgm3 * gustspeed_mps * airspeed_mps * liftslope_prad / (2 * trueloading_pa)
+                    q = k_g * rho0_kgm3 * gustspeed_mps * airspeed_mps * liftslope_prad / (2 * trueloading_pa) / wfract
                     poskey = 'npos_' + suffix
                     negkey = 'nneg_' + suffix
                     gustload_dict[category].update({poskey: 1 + q})
@@ -645,10 +645,10 @@ class CertificationSpecifications:
         vb_keas = vbpen_keas
 
         # V_S, Stall Speed
-        vs_keas = self.vs_keas(loadfactor=1)
+        vs_keas = self.vs_keas(loadfactor=(1*wfract))
 
         # V_invS, Inverted Stalling Speed
-        vis_keas = self.vs_keas(loadfactor=-1)
+        vis_keas = self.vs_keas(loadfactor=(-1*wfract))
         if vis_keas < vs_keas:
             argmsg = 'Inverted-flight stall speed < Level-flight stall speed, consider reducing design Manoeuvre Speed.'
             warnings.warn(argmsg, RuntimeWarning)
@@ -665,7 +665,7 @@ class CertificationSpecifications:
         coordinate_list = ['x', 'y']
         # Curve OA
         oa_x = np.linspace(0, va_keas, 100, endpoint=True)
-        oa_y = rho0_kgm3 * (co.kts2mps(oa_x)) ** 2 * clmax / trueloading_pa / 2
+        oa_y = rho0_kgm3 * (co.kts2mps(oa_x)) ** 2 * clmax / trueloading_pa / 2 / wfract
         coords_manoeuvre.update({'OA': dict(zip(coordinate_list, [list(oa_x), list(oa_y)]))})
         # Points D, E, F
         coords_manoeuvre.update({'D': dict(zip(coordinate_list, [vd_keas, manoeuvreload_dict[category]['npos_D'] * (
@@ -676,24 +676,24 @@ class CertificationSpecifications:
                     wingloading_pa / trueloading_pa)]))})
         # Curve GO
         go_x = np.linspace(viamin_keas, 0, 100, endpoint=True)
-        go_y = 0.5 * rho0_kgm3 * co.kts2mps(go_x) ** 2 * clmin / trueloading_pa
+        go_y = 0.5 * rho0_kgm3 * co.kts2mps(go_x) ** 2 * clmin / trueloading_pa / wfract
         coords_manoeuvre.update({'GO': dict(zip(coordinate_list, [list(go_x), list(go_y)]))})
 
         # Flight Envelope coordinates
         coords_envelope = {}
         # Stall Line OS
-        coords_envelope.update({'OS': dict(zip(coordinate_list, [[vs_keas, vs_keas], [0, 1]]))})
+        coords_envelope.update({'OS': dict(zip(coordinate_list, [[vs_keas, vs_keas], [0, (1/wfract)]]))})
         # Curve+Line SC
         sc_x = np.linspace(vs_keas, vc_keas, 100, endpoint=True)
         sc_y = []
         max_ygust = float(gustloads[category][list(gustloads[category].keys())[0]])
-        b_ygustpen = float(rho0_kgm3 * (co.kts2mps(vbpen_keas)) ** 2 * clmax / trueloading_pa / 2)
+        b_ygustpen = float(rho0_kgm3 * (co.kts2mps(vbpen_keas)) ** 2 * clmax / trueloading_pa / 2 / wfract)
         c_ygust = float(gustloads[category]['npos_Uc'])
         d_ymano = float(manoeuvreload_dict[category]['npos_D'] / wfract)
         for speed in sc_x:
             # If below minimum manoeuvring speed or gust intersection speed, keep on the stall curve
             if (speed <= va_keas) or (speed <= vbpen_keas):
-                sc_y.append(rho0_kgm3 * (co.kts2mps(speed)) ** 2 * clmax / trueloading_pa / 2)
+                sc_y.append(rho0_kgm3 * (co.kts2mps(speed)) ** 2 * clmax / trueloading_pa / 2 / wfract)
             # Else the flight envelope is the max of the gust/manoeuvre envelope sizes
             else:  # vbpen_keas > va_keas
                 sc_y.append(max(np.interp(speed, [vb_keas, vc_keas], [b_ygustpen, c_ygust]), d_ymano))
@@ -718,18 +718,19 @@ class CertificationSpecifications:
         for speed in ef_x:
             ef_y.append(min(np.interp(speed, [vc_keas, vd_keas], [f_ygust, e_ygust]), e_ymano))
         coords_envelope.update({'EF': dict(zip(coordinate_list, [list(ef_x), ef_y]))})
-        # Line FG
-        fg_x = np.linspace(vc_keas, viamin_keas, 100, endpoint=True)
-        fg_y = []
-        for speed in fg_x:
-            fg_y.append(float(min(np.interp(speed, [0, vc_keas], [1, f_ygust]), f_ymano)))
-        coords_envelope.update({'FG': dict(zip(coordinate_list, [list(fg_x), fg_y]))})
-        # Curve GS
-        gs_x = np.linspace(viamin_keas, vis_keas, 100, endpoint=True)
-        gs_y = rho0_kgm3 * (co.kts2mps(gs_x)) ** 2 * clmin / trueloading_pa / 2
-        coords_envelope.update({'GS': dict(zip(coordinate_list, [list(gs_x), list(gs_y)]))})
+        # Curve+Line FS
+        fs_x = np.linspace(vc_keas, vis_keas, 100, endpoint=True)
+        fs_y = []
+        for speed in fs_x:
+            fs_ystall = rho0_kgm3 * (co.kts2mps(speed)) ** 2 * clmin / trueloading_pa / 2 / wfract
+            # If below minimum manoeuvring speed or gust intersection speed, keep on the stall line
+            if speed < viamin_keas:
+                fs_y.append(fs_ystall)
+            else:
+                fs_y.append(max(min(np.interp(speed, [0, vc_keas], [1, f_ygust]), f_ymano), fs_ystall))
+        coords_envelope.update({'FS': dict(zip(coordinate_list, [list(fs_x), fs_y]))})
         # Stall Line iSO
-        coords_envelope.update({'iSO': dict(zip(coordinate_list, [[vis_keas, vis_keas, vs_keas], [-1, 0, 0]]))})
+        coords_envelope.update({'iSO': dict(zip(coordinate_list, [[vis_keas, vis_keas, vs_keas], [-1/wfract, 0, 0]]))})
 
         # Points of Interest coordinates - These are points that appear in the CS-23.333(d) example
         coords_poi = {}
@@ -739,7 +740,7 @@ class CertificationSpecifications:
                            'D': (vd_keas, cd_y[-1]),
                            'E': (vd_keas, e_y),
                            'F': (vc_keas, ef_y[-1]),
-                           'G': (viamin_keas, fg_y[-1])
+                           'G': (viamin_keas, go_y[0])
                            })
         if category == 'comm':
             coords_poi.update({'B': (vb_keas, b_ygustpen)})
@@ -781,7 +782,7 @@ class CertificationSpecifications:
                     yannotate = 0.15 * (ylist[-1] - 1) + 1
                     xyannotate = xannotate, yannotate
                     # Calculate where the actual annotation text with the gust speed should be positioned
-                    offsetx = (abs(gustload) ** 2 * (15.24 - gustspeed_mps)) / 4
+                    offsetx = (abs(4) * (15.24 - gustspeed_mps)) / 4
                     offsety = float((4 - gustindex + 1) * 3 * (12 if gustload < 0 else 10)) ** 0.93
                     label = "$U_{de} = $" + str(gustspeed_mps) + " $ms^{-1}$"
                     # Produce the annotation

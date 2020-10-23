@@ -1770,14 +1770,14 @@ def _setup(engine_name, csvpath, outputs, efficiencies):
                 # Data is available and so the function can proceed.
                 data_available[0][index] = True
             # Checks to see if there is a sea level (SL) polynomial for the output.
-            if "sea level_" + output + "_polynomial.csv" in data.lower():
+            if "sea_level_" + output + "_polynomial.csv" in data.lower():
                 # Processes polynomial and returns
                 sl_output_poly, sl_limits = _poly_process(csvpath + os.sep + data)
                 # Data is available and so the function can proceed
                 data_available[2] = True
             # Checks to see if there is a sea level (SL) take off (TO) output
             # polynomial.
-            if "sea level take off_" + output + "_polynomial.csv" in data.lower():
+            if "sea_level_take_off_" + output + "_polynomial.csv" in data.lower():
                 # Processes polynomial and returns
                 sl_to_output_poly, sl_to_limits = _poly_process(csvpath + os.sep + data)
                 # Data is available and so the function can proceed
@@ -1950,7 +1950,7 @@ def _demo_plot(min_x, max_x, min_y, max_y, func, x_label, y_label, z_label, plt_
                     slice(min_y, max_y + y_inc, y_inc)]
     z = func(x, y)  # Applied function to x and y data
     plt.figure(figsize=(10, 10))  # plots a figure of size 10,10
-    plt.pcolormesh(x, y, z, cmap="viridis")  # creates a colour map
+    plt.pcolormesh(x, y, z, cmap="viridis", shading='auto')  # creates a colour map
     plt.xlabel(x_label)  # Labels x axis
     plt.ylabel(y_label)  # Labels y axis
     plt.title(plt_title)  # Adds title.
