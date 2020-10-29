@@ -21,8 +21,9 @@ author: Andras Sobester
 Installation / Usage
 --------------------
 
-ADRpy is written in Python 3 and tested in Python 3.4, 3.5, 3.6, 3.7, 3.8, 
-and 3.8-dev. It is not available for Python 2.
+ADRpy is written in Python 3 and tested in Python 3.5, 3.6, 3.7 and 3.8.
+
+It is not available for Python 2.
 
 On most systems you should be able to simply open an operating system terminal
 and at the command prompt type
@@ -156,5 +157,11 @@ ADRpy Shorts - video tutorials and explainers
 **1. An Aircraft Engineer's Brief Introduction to Modelling the Atmosphere**
 
 [![1. An Aircraft Engineer's Brief Introduction to Modelling the Atmosphere](http://img.youtube.com/vi/II9vuVCgV-w/0.jpg)](http://www.youtube.com/watch?v=II9vuVCgV-w)
+
+
+**2. On V-n Diagrams and How to Build them in ADRpy**
+
+[![2. On V-n Diagrams and How to Build them in ADRpy](http://img.youtube.com/vi/s-d5z-BQovY/0.jpg)](http://www.youtube.com/watch?v=s-d5z-BQovY)
+
 
 More ADRpy Shorts coming soon!
