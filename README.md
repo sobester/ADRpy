@@ -164,4 +164,9 @@ ADRpy Shorts - video tutorials and explainers
 [![2. On V-n Diagrams and How to Build them in ADRpy](http://img.youtube.com/vi/s-d5z-BQovY/0.jpg)](http://www.youtube.com/watch?v=s-d5z-BQovY)
 
 
+**3. Speed in aviation - GS, WS, TAS, IAS, CAS and EAS**
+
+[![3. Speed in aviation - GS, WS, TAS, IAS, CAS and EAS](http://img.youtube.com/vi/WSzDXlTlXiI/0.jpg)](http://www.youtube.com/watch?v=WSzDXlTlXiI)
+
+
 More ADRpy Shorts coming soon!
