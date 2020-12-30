@@ -37,8 +37,7 @@ from ADRpy import propulsion as pdecks
 
 
 class AircraftConcept:
-    """Definition of a basic aircraft concept. **This is the most important
-    class in ADRpy.** An object of this class defines an
+    """Definition of a basic aircraft concept. An object of this class defines an
     aircraft design in terms of the *brief* it is aiming to meet, high
     level *design* variables that specify it, key parameters that describe
     its *performance*, as well as the *atmosphere* it operates in. These are
@@ -407,7 +406,7 @@ class AircraftConcept:
         default_etaprop = {
             'climb': 0.75, 'cruise': 0.85, 'servceil': 0.65, 'take-off': 0.45, 'turn': 0.85
         }
-        for subdict_i, (subdict_k, subdict_v) in enumerate(performance['etaprop'].items()):
+        for _, (subdict_k, subdict_v) in enumerate(performance['etaprop'].items()):
             if subdict_v is False:
                 self.etadefaultflag += 1
                 performance['etaprop'][subdict_k] = default_etaprop[subdict_k]
@@ -418,7 +417,7 @@ class AircraftConcept:
 
         # If a parameter was specified as a list, the parameter attribute should return an average of the list
         for chapter_i in range(len(default_designlib)):
-            for dict_i, (dict_k, dict_v) in enumerate(default_designlib[chapter_i].items()):
+            for _, (dict_k, dict_v) in enumerate(default_designlib[chapter_i].items()):
                 if type(designlib[chapter_i][dict_k]) == list:
                     designlib[chapter_i][dict_k] = sum(designlib[chapter_i][dict_k]) / len(designlib[chapter_i][dict_k])
 
@@ -1829,82 +1828,83 @@ class AircraftConcept:
 
     def propulsionsensitivity_monothetic(self, wingloading_pa, y_var='tw', y_lim=None, x_var='ws_pa', customlabels=None,
                                          show=True, maskbool=False, textsize=None, figsize_in=None):
-        """One-Factor-at-a-Time investigation of thrust-to-weight constraints, also known
-        as monothetic analysis, iterates through a "design-space", in which changes are
-        made to and investigated for one aircraft design parameter at a time. For some
-        iteration of the design-space, the change in T/W required against wing-loading for
-        a specific wing-load is taken as the local-change or local-sensitivity of the
-        parameter. The relative proportions of these local-sensitivities are then computed
-        across the entire wing-loading space, demonstrating which parameters the propulsion
-        constraints are most sensitive to.
+        """Constraint analysis in the wing loading (or wing area) - T/W ratio (or power) space.
+        The method generates a plot of the combined constraint diagram, with optional sensitivity
+        diagrams for individual constraints. These are based on a One-Factor-at-a-Time analysis
+        of the local sensitivities of the constraints (required T/W or power values) with respect
+        to the variables that define the aircraft concept. The sensitivity charts show the
+        relative proportions of these local sensitivities, referred to as 'relative sensitivities'.
+        Sensitivities are computed for those inputs that are specified as a range (a [min, max] list)
+        instead of a single scalar value and the sensitivity is estimated across this range, with the
+        midpoint taken as the nominal value (see more details in `this notebook <https://github.com/sobester/ADRpy/blob/master/docs/ADRpy/notebooks/Constraint%20analysis%20of%20a%20single%20engine%20piston%20prop.ipynb>`_).
 
-        This function depends on the constraints in :code:`twrequired` being fully defined,
-        failure to do so will likely raise errors.
+        Sensitivities can be computed with respect to components of the design brief, as well as
+        aerodynamic parameter estimates or geometrical parameters.
+
+        The example below can serve as a template for setting up a sensitivity study; further
+        examples can be found in the notebook.
+        
+        This is a higher level wrapper of :code:`twrequired` - please consult its documentation 
+        entry for details on the individual constraints and their required inputs.
 
         **Parameters:**
 
         wingloading_pa
-            array, list of wing-loading values in Pa.
+            array, list of wing loading values in Pa.
 
         y_var
-            string, used to indicate what should be plotted along the y-axis of the combined
-            constraint diagram. Set to 'tw' for dimensionless thrust-to-weight, or 'p_hp' for
-            the power required in horsepower. All values given are those required at Sea Level.
+            string, specifies the quantity to be plotted along the y-axis of the combined
+            constraint diagram. Set to 'tw' for dimensionless thrust-to-weight required, or 'p_hp'
+            for the power required (in horsepower); sea level standard day values in both cases.
             Optional, defaults to 'tw'.
 
         y_lim
             float, used to define the plot y-limit. Optional, defaults to 105% of the maximum
-            propulsion constraint requirement.
+            value across all constraint curves.
 
         x_var
-            string, used to indicate what should be plotted along the x-axis of the combined
-            constraint diagram. Set to 'ws_pa' for wing-loading in Pa, or 's_m2' for wing-area
+            string, specifies the quantity to be plotted along the x-axis of the combined
+            constraint diagram. Set to 'ws_pa' for wing loading in Pa, or 's_m2' for wing area
             in metres squared. Optional, defaults to 'ws_pa'.
 
         customlabels
-            dictionary, used to remap design parameter labels, such that they appear in the
-            plot legends with custom keying. Optional, defaults to None.
+            dictionary, used to remap design definition parameter keys to labels better suited
+            for plot labelling. Optional, defaults to None. See example below for usage.
 
         show
-            boolean/string, used to indicate whether or not the method should produce a figure
-            as a means of interpreting the sensitivity plots (see notes). Available arguments
-            include :code:`True`, :code:`False`, 'combined', 'climb', 'cruise', 'servceil',
-            'take-off', and 'turn'. Optional, defaults to True.
+            boolean/string, used to indicate the type of plot required. Available arguments:
+            :code:`True`, :code:`False`, 'combined', 'climb', 'cruise', 'servceil',
+            'take-off', and 'turn'. Optional, defaults to True. 'combined' will generate
+            the classic combined constraint diagram on its own.
 
         maskbool
-            boolean, used to indicate whether or not constraints that do not contribute to the
-            combined minimum T/W constraint, should be obscured (on the basis of irrelevancy).
-            Optional, defaults to False.
+            boolean, used to indicate whether or not constraints that do not affect the
+            combined minimum propulsion sizing requirement should be obscured. Optional, 
+            defaults to False.
 
         textsize
-            integer, sets a representative reference fontsize that text in the output plot scale
-            themselves in accordance to. Optional, defaults to 10 for six-way subplots, and
-            defaults to 14 for singular plots as selected with the 'show' argument.
+            integer, sets a representative reference fontsize for the text on the plots.
+            Optional, defaults to 10 for multi-subplot figures, and to 14 for singles.
 
         figsize_in
             list, used to specify custom dimensions of the output plot in inches. Image width
             must be specified as a float in the first entry of a two-item list, with height as
-            the remaining item. Optional, defaults to 14.1 inches wide by 10 inches tall.
+            the second item. Optional, defaults to 14.1 inches wide by 10 inches tall.
 
         **See also** ``twrequired``
 
         **Notes**
 
-        1. There is no way to perform a sensitivity analysis of the T/W constraints and have the
-        sensitivity data return as a function output. The data is purely for visual reference so
-        that a designer may make an informed decision on compliance with design constraints for
-        an aircraft concept.
+        1. This is a plotting routine that wraps the various constraint models implemented in ADRpy.
+        If specific constraint data is required, use :code:`twrequired`.
 
-        2. The code does not yet support the functionality required to investigate sensitivities of
-        design parameters embedded within dictionaries, such as weight fractions or propeller
-        efficiencies that vary between constraint cases.
+        2. Investigating sensitivities of design parameters embedded within the aircraft concept
+        definition dictionaries, such as weight fractions or propeller efficiencies for various
+        constraints, is not currently supported. Similarly, it uses the atmosphere provided in
+        the class argument 'designatm'; the computation of sensitivities with respect to
+        atmosphere choice is not supported.
 
-        3. The code does not yet support the functionality required to investigate sensitivities of
-        the aircraft concept to variations in the design atmosphere, and simply inherits the atmosphere
-        provided in the class argument 'designatm', which defaults to the ISA with 0 degree offset.
-
-        4. This code does not use partial derivatives for analysis, as it then becomes redundant
-        to specify maximum and minimum allowable design values for parameters.
+        3. The sensitivities are computed numerically.
 
         **Example** ::
 
@@ -2015,16 +2015,16 @@ class AircraftConcept:
 
         # It's probably not necessary to have these all as functions since they are static - needs future optimisation
         def y_function(aircraft_object, y_type):
-            if y_type == 'p_hp':  # If Horsepower is to be plotted on the y-axis
+            if y_type == 'p_hp':  # If horsepower is to be plotted on the y-axis
                 propulsionrequirement = aircraft_object.powerrequired(wingloading_pa=wingloading_pa, tow_kg=mass_kg)
-            else:  # Else default to T/W plotting on the y-axis
+            else:  # else default to T/W plotting on the y-axis
                 propulsionrequirement = aircraft_object.twrequired(wingloading_pa=wingloading_pa)
             return propulsionrequirement
 
         def x_function(x_type):
-            if x_type == 's_m2':  # If wing-area is to be plotted on the x-axis
+            if x_type == 's_m2':  # If wing area is to be plotted on the x-axis
                 plt_x_axis = self.weight_n / wingloading_pa
-            else:  # Else default to W/S plotting on the x-axis
+            else:  # else default to W/S plotting on the x-axis
                 plt_x_axis = wingloading_pa
             return plt_x_axis
 
@@ -2138,7 +2138,7 @@ class AircraftConcept:
             stackplot = []
             parameters_list = []
             keyclrs_list = []
-            for param_i, (param_k, param_v) in enumerate(propulsionreqprime[whichconstraint].items()):
+            for _, (param_k, param_v) in enumerate(propulsionreqprime[whichconstraint].items()):
                 stackplot.append(param_v / primesum)
                 # Use custom labels if they exist
                 if param_k in customlabels:
