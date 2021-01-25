@@ -13,6 +13,7 @@ wing aircraft.
 """
 
 __author__ = "Andras Sobester"
+
 # Other contributors: Yaseen Reza
 
 # pylint: disable=locally-disabled, too-many-instance-attributes
@@ -817,6 +818,7 @@ class AircraftConcept:
                 # Assume quadratic fit of graph data from naca report 1253
                 def genericquadfunc(x, a, b, c):
                     return a * x ** 2 + b * x + c
+
                 # These are pregenerated static values, to save computational resources
                 popt = np.array([3.2784414, -9.73119668, 6.0546588])
 
@@ -1066,7 +1068,7 @@ class AircraftConcept:
             density_kgpm3 = atmosphere_obj.airdens_kgpm3(altitude_m)
 
             for i in range(len(mach)):
-            
+
                 if propulsion == 'turboprop':
                     # J. D. Mattingly (full reference in atmospheres module)
                     tcorr[i] = at.turbopropthrustfactor(temp_c, pressure_pa, mach[i], self.throttle_r)
@@ -1091,10 +1093,10 @@ class AircraftConcept:
                         propulsionmsg = 'Was not expecting negative "self.bpr" for "jet" propulsion system type!'
                         raise ValueError(propulsionmsg)
 
-            else:
-                propulsionmsg = 'Propulsion system identifier "{0}" was not recognised amongst an accepted ' \
-                                'list of inputs.'.format(str(self.propulsion))
-                warnings.warn(propulsionmsg, RuntimeWarning)
+                else:
+                    propulsionmsg = 'Propulsion system identifier "{0}" was not recognised amongst an accepted ' \
+                                    'list of inputs.'.format(str(self.propulsion))
+                    warnings.warn(propulsionmsg, RuntimeWarning)
 
         # If the propulsion type is specified by the contents of a tuple
         elif isinstance(propulsion, tuple):
@@ -1133,7 +1135,6 @@ class AircraftConcept:
             warnings.warn(pcorrmsg, RuntimeWarning)
 
         return tcorr, pcorr
-
 
     def twrequired_clm(self, wingloading_pa, map2sl=True):
         """Calculates the T/W required for climbing for a range of wing loadings.
@@ -1843,8 +1844,8 @@ class AircraftConcept:
 
         The example below can serve as a template for setting up a sensitivity study; further
         examples can be found in the notebook.
-        
-        This is a higher level wrapper of :code:`twrequired` - please consult its documentation 
+
+        This is a higher level wrapper of :code:`twrequired` - please consult its documentation
         entry for details on the individual constraints and their required inputs.
 
         **Parameters:**
@@ -1879,7 +1880,7 @@ class AircraftConcept:
 
         maskbool
             boolean, used to indicate whether or not constraints that do not affect the
-            combined minimum propulsion sizing requirement should be obscured. Optional, 
+            combined minimum propulsion sizing requirement should be obscured. Optional,
             defaults to False.
 
         textsize
