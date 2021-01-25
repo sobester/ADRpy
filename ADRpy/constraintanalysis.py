@@ -1056,40 +1056,40 @@ class AircraftConcept:
                 raise ValueError(designmsg)
 
         mach = atmosphere_obj.mach(airspeed_mps=airspeed_mpstas, altitude_m=altitude_m)
-        tcorr = 1  # Default correction value (No correction required) for Thrust
-        pcorr = 1  # Default correction value (No correction required) for Power
+        tcorr = np.ones(len(mach))  # Default correction value (No correction required) for Thrust
+        pcorr = np.ones(len(mach))  # Default correction value (No correction required) for Power
 
         # If the propulsion type is generic, identified by a string input
-        if isinstance(self.propulsion, str):
+        if isinstance(propulsion, str):
             temp_c = atmosphere_obj.airtemp_c(altitude_m)
             pressure_pa = atmosphere_obj.airpress_pa(altitude_m)
             density_kgpm3 = atmosphere_obj.airdens_kgpm3(altitude_m)
 
-            if propulsion == 'turboprop':
-                # J. D. Mattingly (full reference in atmospheres module)
-                tcorr = at.turbopropthrustfactor(temp_c, pressure_pa, mach, self.throttle_r)
+            for i in range(len(mach)):
+            
+                if propulsion == 'turboprop':
+                    # J. D. Mattingly (full reference in atmospheres module)
+                    tcorr[i] = at.turbopropthrustfactor(temp_c, pressure_pa, mach[i], self.throttle_r)
 
-            elif propulsion == 'piston':
-                # J. D. Mattingly (full reference in atmospheres module)
-                tcorr = at.pistonpowerfactor(density_kgpm3)
+                elif propulsion == 'piston':
+                    # J. D. Mattingly (full reference in atmospheres module)
+                    tcorr[i] = at.pistonpowerfactor(density_kgpm3)
 
-            elif propulsion == 'electric':
-                # No altitude corrections required for electric propulsion
-                tcorr = 1
-                pcorr = 1
+                elif propulsion == 'electric':
+                    # No altitude corrections required for electric propulsion
+                    pass
 
-            elif propulsion == 'jet':
-                # J. D. Mattingly (full reference in atmospheres module)
-                if self.bpr == 0:
-                    tcorr = at.turbojetthrustfactor(temp_c, pressure_pa, mach, self.throttle_r, False)
-                elif 0 < self.bpr < 5:
-                    tcorr = at.turbofanthrustfactor(temp_c, pressure_pa, mach, self.throttle_r, "lowbpr")
-                elif 5 <= self.bpr:
-                    tcorr = at.turbofanthrustfactor(temp_c, pressure_pa, mach, self.throttle_r, "highbpr")
-                else:
-                    propulsionmsg = 'Was not expecting negative "self.bpr" for "jet" propulsion system type!'
-                    raise ValueError(propulsionmsg)
-
+                elif propulsion == 'jet':
+                    # J. D. Mattingly (full reference in atmospheres module)
+                    if self.bpr == 0:
+                        tcorr[i] = at.turbojetthrustfactor(temp_c, pressure_pa, mach[i], self.throttle_r, False)
+                    elif 0 < self.bpr < 5:
+                        tcorr[i] = at.turbofanthrustfactor(temp_c, pressure_pa, mach[i], self.throttle_r, "lowbpr")
+                    elif 5 <= self.bpr:
+                        tcorr[i] = at.turbofanthrustfactor(temp_c, pressure_pa, mach[i], self.throttle_r, "highbpr")
+                    else:
+                        propulsionmsg = 'Was not expecting negative "self.bpr" for "jet" propulsion system type!'
+                        raise ValueError(propulsionmsg)
 
             else:
                 propulsionmsg = 'Propulsion system identifier "{0}" was not recognised amongst an accepted ' \
