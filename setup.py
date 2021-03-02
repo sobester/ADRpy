@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 here = path.abspath(path.dirname(__file__))
 
@@ -38,5 +38,5 @@ setup(
     author='Andras Sobester',
     install_requires=install_requires,
     dependency_links=dependency_links,
-    author_email='sobester@live.com'
+    author_email=''
 )
