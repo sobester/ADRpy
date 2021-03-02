@@ -1066,12 +1066,17 @@ class AircraftConcept:
             temp_c = atmosphere_obj.airtemp_c(altitude_m)
             pressure_pa = atmosphere_obj.airpress_pa(altitude_m)
             density_kgpm3 = atmosphere_obj.airdens_kgpm3(altitude_m)
+            # Use of constant violates SSOT, but cleaner & faster than instantiating an ISA
+            isa_dens_ratio = atmosphere_obj.airdens_kgpm3(altitude_m) / 1.2249998682209657
 
             for i in range(len(mach)):
 
                 if propulsion == 'turboprop':
-                    # J. D. Mattingly (full reference in atmospheres module)
-                    tcorr[i] = at.turbopropthrustfactor(temp_c, pressure_pa, mach[i], self.throttle_r)
+                    # Legacy model (Mattingly) still available in the atmospheres module.
+                    # Replaced due to unrealistic sharp thrust drop during take-off.
+                    # tcorr[i] = at.turbopropthrustfactor_matt(temp_c, pressure_pa, mach[i], self.throttle_r)
+                    # New model, based on TPE331
+                    tcorr[i] = at.turbopropthrustfactor(isa_dens_ratio, mach[i])
 
                 elif propulsion == 'piston':
                     # J. D. Mattingly (full reference in atmospheres module)
@@ -2118,8 +2123,8 @@ class AircraftConcept:
 
         # GRAPH PLOTTING
 
-        predefinedlabels = {'climb': "Climb", 'cruise': "Cruise", 'servceil': "Service Ceiling",
-                            'take-off': "Take-off Ground Roll", 'turn': "Sustained Turn"}
+        predefinedlabels = {'climb': "Climb", 'cruise': "Cruise", 'servceil': "Service ceiling",
+                            'take-off': "Take-off ground roll", 'turn': "Sustained turn"}
 
         fontsize_title = 1.20 * textsize
         fontsize_label = 1.05 * textsize
@@ -2166,12 +2171,12 @@ class AircraftConcept:
             ax_sens.set_xlim(min(x_axis), max(x_axis))
             ax_sens.set_ylim(0, 1)
             ax_sens.set_xlabel(xlabel=x_labelling(x_type=x_var), fontsize=fontsize_label)
-            ax_sens.set_ylabel(ylabel=('Rel. Sensitivity of ' + y_var.split('_')[0].upper()), fontsize=fontsize_label)
+            ax_sens.set_ylabel(ylabel=('Rel. sensitivity of ' + y_var.split('_')[0].upper()), fontsize=fontsize_label)
             ax_sens.tick_params(axis='x', labelsize=fontsize_tick)
             ax_sens.tick_params(axis='y', labelsize=fontsize_tick)
             # The legend list must be reversed to make sure the legend displays in the same order the plot is stacked
             handles, labels = ax_sens.get_legend_handles_labels()
-            ax_sens.legend(reversed(handles), reversed(labels), title='Design Variables', loc='center left',
+            ax_sens.legend(reversed(handles), reversed(labels), title='Varying factors', loc='center left',
                            bbox_to_anchor=(1, 0.5), prop={'size': fontsize_legnd}, title_fontsize=fontsize_legnd)
 
             if maskbool:
@@ -2199,7 +2204,7 @@ class AircraftConcept:
             if ax_comb is None:
                 ax_comb = plt.gca()
 
-            ax_comb.plot(x_axis, propulsionreqmed['combined'], lw=3.5, color='k', label="Feasible Turn $C_L$")
+            ax_comb.plot(x_axis, propulsionreqmed['combined'], lw=3.5, color='k', label="Combined front \nup to turn stall line")
             # Aggregate the propulsion constraints onto the combined diagram
             for item in sensitivityplots_list:
                 ax_comb.plot(x_axis, propulsionreqmed[item], label=predefinedlabels[item], lw=2.0, ls='--',
@@ -2208,15 +2213,15 @@ class AircraftConcept:
             # If the code could figure out where the clean stall takes place, plot it
             if xcrit_stall:
                 if min(x_axis) < xcrit_stall < max(x_axis):
-                    ax_comb.plot([xcrit_stall, xcrit_stall], [0, ylim_hi], label="$V_{stall}$ SL")
+                    ax_comb.plot([xcrit_stall, xcrit_stall], [0, ylim_hi], label="Clean stall, 1g")
 
             # If the code could figure out where the turn stall takes place, plot it
             if len(propfeasindex) > 0:
                 xturn_stall = x_axis[propfeasindex[-1]]
                 if min(x_axis) < xturn_stall < max(x_axis):
-                    ax_comb.plot([xturn_stall, xturn_stall], [0, ylim_hi], label="Sus. Turn stall")
+                    ax_comb.plot([xturn_stall, xturn_stall], [0, ylim_hi], label="Turn stall limit")
 
-            ax_comb.set_title('Aggregated Propulsion Constraints', size=fontsize_title)
+            # ax_comb.set_title('Aggregated Propulsion Constraints', size=fontsize_title)
             ax_comb.set_xlim(min(x_axis), max(x_axis))
             ax_comb.set_ylim(0, ylim_hi)
             ax_comb.set_xlabel(xlabel=x_labelling(x_type=x_var), fontsize=fontsize_label)
@@ -2262,7 +2267,7 @@ class AircraftConcept:
                                     gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
             fig.canvas.set_window_title('ADRpy constraintanalysis.py')
             fig.subplots_adjust(left=0.1, bottom=None, right=0.82, top=None, wspace=None, hspace=None)
-            fig.suptitle(suptitle['t'], size=suptitle['size'])
+            # fig.suptitle(suptitle['t'], size=suptitle['size'])
 
             axs_dict = dict(zip(plots_list, [axs[0, 0], axs[1, 0], axs[2, 0], axs[0, 1], axs[1, 1], axs[2, 1]]))
 
@@ -2281,11 +2286,11 @@ class AircraftConcept:
 
             if show in sensitivityplots_list:
                 # Plot INDIVIDUAL constraint sensitivity diagram
-                fig.suptitle(suptitle['t'], size=suptitle['size'])
+                # fig.suptitle(suptitle['t'], size=suptitle['size'])
                 sensitivityplots(whichconstraint=show, ax_sens=ax)
             else:
                 # Plot COMBINED constraint diagram
-                fig.suptitle("Combined View of Propulsion System Requirements", size=suptitle['size'])
+                # fig.suptitle("Combined View of Propulsion System Requirements", size=suptitle['size'])
                 combinedplot(ax_comb=ax)
 
         if show:
