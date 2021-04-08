@@ -169,4 +169,8 @@ ADRpy Shorts - video tutorials and explainers
 [![3. Speed in aviation - GS, WS, TAS, IAS, CAS and EAS](http://img.youtube.com/vi/WSzDXlTlXiI/0.jpg)](http://www.youtube.com/watch?v=WSzDXlTlXiI)
 
 
+**4. Wing and propulsion system sizing with ADRpy**
+
+[![4. Wing and propulsion system sizing](http://img.youtube.com/vi/TMM7mE1NjaE/0.jpg)](https://www.youtube.com/watch?v=TMM7mE1NjaE)
+
 More ADRpy Shorts coming soon!
