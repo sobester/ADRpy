@@ -144,12 +144,9 @@ You should see the following output:
 More extensive examples - a library of notebooks
 ------------------------------------------------
 
-Click on [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks) to open a library of examples recorded in Jupyter notebooks. You can play
-with these 'live' in Binder, or you can click File / Download as / ... to create your own local 
-copy in any number of formats. [*Note: if you don't want to wait for Binder to generate the library,
-you can still access the 'static' versions of the notebooks through nbviewer - click on the required
-notebook in the lower half of the holding page.* ]
+To view them on GitHub, go to [ADRpy's notebooks folder](https://github.com/sobester/ADRpy/tree/master/docs/ADRpy/notebooks).
 
+Alternatively, grab the whole repository as a .zip by clicking the big, green 'Code' button at the top of this page. 
 
 ADRpy Shorts - video tutorials and explainers
 ---------------------------------------------------------
@@ -172,5 +169,3 @@ ADRpy Shorts - video tutorials and explainers
 **4. Wing and propulsion system sizing with ADRpy**
 
 [![4. Wing and propulsion system sizing](http://img.youtube.com/vi/TMM7mE1NjaE/0.jpg)](https://www.youtube.com/watch?v=TMM7mE1NjaE)
-
-More ADRpy Shorts coming soon!

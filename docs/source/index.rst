@@ -61,16 +61,12 @@ see `the ADRpy GitHub repository <https://github.com/sobester/ADRpy#aircraft-des
 Notebooks
 ---------
 
-ADRpy includes a library of examples recorded in Jupyter notebooks. You can play
-with these 'live' in Binder:
+ADRpy includes a library of examples recorded in Jupyter notebooks. 
 
-.. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks
+You can view these on GitHub in `the ADRpy notebooks library <https://github.com/sobester/ADRpy/tree/master/docs/ADRpy/notebooks>`_.
 
-...or you can click File / Download as / ... to create your own local copy in any number of formats.
-[*Note: if you don't want to wait for Binder to generate the library, you can still access the 
-'static' versions of the notebooks through nbviewer - click on the required notebook in 
-the lower half of the holding page.*]
+Alternatively, hit the green 'Code' button on ADRpy's top level page and 'Download ZIP' to get your own
+copy, along with the rest of the repository.
 
 ADRpy Modules
 -------------
