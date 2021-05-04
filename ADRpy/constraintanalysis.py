@@ -2036,16 +2036,16 @@ class AircraftConcept:
 
         def y_labelling(y_type):
             if y_type == 'p_hp':  # Horsepower is to be plotted on the y-axis
-                ylabel = 'Power Required [hp]'
+                ylabel = 'Power required [hp]'
             else:  # Else default to T/W plotting on the y-axis
-                ylabel = 'Thrust-to-Weight [-]'
+                ylabel = 'Thrust to weight ratio [-]'
             return ylabel
 
         def x_labelling(x_type):
             if x_type == 's_m2':  # If wing-area is to be plotted on the x-axis
-                xlabel = 'Wing Area [m$^2$]'
+                xlabel = 'Wing area [m$^2$]'
             else:  # Else default to W/S plotting on the x-axis
-                xlabel = 'Wing Loading [Pa]'
+                xlabel = 'Wing loading [Pa]'
             return xlabel
 
         def wherecleanstall(x_type):
@@ -2265,7 +2265,7 @@ class AircraftConcept:
             # Plotting setup, arrangement of 6 windows
             fig, axs = plt.subplots(3, 2, figsize=figsize_in,
                                     gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
-            fig.canvas.set_window_title('ADRpy constraintanalysis.py')
+            # fig.canvas.set_window_title('ADRpy constraintanalysis.py')
             fig.subplots_adjust(left=0.1, bottom=None, right=0.82, top=None, wspace=None, hspace=None)
             # fig.suptitle(suptitle['t'], size=suptitle['size'])
 
@@ -2280,8 +2280,7 @@ class AircraftConcept:
         elif show in plots_list:
             # Plotting setup, single window
             fig, ax = plt.subplots(1, 1, figsize=figsize_in,
-                                   gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all')
-            fig.canvas.set_window_title('ADRpy constraintanalysis.py')
+                                   gridspec_kw={'hspace': 0.4, 'wspace': 0.8}, sharex='all') 
             fig.subplots_adjust(left=0.1, bottom=None, right=0.78, top=None, wspace=None, hspace=None)
 
             if show in sensitivityplots_list:
