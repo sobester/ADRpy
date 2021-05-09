@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-__version__ = '0.1.19'
+__version__ = '0.2.4'
 
 here = path.abspath(path.dirname(__file__))
 
@@ -14,7 +14,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     all_reqs = f.read().split('\n')
 
-install_requires = [x.strip() for x in all_reqs if 'git+' not in x]
+install_requires = [x.strip() for x in all_reqs if 'git+' not in x and x != 'pypi-publisher']
 dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startswith('git+')]
 
 setup(
@@ -38,5 +38,5 @@ setup(
     author='Andras Sobester',
     install_requires=install_requires,
     dependency_links=dependency_links,
-    author_email='sobester@live.com'
+    author_email=''
 )

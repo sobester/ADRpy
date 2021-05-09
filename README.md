@@ -21,8 +21,9 @@ author: Andras Sobester
 Installation / Usage
 --------------------
 
-ADRpy is written in Python 3 and tested in Python 3.4, 3.5, 3.6, 3.7, 3.8, 
-and 3.8-dev. It is not available for Python 2.
+ADRpy is written in Python 3 and tested in Python 3.5, 3.6, 3.7 and 3.8.
+
+It is not available for Python 2.
 
 On most systems you should be able to simply open an operating system terminal
 and at the command prompt type
@@ -143,12 +144,9 @@ You should see the following output:
 More extensive examples - a library of notebooks
 ------------------------------------------------
 
-Click on [![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/sobester/ADRpy/master?filepath=/docs/ADRpy/notebooks) to open a library of examples recorded in Jupyter notebooks. You can play
-with these 'live' in Binder, or you can click File / Download as / ... to create your own local 
-copy in any number of formats. [*Note: if you don't want to wait for Binder to generate the library,
-you can still access the 'static' versions of the notebooks through nbviewer - click on the required
-notebook in the lower half of the holding page.* ]
+To view them on GitHub, go to [ADRpy's notebooks folder](https://github.com/sobester/ADRpy/tree/master/docs/ADRpy/notebooks).
 
+Alternatively, grab the whole repository as a .zip by clicking the big, green 'Code' button at the top of this page. 
 
 ADRpy Shorts - video tutorials and explainers
 ---------------------------------------------------------
@@ -157,4 +155,17 @@ ADRpy Shorts - video tutorials and explainers
 
 [![1. An Aircraft Engineer's Brief Introduction to Modelling the Atmosphere](http://img.youtube.com/vi/II9vuVCgV-w/0.jpg)](http://www.youtube.com/watch?v=II9vuVCgV-w)
 
-More ADRpy Shorts coming soon!
+
+**2. On V-n Diagrams and How to Build them in ADRpy**
+
+[![2. On V-n Diagrams and How to Build them in ADRpy](http://img.youtube.com/vi/s-d5z-BQovY/0.jpg)](http://www.youtube.com/watch?v=s-d5z-BQovY)
+
+
+**3. Speed in aviation - GS, WS, TAS, IAS, CAS and EAS**
+
+[![3. Speed in aviation - GS, WS, TAS, IAS, CAS and EAS](http://img.youtube.com/vi/WSzDXlTlXiI/0.jpg)](http://www.youtube.com/watch?v=WSzDXlTlXiI)
+
+
+**4. Wing and propulsion system sizing with ADRpy**
+
+[![4. Wing and propulsion system sizing](http://img.youtube.com/vi/TMM7mE1NjaE/0.jpg)](https://www.youtube.com/watch?v=TMM7mE1NjaE)

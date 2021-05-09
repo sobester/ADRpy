@@ -12,7 +12,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         # Create an aircraft test library, to be populated
         self.ac_lib = []
 
-        # AIRCRAFT 0: Business Jet (Learjet 45XR)
+        # AIRCRAFT 0: Business Jet (similar to a Learjet 45XR)
         l45xr_brief = {'rwyelevation_m': 1000, 'groundrun_m': 1200,  # Take-off Constraint
                        'climbalt_m': 1000, 'climbspeed_kias': 250, 'climbrate_fpm': 1000,  # Climb Constraint
                        'cruisealt_m': 15000, 'cruisespeed_ktas': 445,  # Cruise Constraint
@@ -25,7 +25,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
                       'CDminclean': 0.02}
         self.ac_lib.append([l45xr_brief, l45xr_def, l45xr_perf])
 
-        # AIRCRAFT 1: Single Engine Piston Propeller Aircraft (Cirrus SR22)
+        # AIRCRAFT 1: Single Engine Piston Propeller Aircraft (based on the Cirrus SR22)
         sr22_brief = {'rwyelevation_m': 0, 'groundrun_m': 313,  # Take-off Constraint
                       'stloadfactor': 1.5, 'turnalt_m': 1000, 'turnspeed_ktas': 100,  # Turn Constraint
                       'climbalt_m': 0, 'climbspeed_kias': 101, 'climbrate_fpm': 1398,  # Climb Constraint
@@ -39,7 +39,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
                                                        'turn': 0.85, 'servceil': 0.8}}
         self.ac_lib.append([sr22_brief, sr22_def, sr22_perf])
 
-        # AIRCRAFT 2: Fighter (F/A-18C Hornet)
+        # AIRCRAFT 2: Fighter (similar to an F/A-18C Hornet)
         fa18c_brief = {'groundrun_m': 427, 'servceil_m': 15240,
                        'cruisealt_m': 12000, 'cruisespeed_ktas': 570}
         fa18c_def = {'aspectratio': 4, 'sweep_le_deg': 27, 'sweep_25_deg': 20, 'wingarea_m2': 38,
@@ -108,7 +108,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         # For each design dictionary of the random aircraft picked
         for dictindex in range(len(self.ac_lib[self.ac_rand_i])):
             # Go through each item of a single design dictionary from the test library and confirm it copied correctly
-            for i, (k, test_value) in enumerate(self.ac_lib[self.ac_rand_i][dictindex].items()):
+            for _, (k, test_value) in enumerate(self.ac_lib[self.ac_rand_i][dictindex].items()):
                 if type(self.ac_random.designspace[dictindex][k]) == list:
                     dictvalue = sum(self.ac_random.designspace[dictindex][k]) \
                                 / len(self.ac_random.designspace[dictindex][k])
@@ -124,7 +124,7 @@ class TestConstraintAnalysisModule(unittest.TestCase):
         # For each design dictionary of the random aircraft picked
         for dictindex in range(len(self.ac_lib[-1])):
             # Go through each item of a single design dictionary from the test library and confirm it copied correctly
-            for i, (k, test_value) in enumerate(self.ac_lib[-1][dictindex].items()):
+            for _, (k, test_value) in enumerate(self.ac_lib[-1][dictindex].items()):
                 if type(self.ac_last.designspace[dictindex][k]) == list:
                     dictvalue = sum(self.ac_last.designspace[dictindex][k]) \
                                 / len(self.ac_last.designspace[dictindex][k])

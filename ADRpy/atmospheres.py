@@ -941,7 +941,7 @@ throttleratio=1, ptype="highbpr"):
     return 0.6 * delta0 * (1 - 3.8 * (theta0 - throttleratio) / theta0)
 
 
-def turbopropthrustfactor(temp_c, pressure_pa, mach, throttleratio=1):
+def turbopropthrustfactor_matt(temp_c, pressure_pa, mach, throttleratio=1):
     """Multiply SL static thrust by this to get thrust at specified conditions"""
 
     # Model based on Mattingly, J. D., "Elements of Gas Turbine Propulsion",
@@ -958,6 +958,42 @@ def turbopropthrustfactor(temp_c, pressure_pa, mach, throttleratio=1):
         return delta0 * (1 - 0.96 * (mach - 0.1) ** 0.25)
     return delta0 * (1 - 0.96 * (mach - 0.1) ** 0.25 - \
 3 * (theta0 - throttleratio) / (8.13 * (mach - 0.1)))
+
+
+def turbopropthrustfactor(dens_ratio, mach):
+    """Multiply SL static thrust by this to get thrust at specified dens. ratio and Mach no."""
+
+    # Model based on TPE331-10 thrust curves
+
+    X_alt_ft = [0, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000]
+    X_alt_ft = [40000, 35000, 30000, 25000, 20000, 15000, 10000, 5000, 0]
+    X_alt_ft = X_alt_ft[::-1]
+    isa_sl_dens = 1.2249998682209657 #SSOT violation in the interest of speed
+    X_dens_ratio = [0.24616951531253428, 0.3098749509963361, 0.3741322424507335,
+                    0.44811893933199765, 0.5328112272029571, 0.6292375381232487,
+                    0.7384790974933775, 0.8616704548972803, 1.0]
+    Y_Mach = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+
+    Z_thr_ratio = \
+    np.array([[0.24301874, 0.22386998, 0.17652686, 0.14221442, 0.11592392, 0.09937799, 0.06240678],
+              [0.3128897 , 0.30047179, 0.26491134, 0.21632642, 0.17804871, 0.1498797 , 0.12426883],
+              [0.38302311, 0.3725948 , 0.33679446, 0.27993518, 0.23118738, 0.20371041, 0.17623344],
+              [0.45869702, 0.44896454, 0.40851692, 0.33699743, 0.27831082, 0.24504059, 0.21177037],
+              [0.54553835, 0.53270352, 0.47928574, 0.39099644, 0.32349623, 0.27757851, 0.23166079],
+              [0.6440402 , 0.62518827, 0.55076698, 0.44448741, 0.36925856, 0.30213092, 0.23500329],
+              [0.75391673, 0.72629241, 0.62626668, 0.49791383, 0.41741569, 0.3135676 , 0.20971952],
+              [0.87466664, 0.83573268, 0.70577692, 0.53837968, 0.44090342, 0.25876522, 0.07662703],
+              [1.        , 0.92961537, 0.7332334 , 0.53288748, 0.42905484, 0.2518872 , 0.07471956]])
+    
+    thrust_ratio_spline = interpolate.RectBivariateSpline(X_dens_ratio, Y_Mach, Z_thr_ratio, kx=2, ky=2)
+
+    return thrust_ratio_spline(dens_ratio, mach)[0]
+
+
+
+
+
+
 
 
 def turbojetthrustfactor(temp_c, pressure_pa, mach, \
