@@ -2236,11 +2236,13 @@ class AircraftConcept:
             if xcrit_stall:  # If the stall constraint is given, the CL mask should account for turn/stall constraints
                 x2_clmask = max(xcrit_stall, x2_infeascl)
                 x1_clmask = min(xcrit_stall, x1_infeascl)
+                
             else:  # Else the CL mask should only evaluate the turn constraint CL
                 x2_clmask = x2_infeascl
                 x1_clmask = x1_infeascl
+                
             # If a non-zero-thickness area was found in the "combined" plot region for which cl is invalid, mask it
-            if x2_infeascl != x1_infeascl:
+            if len(infeas_x_axis) >= 1:
                 ax_comb.fill([x1_clmask, x2_clmask, x2_clmask, x1_clmask], [0, 0, ylim_hi, ylim_hi],
                              color=style['inv_soln']['colour'], alpha=style['inv_soln']['alpha'])
 
