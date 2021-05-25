@@ -734,7 +734,7 @@ class CertificationSpecifications:
                 fs_y.append(max(min(np.interp(speed, [0, vc_keas], [1, f_ygust]), f_ymano), fs_ystall))
         coords_envelope.update({'FS': dict(zip(coordinate_list, [list(fs_x), fs_y]))})
         # Stall Line iSO
-        coords_envelope.update({'iSO': dict(zip(coordinate_list, [[vis_keas, vis_keas, vs_keas], [go_y[0], 0, 0]]))})
+        coords_envelope.update({'iSO': dict(zip(coordinate_list, [[vis_keas, vis_keas, vs_keas], [max(-1, go_y[0]), 0, 0]]))})
 
         # Points of Interest coordinates - These are points that appear in the CS-23.333(d) example
         coords_poi = {}
@@ -755,6 +755,8 @@ class CertificationSpecifications:
         yneglim = min(coords_poi['E'][1], coords_poi['F'][1], coords_poi['G'][1])
 
         if show:
+            if show is True:
+                show=[]
             # Plotting parameters
             fontsize_title = 1.20 * textsize
             fontsize_label = 1.05 * textsize
