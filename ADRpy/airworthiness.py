@@ -520,10 +520,14 @@ class CertificationSpecifications:
         figsize_in
             list, used to specify custom dimensions of the output plot in inches. Image width
             must be specified as a float in the first entry of a two-item list, with height as
-            the remaining item. Optional, defaults to 12 inches wide by 7.5 inches tall.
+            the remaining item. If text from the legend does not fit, widening the figure will 
+            likely solve the issue. Optional, defaults to 12 inches wide by 7.5 inches tall. 
 
         show
             boolean, used to specify if the plot should be displayed. Optional, defaults to True.
+
+            list, used to specify further options about the plot. Use argument :code:`"reducedannotations"` 
+            to remove gust speed annotations from the plot.
 
         **Outputs:**
 
@@ -730,7 +734,7 @@ class CertificationSpecifications:
                 fs_y.append(max(min(np.interp(speed, [0, vc_keas], [1, f_ygust]), f_ymano), fs_ystall))
         coords_envelope.update({'FS': dict(zip(coordinate_list, [list(fs_x), fs_y]))})
         # Stall Line iSO
-        coords_envelope.update({'iSO': dict(zip(coordinate_list, [[vis_keas, vis_keas, vs_keas], [-1/wfract, 0, 0]]))})
+        coords_envelope.update({'iSO': dict(zip(coordinate_list, [[vis_keas, vis_keas, vs_keas], [max(-1, go_y[0]), 0, 0]]))})
 
         # Points of Interest coordinates - These are points that appear in the CS-23.333(d) example
         coords_poi = {}
@@ -748,9 +752,11 @@ class CertificationSpecifications:
             del coords_poi['B']
 
         yposlim = max(max_ygust, coords_poi['C'][1], coords_poi['D'][1])
-        yneglim = min(coords_poi['E'][1], coords_poi['F'][1])
+        yneglim = min(coords_poi['E'][1], coords_poi['F'][1], coords_poi['G'][1])
 
         if show:
+            if show is True:
+                show=[]
             # Plotting parameters
             fontsize_title = 1.20 * textsize
             fontsize_label = 1.05 * textsize
@@ -760,7 +766,7 @@ class CertificationSpecifications:
             fig = plt.figure(figsize=figsize_in)
             fig.canvas.set_window_title('ADRpy airworthiness.py')
 
-            ax = fig.add_axes([0.1, 0.1, 0.7, 0.8])
+            ax = fig.add_axes([0.1, 0.1, 0.64, 0.8])
             ax.set_title("EASA CS-23 Amendment 4 - Flight Envelope ({0} Category)".format(catg_names[category]),
                          fontsize=fontsize_title)
             ax.set_xlabel("Airspeed [KEAS]", fontsize=fontsize_label)
@@ -776,7 +782,7 @@ class CertificationSpecifications:
                 gustspeed_mps = round(gustspeeds_dict[category][str(gusttype + '_mps')], 2)
                 xlist += [0, airspeed_atgust_keas[gusttype]]
                 ylist += [1, gustload]
-                if gustload >= 0:
+                if gustload >= 1:
                     # Calculate where gust speed annotations should point to
                     xannotate = 0.15 * xlist[-1]
                     yannotate = 0.15 * (ylist[-1] - 1) + 1
@@ -786,9 +792,10 @@ class CertificationSpecifications:
                     offsety = float((4 - gustindex + 1) * 3 * (12 if gustload < 0 else 10)) ** 0.93
                     label = "$U_{de} = $" + str(gustspeed_mps) + " $ms^{-1}$"
                     # Produce the annotation
-                    ax.annotate(label, xy=xyannotate, textcoords='offset points', xytext=(offsetx, offsety),
-                                fontsize=fontsize_legnd,
-                                arrowprops={'arrowstyle': '->', 'color': 'black', 'alpha': 0.8})
+                    if "reducedannotations" not in show:
+                        ax.annotate(label, xy=xyannotate, textcoords='offset points', xytext=(offsetx, offsety),
+                                    fontsize=fontsize_legnd,
+                                    arrowprops={'arrowstyle': '->', 'color': 'black', 'alpha': 0.8})
             # Plot the gust lines
             coords = np.array(xlist, dtype=object), np.array(ylist, dtype=object)
             for gustline_idx in range(len(gustloads[category])):

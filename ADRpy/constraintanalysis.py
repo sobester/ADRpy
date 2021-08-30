@@ -1038,7 +1038,7 @@ class AircraftConcept:
         propulsion = self.propulsion
         if self.propulsion is False:
             propulsionmsg = 'A valid propulsion system type was not specified in the "propulsion" arg instantiating ' \
-                            'this class object. Defaulting to piston engine.'
+                            'this class object. Using defaults from bpr key in design definitions dictionary.'
             warnings.warn(propulsionmsg, RuntimeWarning)
 
             if self.bpr >= 0:
