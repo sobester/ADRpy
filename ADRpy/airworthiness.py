@@ -764,7 +764,7 @@ class CertificationSpecifications:
             fontsize_tick = 0.90 * textsize
 
             fig = plt.figure(figsize=figsize_in)
-            fig.canvas.set_window_title('ADRpy airworthiness.py')
+            fig.canvas.manager.set_window_title('ADRpy airworthiness.py')
 
             ax = fig.add_axes([0.1, 0.1, 0.64, 0.8])
             ax.set_title("EASA CS-23 Amendment 4 - Flight Envelope ({0} Category)".format(catg_names[category]),
