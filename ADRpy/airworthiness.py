@@ -709,9 +709,10 @@ class CertificationSpecifications:
         for speed in cd_x:
             cd_y.append(float(max(np.interp(speed, [vc_keas, vd_keas], [float(sc_y[-1]), d_ygust]), d_ymano)))
         coords_envelope.update({'CD': dict(zip(coordinate_list, [list(cd_x), cd_y]))})
+
         # Point E
         e_ygust = float(gustloads[category]['nneg_Ud'])
-        e_ymano = manoeuvreload_dict[category]['nneg_D'] * wfract
+        e_ymano = manoeuvreload_dict[category]['nneg_D'] / wfract
         e_y = min(e_ygust, e_ymano)
         coords_envelope.update({'E': dict(zip(coordinate_list, [vd_keas, e_y]))})
         # Line EF
@@ -719,8 +720,9 @@ class CertificationSpecifications:
         ef_y = []
         f_ygust = float(gustloads[category]['nneg_Uc'])
         f_ymano = manoeuvreload_dict[category]['nneg_C'] / wfract
+        f_ystall = rho0_kgm3 * (co.kts2mps(vc_keas)) ** 2 * clmin / trueloading_pa / 2 / wfract
         for speed in ef_x:
-            ef_y.append(min(np.interp(speed, [vc_keas, vd_keas], [f_ygust, e_ygust]), e_ymano))
+            ef_y.append(min(np.interp(speed, [vc_keas, vd_keas], [max(f_ygust, f_ystall), e_ygust]), e_ymano))
         coords_envelope.update({'EF': dict(zip(coordinate_list, [list(ef_x), ef_y]))})
         # Curve+Line FS
         fs_x = np.linspace(vc_keas, vis_keas, 100, endpoint=True)

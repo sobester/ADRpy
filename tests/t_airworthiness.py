@@ -103,6 +103,13 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         self.ac_lib.append([gudmundsson_brief, gudmundsson_def, gudmundsson_perf])
 
+        # AIRCRAFT 7: GDP Test case 1
+        gdp1_brief = {}
+        gdp1_def = {'aspectratio':12, 'wingarea_m2':1.2, 'weight_n':347.15}
+        gdp1_perf = {'CLmaxclean':1.5, 'CLminclean': -1, 'CLslope':6.29}
+
+        self.ac_lib.append([gdp1_brief, gdp1_def, gdp1_perf])
+
         return
 
     def test_flightenvelope(self):
@@ -110,14 +117,21 @@ class TestConstraintAnalysisModule(unittest.TestCase):
 
         print("CS 23.333 Flight Envelope Plot Test.")
 
-        vndefinitions={'divespeed_keas': 150, 'certcat': 'norm'}
-
         # Use Aircraft 6: Snorri Gudmundsson's example
         acindex = 6
+        vndefinitions = {'divespeed_keas': 150, 'certcat': 'norm', 'weightfraction':1}
         concept = aw.CertificationSpecifications(self.ac_lib[acindex][0], self.ac_lib[acindex][1],
                                                  self.ac_lib[acindex][2], None, None, csbrief=vndefinitions)
-
         concept.flightenvelope(textsize=10)
+
+        # Use Aircraft 7: GDP Test Case 1
+        acindex = 7
+        vndefinitions = {'cruisespeed_keas':25, 'divespeed_keas': 45, 'certcat': 'norm', 'weightfraction':1}
+        concept = aw.CertificationSpecifications(self.ac_lib[acindex][0], self.ac_lib[acindex][1],
+                                                 self.ac_lib[acindex][2], None, "electric", csbrief=vndefinitions)
+        concept.flightenvelope(textsize=10)
+
+
 
         return
 
