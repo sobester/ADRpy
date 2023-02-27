@@ -404,9 +404,9 @@ class CertificationSpecifications:
         nposminimum = 2.1 + 24000 / (mtow_lbf + 10000)
 
         limitload_dict['norm'].update({'npos_min': min(3.8, nposminimum)})
-        limitload_dict['util'].update({'npos_min': min(4.4, nposminimum)})
+        limitload_dict['util'].update({'npos_min': 4.4})
         limitload_dict['comm'].update({'npos_min': min(3.8, nposminimum)})
-        limitload_dict['aero'].update({'npos_min': min(6.0, nposminimum)})
+        limitload_dict['aero'].update({'npos_min': 6.0})
 
         # (b) Negative Limit Manoeuvring Load
 
