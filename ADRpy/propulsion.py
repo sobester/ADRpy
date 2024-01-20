@@ -153,9 +153,9 @@ class TurbopropDeck:
             thrust_df = data[0][0]
             # For the thrust data, a numpy arrays containing the Mach number,
             # altitude and thrust data is created for later use.
-            ias_thr_mps = pd.DataFrame.to_numpy(thrust_df["Mach Number"])
-            alt_thr_m = pd.DataFrame.to_numpy(thrust_df["Altitude (m)"])
-            thr_thr_n = pd.DataFrame.to_numpy(thrust_df["Thrust (N)"])
+            ias_thr_mps = thrust_df["Mach Number"].to_numpy()
+            alt_thr_m = thrust_df["Altitude (m)"].to_numpy()
+            thr_thr_n = thrust_df["Thrust (N)"].to_numpy()
             # Thrust data list.
             self.thr_data = np.array([ias_thr_mps, alt_thr_m, thr_thr_n])
         if self.data_available[0][1] is True:
@@ -163,9 +163,9 @@ class TurbopropDeck:
             power_df = data[0][1]
             # For the power data, a numpy arrays containing the Mach number,
             # altitude and power data is created for later use.
-            ias_pwr_mps = pd.DataFrame.to_numpy(power_df["Mach Number"])
-            alt_pwr_m = pd.DataFrame.to_numpy(power_df["Altitude (m)"])
-            pwr_pwr_w = pd.DataFrame.to_numpy(power_df["Power (W)"])
+            ias_pwr_mps = power_df["Mach Number"].to_numpy()
+            alt_pwr_m = power_df["Altitude (m)"].to_numpy()
+            pwr_pwr_w = power_df["Power (W)"].to_numpy()
             # Power data list.
             self.pwr_data = np.array([ias_pwr_mps, alt_pwr_m, pwr_pwr_w])
         # Creates BSFC dataframe variable.
@@ -174,9 +174,9 @@ class TurbopropDeck:
             bsfc_df = data[1][0]
             # For the BSFC data, a numpy array containing the Mach number,
             # thrust and BSFC data is created for later use.
-            mach_bsfc = pd.DataFrame.to_numpy(bsfc_df["Mach Number"])
-            thr_bsfc_n = pd.DataFrame.to_numpy(bsfc_df["Altitude (m)"])
-            bsfc_bsfc_gpknps = pd.DataFrame.to_numpy(bsfc_df["BSFC (g/(kWh))"])
+            mach_bsfc = bsfc_df["Mach Number"].to_numpy()
+            thr_bsfc_n = bsfc_df["Altitude (m)"].to_numpy()
+            bsfc_bsfc_gpknps = bsfc_df["BSFC (g/(kWh))"].to_numpy()
             # BSFC data list.
             self.bsfc_data = np.array([mach_bsfc, thr_bsfc_n, bsfc_bsfc_gpknps])
 
@@ -572,9 +572,9 @@ class PistonDeck:
             power_df = data[0][0]
             # For the thrust data, a numpy arrays containing the Mach number,
             # altitude and thrust data is created for later use.
-            spd_pwr = pd.DataFrame.to_numpy(power_df["Speed (RPM)"])
-            alt_pwr_m = pd.DataFrame.to_numpy(power_df["Altitude (m)"])
-            pwr_pwr_n = pd.DataFrame.to_numpy(power_df["Power (W)"])
+            spd_pwr = power_df["Speed (RPM)"].to_numpy()
+            alt_pwr_m = power_df["Altitude (m)"].to_numpy()
+            pwr_pwr_n = power_df["Power (W)"].to_numpy()
             # Power data list.
             self.pwr_data = np.array([spd_pwr, alt_pwr_m, pwr_pwr_n])
         # Creates BSFC dataframe variable.
@@ -583,9 +583,9 @@ class PistonDeck:
             bsfc_df = data[1][0]
             # For the TSFC data, a numpy array containing the Mach number,
             # thrust and TSFC data is created for later use.
-            spd_bsfc = pd.DataFrame.to_numpy(bsfc_df["Speed (RPM)"])
-            pwr_bsfc_w = pd.DataFrame.to_numpy(bsfc_df["Power (W)"])
-            bsfc_bsfc_gpkwph = pd.DataFrame.to_numpy(bsfc_df["BSFC (g/(kWh))"])
+            spd_bsfc = bsfc_df["Speed (RPM)"].to_numpy()
+            pwr_bsfc_w = bsfc_df["Power (W)"].to_numpy()
+            bsfc_bsfc_gpkwph = bsfc_df["BSFC (g/(kWh))"].to_numpy()
             # BSFC for best power data list.
             self.bsfc_data = np.array([spd_bsfc, pwr_bsfc_w, bsfc_bsfc_gpkwph])
         if self.data_available[1][1] is True:
@@ -593,9 +593,9 @@ class PistonDeck:
             bsfc_pwr_df = data[1][1]
             # For the BSFC data, a numpy array containing the Mach number,
             # thrust and BSFC for best power data is created for later use.
-            spd_bsfc_pwr = pd.DataFrame.to_numpy(bsfc_pwr_df["Speed (RPM)"])
-            pwr_bsfc_pwr_w = pd.DataFrame.to_numpy(bsfc_pwr_df["Power (W)"])
-            bsfc_bsfc_pwr_gpkwph = pd.DataFrame.to_numpy(bsfc_pwr_df["BSFC (g/(kWh))"])
+            spd_bsfc_pwr = bsfc_pwr_df["Speed (RPM)"].to_numpy()
+            pwr_bsfc_pwr_w = bsfc_pwr_df["Power (W)"].to_numpy()
+            bsfc_bsfc_pwr_gpkwph = bsfc_pwr_df["BSFC (g/(kWh))"].to_numpy()
             # TSFC data list.
             self.bsfc_pwr_data = np.array([spd_bsfc_pwr, pwr_bsfc_pwr_w, bsfc_bsfc_pwr_gpkwph])
 
@@ -976,9 +976,9 @@ class ElectricDeck:
             torque_df = data[0][0]
             # For the thrust data, a numpy arrays containing the Mach number,
             # altitude and thrust data is created for later use.
-            spd_eta_rpm = pd.DataFrame.to_numpy(torque_df["Speed (RPM)"])
-            trq_eta_nm = pd.DataFrame.to_numpy(torque_df["Torque (Nm)"])
-            eta_eta = pd.DataFrame.to_numpy(torque_df["Efficiency"])
+            spd_eta_rpm = torque_df["Speed (RPM)"].to_numpy()
+            trq_eta_nm = torque_df["Torque (Nm)"].to_numpy()
+            eta_eta = torque_df["Efficiency"].to_numpy()
             # Finds shaft power by multiplying torque by angular frequency.
             sft_pwr_eta = trq_eta_nm * spd_eta_rpm * (2 * np.pi) / 60
             # Finds electrical power by finding shaft power by efficiency.
@@ -1192,9 +1192,9 @@ class JetDeck:
             thrust_df = data[0][0]
             # For the thrust data, a numpy arrays containing the Mach number,
             # altitude and thrust data is created for later use.
-            mach_thr = pd.DataFrame.to_numpy(thrust_df["Mach Number"])
-            alt_thr_m = pd.DataFrame.to_numpy(thrust_df["Altitude (m)"])
-            thr_thr_n = pd.DataFrame.to_numpy(thrust_df["Thrust (N)"])
+            mach_thr = thrust_df["Mach Number"].to_numpy()
+            alt_thr_m = thrust_df["Altitude (m)"].to_numpy()
+            thr_thr_n = thrust_df["Thrust (N)"].to_numpy()
             # Thrust data list.
             self.thr_data = np.array([mach_thr, alt_thr_m, thr_thr_n])
         # Creates TSFC dataframe variable.
@@ -1203,9 +1203,9 @@ class JetDeck:
             tsfc_df = data[1][0]
             # For the TSFC data, a numpy array containing the Mach number,
             # thrust and TSFC data is created for later use.
-            mach_tsfc = pd.DataFrame.to_numpy(tsfc_df["Mach Number"])
-            thr_tsfc_n = pd.DataFrame.to_numpy(tsfc_df["Thrust (N)"])
-            tsfc_tsfc_gpknps = pd.DataFrame.to_numpy(tsfc_df["TSFC (g/(kNs))"])
+            mach_tsfc = tsfc_df["Mach Number"].to_numpy()
+            thr_tsfc_n = tsfc_df["Thrust (N)"].to_numpy()
+            tsfc_tsfc_gpknps = tsfc_df["TSFC (g/(kNs))"].to_numpy()
             # TSFC data list.
             self.tsfc_data = np.array([mach_tsfc, thr_tsfc_n, tsfc_tsfc_gpknps])
         # Sea level (SL) thrust (thr) polynomial (poly) data.
