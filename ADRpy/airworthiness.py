@@ -12,7 +12,7 @@ point of view of meeting initial airworthiness requirements.
 
 """
 
-__author__ = "Yaseen Reza"
+__author__ = "Yaseen Reza ft Arian Rudaki"
 
 import math
 import warnings
