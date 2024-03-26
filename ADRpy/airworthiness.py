@@ -211,7 +211,7 @@ class CertificationSpecifications:
         altitude_m = self.altitude_m
 
         # Create a dictionary of empty dictionaries for each aircraft category
-        cs23categories_list = ['norm', 'util', 'comm', 'aero']
+        cs23categories_list = ['norm', 'util', 'comm', 'aero','UAV']
         manoeuvre_dict = dict(zip(cs23categories_list, [{} for _ in range(len(cs23categories_list))]))
         gustmps_dict = dict(zip(cs23categories_list, [{} for _ in range(len(cs23categories_list))]))
 
@@ -228,6 +228,7 @@ class CertificationSpecifications:
 
         # (b)(3)
         manoeuvre_dict['norm'].update({'nneg_D': 0})
+        manoeuvre_dict['UAV'].update({'nneg_D': 0})
         manoeuvre_dict['util'].update({'nneg_D': -1})
         manoeuvre_dict['comm'].update({'nneg_D': 0})
         manoeuvre_dict['aero'].update({'nneg_D': -1})
@@ -240,6 +241,8 @@ class CertificationSpecifications:
         gustd_mps = np.interp(altitude_m, [co.feet2m(20000), co.feet2m(50000)], [co.feet2m(25), co.feet2m(12.5)])
 
         gustmps_dict['norm'].update({'Uc_mps': gustc_mps[0], 'Ud_mps': gustd_mps})
+
+        gustmps_dict['UAV'].update({'Uc_mps': gustc_mps[0], 'Ud_mps': gustd_mps})
 
         gustmps_dict['util'].update({'Uc_mps': gustc_mps[0], 'Ud_mps': gustd_mps})
 
