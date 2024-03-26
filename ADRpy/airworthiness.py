@@ -289,7 +289,7 @@ class CertificationSpecifications:
         wingloading_lbft2 = co.pa2lbfft2(wingloading_pa)
 
         # Create a dictionary of empty dictionaries for each aircraft category
-        cs23categories_list = ['norm', 'util', 'comm', 'aero']
+        cs23categories_list = ['norm', 'util', 'comm', 'aero','UAV']
         eas_dict = dict(zip(cs23categories_list, [{} for _ in range(len(cs23categories_list))]))
 
         # (a) Design cruising speed, V_C
@@ -299,6 +299,7 @@ class CertificationSpecifications:
         vcfactor_1ii = np.interp(wingloading_lbft2, [20, 100], [36, 28.6])
 
         eas_dict['norm'].update({'vcmin_keas': vcfactor_1i * np.sqrt(wingloading_lbft2)})
+        eas_dict['UAV'].update({'vcmin_keas': vc_keas })
         eas_dict['util'].update({'vcmin_keas': vcfactor_1i * np.sqrt(wingloading_lbft2)})
         eas_dict['comm'].update({'vcmin_keas': vcfactor_1i * np.sqrt(wingloading_lbft2)})
         eas_dict['aero'].update({'vcmin_keas': vcfactor_1ii * np.sqrt(wingloading_lbft2)})
@@ -321,6 +322,7 @@ class CertificationSpecifications:
         vdfactor_2iii = np.interp(wingloading_lbft2, [20, 100], [1.55, 1.35])
 
         eas_dict['norm'].update({'vdmin_keas': np.fmax(1.25 * vc_keas, vdfactor_2i * eas_dict['norm']['vcmin_keas'])})
+        eas_dict['UAV'].update({'vdmin_keas': 1.25*vc_keas})
         eas_dict['util'].update({'vdmin_keas': np.fmax(1.25 * vc_keas, vdfactor_2ii * eas_dict['util']['vcmin_keas'])})
         eas_dict['comm'].update({'vdmin_keas': np.fmax(1.25 * vc_keas, vdfactor_2i * eas_dict['comm']['vcmin_keas'])})
         eas_dict['aero'].update({'vdmin_keas': np.fmax(1.25 * vc_keas, vdfactor_2iii * eas_dict['aero']['vcmin_keas'])})
@@ -398,7 +400,7 @@ class CertificationSpecifications:
         mtow_lbf = co.n2lbf(mtow_n)
 
         # Create a dictionary of empty dictionaries for each aircraft category
-        cs23categories_list = ['norm', 'util', 'comm', 'aero']
+        cs23categories_list = ['norm', 'util', 'comm', 'aero','UAV']
         limitload_dict = dict(zip(cs23categories_list, [{} for _ in range(len(cs23categories_list))]))
 
         # (a) Positive Limit Manoeuvring Load
@@ -406,18 +408,20 @@ class CertificationSpecifications:
         # (a) (1, 2, 3)
         nposminimum = 2.1 + 24000 / (mtow_lbf + 10000)
 
-        limitload_dict['norm'].update({'npos_min': min(3.8, nposminimum)})
+        limitload_dict['norm'].update({'npos_min': max(3.8, nposminimum)})
+        limitload_dict['UAV'].update({'npos_min': max(3.8, nposminimum)})
         limitload_dict['util'].update({'npos_min': 4.4})
-        limitload_dict['comm'].update({'npos_min': min(3.8, nposminimum)})
+        limitload_dict['comm'].update({'npos_min': max(3.8, nposminimum)})
         limitload_dict['aero'].update({'npos_min': 6.0})
 
         # (b) Negative Limit Manoeuvring Load
 
         # (b) (1, 2)
         limitload_dict['norm'].update({'nneg_max': -0.4 * limitload_dict['norm']['npos_min']})
-        limitload_dict['util'].update({'nneg_max': -0.4 * limitload_dict['norm']['npos_min']})
-        limitload_dict['comm'].update({'nneg_max': -0.4 * limitload_dict['norm']['npos_min']})
-        limitload_dict['aero'].update({'nneg_max': -0.5 * limitload_dict['norm']['npos_min']})
+        limitload_dict['UAV'].update({'nneg_max': -0.4 * limitload_dict['UAV']['npos_min']})
+        limitload_dict['util'].update({'nneg_max': -0.4 * limitload_dict['util']['npos_min']})
+        limitload_dict['comm'].update({'nneg_max': -0.4 * limitload_dict['comm']['npos_min']})
+        limitload_dict['aero'].update({'nneg_max': -0.5 * limitload_dict['aero']['npos_min']})
 
         # (c) Manoeuvring load factors lower than specified above may be used if the aircraft can
         # not exceed these values in flight.
@@ -483,7 +487,7 @@ class CertificationSpecifications:
         k_g = 0.88 * mu_g / (5.3 + mu_g)
 
         # Gust load factors
-        cs23categories_list = ['norm', 'util', 'comm', 'aero']
+        cs23categories_list = ['norm', 'util', 'comm', 'aero','UAV']
         gustload_dict = dict(zip(cs23categories_list, [{} for _ in range(len(cs23categories_list))]))
 
         for category in cs23categories_list:
@@ -566,12 +570,12 @@ class CertificationSpecifications:
         """
 
         category = self.category
-        cs23categories_list = ['norm', 'util', 'comm', 'aero']
+        cs23categories_list = ['norm', 'util', 'comm', 'aero','UAV']
         if category not in cs23categories_list:
-            designmsg = 'Valid aircraft category not specified, please select from "{0}", "{1}", "{2}", or "{3}".' \
-                .format(cs23categories_list[0], cs23categories_list[1], cs23categories_list[2], cs23categories_list[3])
+            designmsg = 'Valid aircraft category not specified, please select from "{0}", "{1}", "{2}", "{3}"or "{4}".' \
+                .format(cs23categories_list[0], cs23categories_list[1], cs23categories_list[2], cs23categories_list[3],cs23categories_list[4])
             raise ValueError(designmsg)
-        catg_names = {'norm': "Normal", 'util': "Utility", 'comm': "Commuter", 'aero': "Aerobatic"}
+        catg_names = {'norm': "Normal", 'util': "Utility", 'comm': "Commuter", 'aero': "Aerobatic",'UAV':"UAV"}
 
         if textsize is None:
             textsize = 10
@@ -696,7 +700,7 @@ class CertificationSpecifications:
         max_ygust = float(gustloads[category][list(gustloads[category].keys())[0]])
         b_ygustpen = float(rho0_kgm3 * (co.kts2mps(vbpen_keas)) ** 2 * clmax / trueloading_pa / 2 / wfract)
         c_ygust = float(gustloads[category]['npos_Uc'])
-        d_ymano = float(manoeuvreload_dict[category]['npos_D'] / wfract)
+        d_ymano = float(manoeuvreload_dict[category]['npos_D']) #/ wfract)
         for speed in sc_x:
             # If below minimum manoeuvring speed or gust intersection speed, keep on the stall curve
             if (speed <= va_keas) or (speed <= vbpen_keas):
@@ -715,14 +719,14 @@ class CertificationSpecifications:
 
         # Point E
         e_ygust = float(gustloads[category]['nneg_Ud'])
-        e_ymano = manoeuvreload_dict[category]['nneg_D'] / wfract
+        e_ymano = manoeuvreload_dict[category]['nneg_D'] #/ wfract
         e_y = min(e_ygust, e_ymano)
         coords_envelope.update({'E': dict(zip(coordinate_list, [vd_keas, e_y]))})
         # Line EF
         ef_x = np.linspace(vd_keas, vc_keas, 100, endpoint=True)
         ef_y = []
         f_ygust = float(gustloads[category]['nneg_Uc'])
-        f_ymano = manoeuvreload_dict[category]['nneg_C'] / wfract
+        f_ymano = manoeuvreload_dict[category]['nneg_C'] #/ wfract
         f_ystall = rho0_kgm3 * (co.kts2mps(vc_keas)) ** 2 * clmin / trueloading_pa / 2 / wfract
         for speed in ef_x:
             ef_y.append(min(np.interp(speed, [vc_keas, vd_keas], [max(f_ygust, f_ystall), e_ygust]), e_ymano))
